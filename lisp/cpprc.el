@@ -2,10 +2,6 @@
 
 ;; Projectile
 ;;
-;; Remember needs a .projectile at root folder of each project.
-;; Projectile is useful for jumping files, searching symbols, etc
-;; in a project folder hierarchy and costs nothing
-;;
 (projectile-global-mode)
 (setq projectile-completion-system 'helm)
 (require 'helm-projectile)
@@ -19,6 +15,11 @@
                   (format " Proj[%s]"
                           (projectile-project-name))
                 "")))
+;; default switch project is to select file in project
+;(setq projectile-switch-project-action 'projectile-dired)
+;; need this to accept wild cards in ignore files
+;; however it is said to be slow!
+(setq projectile-indexing-method 'native)
 
 ;; CEDET
 ;;
@@ -27,7 +28,7 @@
 (global-semantic-idle-scheduler-mode 1)
 ;(add-to-list 'semantic-default-submodes 'global-semantic-decoration-mode)
 (global-semantic-idle-local-symbol-highlight-mode 1)
-(global-semantic-idle-summary-mode 1)
+(global-semantic-idle-summary-mode 0)
 (require 'semantic/ia)
 (require 'semantic/bovine/gcc)
 ;(require 'semantic/bovine/clang)

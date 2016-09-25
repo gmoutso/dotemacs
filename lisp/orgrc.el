@@ -60,9 +60,9 @@
 ;; I like one python babel session
 ;; note the variable is buffer-local
 (eval-after-load 'ob-python '(add-to-list 'org-babel-default-header-args:python '(:session . "*org-python*")))
-(eval-after-load 'ob-ipython '(add-to-list 'org-babel-default-header-args:ipython '(:session . "*org-ipython*")))
+(eval-after-load 'ob-ipython '(add-to-list 'org-babel-default-header-args:ipython '(:session . "ipython")))
 ;; use <p[tab] for python block
-(eval-after-load 'org '(add-to-list 'org-structure-template-alist '("p" "#+BEGIN_SRC ipython\n?\n#+END_SRC")))
+(eval-after-load 'org '(add-to-list 'org-structure-template-alist '("p" "#+BEGIN_SRC ipython :session\n?\n#+END_SRC")))
 (require 'ob-ipython)
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -73,3 +73,62 @@
 (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
 (setq org-confirm-babel-evaluate nil)
 (setq org-export-babel-evaluate nil)
+
+;;; key bindings
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "C-c m") 'org-toggle-latex-fragment)
+  (define-key org-mode-map (kbd "C-c l t") 'org-toggle-link-display)
+					;use narrow instead C-x n s/b/e/w
+					;(define-key org-mode-map (kbd "C-c b") 'org-tree-to-indirect-buffer)
+  )
+
+;; org-mode shortcuts
+(add-hook 'org-mode-hook 
+	  (lambda()
+	    (setq line-spacing '0.25)
+	    )
+	  )
+
+;;
+;; org-publish projects
+;;
+;; (setq org-publish-project-alist
+;;   '(("html"
+;;      :base-directory "~/org/"
+;;      :base-extension "org"
+;;      :publishing-directory "~/org/exports"
+;;      :publishing-function org-publish-org-to-html)
+;;     ("pdf"
+;;      :base-directory "~/org/"
+;;      :base-extension "org"
+;;      :publishing-directory "~/org/exports"
+;;      :publishing-function org-publish-org-to-pdf)
+;;     ("all" :components ("html" "pdf"))))
+
+
+
+;;; org capture-refile-archive
+;; for use in refile
+;; use org-agenda-file-to-front, or by setting the org-agenda-files
+;; (setq org-agenda-files "~/Dropbox/org/")
+(setq org-agenda-files
+    '("~/Dropbox/org/notes.org" "~/Dropbox/org/finance/jobs.org"))
+(setq org-refile-targets '((org-agenda-files . (:maxlevel . 2))))
+;; for use in capture
+(global-set-key (kbd "C-c c") 'org-capture)
+(setq org-default-notes-file "~/Dropbox/org/notes.org")
+;; org-capture templates
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/Dropbox/org/todo.org" "Tasks")
+             "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
+	 "* %?\nEntered on %U\n  %i\n  %a")
+	("e" "Empty note" entry (file nil) "" :empty-lines 1 :kill-buffer t)
+	("s" "Source Code Snippet" entry
+         (file nil)
+         ;; Prompt for tag and language
+         "* %^{header description}\n#+BEGIN_SRC %^{language|ipython|c++|shell} \n %i %? \n#+END_SRC")))
+;; also include the file to refile as header level 1
+(setq org-refile-use-outline-path 'file)
+(setq org-outline-path-complete-in-steps nil)
+(setq org-completion-use-ido nil)

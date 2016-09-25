@@ -35,3 +35,7 @@
 ;;           (lambda (frame)
 ;;             (select-frame frame)
 ;;             (reload-tabrule)))
+
+;; do not show icons in helm (mode-icons-mode)
+(setq mode-icons-change-mode-name nil)
+(mode-icons-reset)

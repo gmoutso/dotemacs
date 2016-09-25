@@ -1,11 +1,3 @@
-;; org-mode shortcuts
-(add-hook 'org-mode-hook 
-  (lambda()
-    (local-set-key (kbd "M-6") 'org-preview-latex-fragment)
-    (local-set-key (kbd "<C-tab>")  'shk-tabbar-next)
-    (local-set-key (kbd "<C-S-tab>")  'shk-tabbar-prev)
-    ))
-
 ;; helm
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "M-r") 'helm-recentf)
