@@ -82,6 +82,7 @@
 (push '(" *undo-tree*" :width 0.3 :position right) popwin:special-display-config)
 ;(push '("^\\*anything.*\\*$" :regexp t) popwin:special-display-config)
 (push '(anaconda-mode-view-mode :dedicated t) popwin:special-display-config)
+(push '(Man-mode :dedicated t) popwin:special-display-config)
 
 ;;
 ;; smarter move to first line
@@ -114,6 +115,32 @@ point reaches the beginning or end of the buffer, stop there."
 ;(global-set-key [remap move-beginning-of-line]
 ;                'smarter-move-beginning-of-line)
 (global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
+
+
+(require 'newcomment)
+(defun move-end-of-code ()
+  (interactive)
+  (when (comment-search-forward (line-end-position) t)
+    (goto-char (match-beginning 0))
+    (skip-syntax-backward " " (line-beginning-position))))
+
+(defun smarter-move-end-of-line (arg)
+  "Move point to end of line or beginning of comment."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move arg lines forward first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+
+  (let ((orig-point (point)))
+    (move-end-of-line nil)
+    (when (= orig-point (point))
+      (move-beginning-of-line nil)
+      (move-end-of-code))))
+
+(global-set-key (kbd "C-e") 'smarter-move-end-of-line)
 
 ;;
 ;; zoom in/out

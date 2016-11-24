@@ -4,6 +4,9 @@
 ;; mobile org
 (setq org-directory "~/Dropbox/org")
 
+;; make M-Ret not break heading content if cursor is not at the end of item
+(setq org-insert-heading-respect-content nil)
+
 ;; (defun org-mode-reftex-setup ()
 ;;   (load-library "reftex")
 ;;   (and (buffer-file-name) (file-exists-p (buffer-file-name))
@@ -80,7 +83,17 @@
   (define-key org-mode-map (kbd "C-c l t") 'org-toggle-link-display)
 					;use narrow instead C-x n s/b/e/w
 					;(define-key org-mode-map (kbd "C-c b") 'org-tree-to-indirect-buffer)
-  )
+  (define-key org-mode-map (kbd "C-c C-.") 'org-time-stamp)
+     ;; (define-key org-mode-map (kbd "C-c a") 'org-agenda)
+     )
+(define-key global-map "\C-ca" 'org-agenda)
+
+;; when cycling TODO->DONE insert a CLOSED timestamp
+(setq org-log-done t)
+;; the CLOSED timestamp should not have time
+(setq org-log-done-with-time nil)
+;; the CLOSED timestamp should be kept if DONE is deleted
+(setq org-closed-keep-when-no-todo t)
 
 ;; org-mode shortcuts
 (add-hook 'org-mode-hook 
@@ -121,8 +134,10 @@
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline "~/Dropbox/org/todo.org" "Tasks")
              "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
-	 "* %?\nEntered on %U\n  %i\n  %a")
+        ;; ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
+	;;  "* %?\nEntered on %U\n  %i\n  %a")
+	("c" "Clipboard note" entry (file "~/Dropbox/org/notes.org")
+	 "* %?\n %x %i")
 	("e" "Empty note" entry (file nil) "" :empty-lines 1 :kill-buffer t)
 	("s" "Source Code Snippet" entry
          (file nil)
@@ -132,3 +147,48 @@
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
 (setq org-completion-use-ido nil)
+
+
+;; org journal
+;; Quick summary:
+;; To create a new journal entry for the current time and day: C-c C-j
+;; To open today's journal without creating a new entry: C-u C-c C-j
+;; In calendar view: j to view an entry in a new buffer
+;;                   C-j to view an entry but not switch to it
+;;                   i j to add a new entry
+;;                   f w to search all entries of the current week
+;;                   f m to search all entries of the current month
+;;                   f y to search all entries of the current year
+;;                   f f to search all entries of all time
+;;                   [ to go to previous entry
+;;                   ] to go to next entry
+;; When viewing a journal entry: C-c C-b to view previous entry
+;;                               C-c C-f to view next entry
+(require 'org-journal)
+(setq org-journal-dir (file-name-as-directory (expand-file-name "journal" org-directory)))
+
+;; call an org-capture frame
+;; http://www.diegoberrocal.com/blog/2015/08/19/org-protocol/
+;;
+;; http://emacs.stackexchange.com/questions/22242/using-org-protocol-with-a-floating-capture-window
+;;
+;; emacsclient -a "emacs-snapshot --daemon" -c -F "((name . \"org-capture\") (height . 10) (width . 80))" -e "(org-capture nil \"t\")"
+;; or better
+;; emacsclient -a "emacs-snapshot --daemon" -e "(make-capture-frame)"
+;;
+(defun org-capture-finalize-my-advice (&optional STAY-WITH-CAPTURE)
+  "delete the frame named org-capture after capturing"
+  (if (equal "org-capture" (frame-parameter nil 'name))
+      (delete-frame) ))
+(advice-add 'org-capture-finalize :after #'org-capture-finalize-my-advice)
+;; (advice-remove  'org-capture-finalize 'org-capture-my-finalize-advice)
+(defun make-capture-frame ()
+  "Create a new frame and run org-capture. Useful as an OS shrotcut."
+  (interactive)
+  ;; (make-frame '((name . "org-capture")
+  ;;               (width . 120)
+  ;;               (height . 15)))
+  (select-frame-by-name "org-capture")
+  (org-capture nil "c")
+  (setq mode-line-format nil)
+  (delete-other-windows))
