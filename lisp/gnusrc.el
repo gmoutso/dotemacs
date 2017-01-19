@@ -23,6 +23,15 @@ starttls-use-gnutls t
 )
 
 ;;
+;; allow also gmail-like server-side search (has:attachment newer_than:2d etc)
+;;
+(add-to-list 'nnir-imap-search-arguments '("gmail" . "X-GM-RAW"))
+;; (setq nnir-imap-default-search-key "gmail")
+
+
+
+
+;;
 ;; smtpmail-multi
 ;;
 (setq smtpmail-multi-accounts
@@ -71,18 +80,63 @@ starttls-use-gnutls t
 		      )
   ))
 
-;; do not use ~/.newsrc (for use with other newsclients)
+;; do not save or read .newsrc 
 (setq gnus-save-newsrc-file nil)
 (setq gnus-read-newsrc-file nil)
 
-;; reverse date (number) order
-(setq gnus-thread-sort-functions
-      '((not gnus-thread-sort-by-number)))
 
-;; set gnus-parameter (does this even work?)
+;;
+;; summary line format
+;;
+(setq-default
+ gnus-summary-line-format "%U%R%O %(%&user-date;  %-15,15f %B%s%)\n"
+ gnus-user-date-format-alist '((t . "%Y-%m-%d %H:%M"))
+ gnus-group-line-format ;; "%M%S%p%P%5y:%B%(%g%)\n")
+ "%S%p%P %(%-40g%): %4y unread, %2T ticked\n")
+;;
+;; threading formatting
+;;
+(setq-default
+ ;; do not show threads by default
+ gnus-show-threads nil
+ ;; but when you do, use references
+ gnus-summary-thread-gathering-function 'gnus-gather-threads-by-references
+ ;; reverse date (or number) order
+ gnus-thread-sort-functions '((not gnus-thread-sort-by-date))
+ ;; formating
+ gnus-sum-thread-tree-false-root ""
+ gnus-sum-thread-tree-indent " "
+ gnus-sum-thread-tree-leaf-with-other "├► "
+ gnus-sum-thread-tree-root ""
+ gnus-sum-thread-tree-single-leaf "╰► "
+ gnus-sum-thread-tree-vertical "│")
+
+;;
+;; on startup, only read inboxes!
+;;
+;; makes it faster
+;; inbox 1, sent 2, unsubscribed 6, rest 3
+;; (setq gnus-activate-level 6)
+
+
+;; set gnus-parameter
+;; 1) show all (even unread) or a number N of messages
 (setq gnus-parameters
   '(("nnimap.*"
-     (display . all))))
+     (display . 20)
+     )
+     ))
+;;
+;; html message rendering
+;;
+;; set renderer for html mail to w3m in emacs
+(setq mm-text-html-renderer 'gnus-w3m)
+(setq gnus-inhibit-images nil)
+
+;;
+;; faster and easier text emails
+;;
+(setq nnimap-fetch-partial-articles "text/")
 
 ; Archive outgoing email in Sent folder on imap.gmail.com:
 ;; (setq gnus-message-archive-method '(nnimap "imap.gmail.com")
@@ -91,9 +145,26 @@ starttls-use-gnutls t
 (setq gnus-message-archive-group nil)
 ;; https://searchcode.com/file/115586788/gnus.el
 ;;[[http://stackoverflow.com/questions/4982831/i-dont-want-to-expire-mail-in-gnus]]
-(setq gnus-large-newsgroup 'nil)
+(setq gnus-large-newsgroup nil)
 
-(setq-default
- gnus-summary-line-format "%U%R%z%I %(%&user-date;  %-15,15f  %s%)\n"
- gnus-user-date-format-alist '((t . "%Y-%m-%d %H:%M"))
-)
+;;
+;; caching
+;;
+;; To turn caching on, set gnus-use-cache to t. By default, all articles ticked ! or marked as dormant ? will then be copied over to your local cache (gnus-cache-directory). If you  set gnus-use-cache to 'passive', you can still use manually the cache with * and M-*
+;; (setq gnus-use-cache 'passive)
+;; do we really need caching?
+;; caching is different "in use" to offline emailing (see "the gnus agent")
+
+;;
+;; offline agent
+;;
+(setq
+      ;; gnus-auto-goto-ignores 'undownoaded ;; re maneuvering
+      ;; expiring
+      gnus-agent-enable-expiration 'ENABLE
+      gnus-agent-expire-days 0 ;; expire if 0 day old and expirable
+      gnus-agent-expire-all nil ;; only read to be expired
+      ;;
+      gnus-agent-cache nil ;; prefer online imap to local storage
+      )
+
