@@ -1,3 +1,6 @@
+;; search through many org files
+(require 'helm-org-rifle)
+
 (setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 
@@ -94,6 +97,9 @@
 (setq org-log-done-with-time nil)
 ;; the CLOSED timestamp should be kept if DONE is deleted
 (setq org-closed-keep-when-no-todo t)
+;; in global todo ignore entries that:
+(setq org-agenda-todo-ignore-scheduled 'future)
+;; (setq ‘org-agenda-todo-ignore-with-date t)
 
 ;; org-mode shortcuts
 (add-hook 'org-mode-hook 
@@ -125,7 +131,7 @@
 ;; use org-agenda-file-to-front, or by setting the org-agenda-files
 ;; (setq org-agenda-files "~/Dropbox/org/")
 (setq org-agenda-files
-    '("~/Dropbox/org/notes.org" "~/Dropbox/org/finance/jobs.org"))
+    '("~/Dropbox/org/notes.org"))
 (setq org-refile-targets '((org-agenda-files . (:maxlevel . 2))))
 ;; for use in capture
 (global-set-key (kbd "C-c c") 'org-capture)
@@ -133,11 +139,11 @@
 ;; org-capture templates
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline "~/Dropbox/org/todo.org" "Tasks")
-             "* TODO %?\n  %i\n  %a")
-        ;; ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
+             "* TODO %?\n  %i\n  %a" :kill-buffer t)
+        ;;("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
 	;;  "* %?\nEntered on %U\n  %i\n  %a")
-	("c" "Clipboard note" entry (file "~/Dropbox/org/notes.org")
-	 "* %?\n %x %i")
+	("c" "Clipboard note" entry (file nil)
+	 "* %?\n %x %i" :kill-buffer t)
 	("e" "Empty note" entry (file nil) "" :empty-lines 1 :kill-buffer t)
 	("s" "Source Code Snippet" entry
          (file nil)
