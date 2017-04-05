@@ -1,5 +1,10 @@
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
+;;
+;; compile settings
+;;
+(setq compilation-ask-about-save nil)
+
 ;; Projectile
 ;;
 (projectile-global-mode)

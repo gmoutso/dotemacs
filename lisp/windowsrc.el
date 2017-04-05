@@ -1,4 +1,15 @@
 ;;
+;; scrolling
+;;
+;; Turn on horizontal scrolling with mouse wheel
+;; (global-set-key (kbd "<mouse-6>") '(lambda ()
+;;                                      (interactive)
+;;                                      (scroll-right 4)))
+;; (global-set-key (kbd "<mouse-7>") '(lambda ()
+;;                                      (interactive)
+;;                                      (scroll-left 4)))
+
+;;
 ;; winner undo
 ;;
 (winner-mode 1)
