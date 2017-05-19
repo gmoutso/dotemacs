@@ -274,7 +274,8 @@ ARG is passed through to `org-copy-schedule-today'."
 (add-hook 'org-agenda-finalize-hook
       (lambda () (remove-text-properties
          (point-min) (point-max) '(mouse-face t)))) 
-;; org journal
+
+;; org-journal.el
 ;; Quick summary:
 ;; To create a new journal entry for the current time and day: C-c C-j
 ;; To open today's journal without creating a new entry: C-u C-c C-j
@@ -289,8 +290,36 @@ ARG is passed through to `org-copy-schedule-today'."
 ;;                   ] to go to next entry
 ;; When viewing a journal entry: C-c C-b to view previous entry
 ;;                               C-c C-f to view next entry
-(require 'org-journal)
+;; (require 'org-journal)
 (setq org-journal-dir (file-name-as-directory (expand-file-name "journal" org-directory)))
+
+;; howardism.org journal solution
+(defun get-journal-file-today ()
+  "Return filename for today's journal entry"
+   (let ((daily-name (format-time-string "%Y%m%d")))
+    (expand-file-name daily-name org-journal-dir)))
+(add-to-list 'org-capture-templates '(
+	"j" "Journal Note"
+         entry (file (get-journal-file-today))
+         "* Event: %?"
+         ))
+(add-to-list 'auto-mode-alist '(".*/journal/[0-9]*$" . org-mode))
+(defun journal-file-insert ()
+  "Insert's the journal heading based on the file's name."
+  (interactive)
+  (when (string-match "\\(20[0-9][0-9]\\)\\([0-9][0-9]\\)\\([0-9][0-9]\\)"
+                      (buffer-name))
+    (let ((year  (string-to-number (match-string 1 (buffer-name))))
+          (month (string-to-number (match-string 2 (buffer-name))))
+          (day   (string-to-number (match-string 3 (buffer-name))))
+          (datim nil))
+      (setq datim (encode-time 0 0 0 day month year))
+      (insert (format-time-string
+	       "* %A, %d %B %Y \n" datim)))))
+(require 'autoinsert)
+(add-hook 'find-file-hook 'auto-insert)
+(add-to-list 'auto-insert-alist '(".*/[0-9]*$" . journal-file-insert))
+
 
 ;; call an org-capture frame
 ;; http://www.diegoberrocal.com/blog/2015/08/19/org-protocol/
