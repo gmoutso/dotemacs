@@ -1,0 +1,538 @@
+Summary mode:
+Major mode for reading articles.
+
+All normal editing commands are switched off.
+
+Each line in this buffer represents one article.  To read an
+article, you can, for instance, type ‘SPC’.  To move forwards
+and backwards while displaying articles, type ‘n’ and ‘p’,
+respectively.
+
+You can also post articles and send mail from this buffer.  To
+follow up an article, type ‘f’.  To mail a reply to the author
+of an article, type ‘r’.
+
+There are approx. one gazillion commands you can execute in this
+buffer; read the info pages for more information (‘C-c TAB’).
+
+The following commands are available: key binding
+--- -------
+| default key     | my key | binding                                          | imap | use |
+|-----------------+--------+--------------------------------------------------+------+-----|
+| 0 .. 9          |        | digit-argument                                   |      |     |
+| C-c             |        | Prefix Command                                   |      |     |
+| C-d             |        | gnus-summary-enter-digest-group                  | no   |     |
+| TAB             |        | gnus-summary-widget-forward                      | yes  |     |
+| C-k             |        | gnus-summary-kill-same-subject                   | yes  |     |
+| C-l             |        | gnus-recenter                                    |      |     |
+| RET             |        | gnus-summary-scroll-up                           |      |     |
+| C-o             |        | gnus-summary-save-article-mail                   | yes  |     |
+| C-t             |        | gnus-summary-toggle-truncation                   | yes  |     |
+| C-w             |        | gnus-summary-mark-region-as-read                 | yes  |     |
+| C-x             |        | Prefix Command                                   |      |     |
+| ESC             |        | Prefix Command                                   |      |     |
+| SPC             |        | gnus-summary-next-page                           |      |     |
+| "!"             |        | gnus-summary-tick-article-forward                | yes  |     |
+| "#"             |        | gnus-summary-mark-as-processable                 | yes  |     |
+| &               |        | gnus-summary-execute-command                     | yes  | no  |
+| "*"             |        | gnus-cache-enter-article                         | yes  | yes |
+| ,               |        | gnus-summary-best-unread-article                 | yes  | no  |
+| .               |        | gnus-summary-first-unread-article                | yes  | yes |
+| "/"             |        | gnus-summary-limit-map                           | yes  | yes |
+| <               |        | gnus-summary-beginning-of-article                | yes  | yes |
+| "="             |        | gnus-summary-expand-window                       | yes  | yes |
+| >               |        | gnus-summary-end-of-article                      | yes  | yes |
+| ?               |        | gnus-summary-mark-as-dormant                     | yes  | yes |
+| A               |        | gnus-summary-article-map                         | yes  | yes |
+| B               |        | gnus-summary-backend-map                         | yes  | yes |
+| C               |        | gnus-summary-cancel-article                      | no   |     |
+| D               |        | gnus-summary-mark-as-read-backward               | yes  | no  |
+| E               |        | gnus-summary-mark-as-expirable                   | yes  | yes |
+| F               |        | gnus-summary-followup-with-original              | yes  | no  |
+| G               |        | gnus-summary-goto-map                            |      |     |
+| H               |        | gnus-summary-help-map                            |      |     |
+| I               |        | gnus-summary-increase-score                      | yes  | no  |
+| K               |        | gnus-summary-mime-map                            | yes  | yes |
+| L               |        | gnus-summary-lower-score                         | yes  | no  |
+| M               |        | gnus-summary-mark-map                            | yes  | yes |
+| N               |        | gnus-summary-next-article                        | yes  | yes |
+| O               |        | gnus-summary-save-map                            | yes  | no  |
+| P               |        | gnus-summary-prev-article                        | yes  | yes |
+| Q               |        | gnus-summary-exit-no-update                      | yes  | ?   |
+| R               |        | gnus-summary-reply-with-original                 | yes  | yes |
+| S               |        | gnus-summary-send-map                            | yes  | yes |
+| T               |        | gnus-summary-thread-map                          | yes  | no  |
+| U               |        | gnus-summary-tick-article-backward               | yes  | no  |
+| V               |        | gnus-summary-score-map                           | yes  | no  |
+| W               |        | gnus-summary-wash-map                            | yes  | ?   |
+| X               |        | gnus-uu-extract-map                              | yes  | ?   |
+| Y               |        | gnus-summary-buffer-map                          | yes  | yes |
+| Z               |        | gnus-summary-exit-map                            | yes  | ?   |
+| "^"             |        | gnus-summary-refer-parent-article                | yes  | yes |
+| a               |        | gnus-summary-post-news                           | no   |     |
+| b               |        | gnus-article-view-part                           | yes  | yes |
+| c               |        | gnus-summary-catchup-and-exit                    | yes  | no  |
+| d               |        | gnus-summary-mark-as-read-forward                | yes  | yes |
+| e               |        | gnus-summary-edit-article                        | yes  | no  |
+| f               |        | gnus-summary-followup                            | yes  | no  |
+| g               |        | gnus-summary-show-article                        | yes  | yes |
+| h               |        | gnus-summary-select-article-buffer               | yes  | yes |
+| j               |        | gnus-summary-goto-article                        | yes  | no  |
+| k               |        | gnus-summary-kill-same-subject-and-select        | yes  | no  |
+| l               |        | gnus-summary-goto-last-article                   | yes  | yes |
+| m               |        | gnus-summary-mail-other-window                   | yes  | yes |
+| n               |        | gnus-summary-next-unread-article                 | yes  | yes |
+| o               |        | gnus-summary-save-article                        | yes  | no  |
+| p               |        | gnus-summary-prev-unread-article                 | yes  | yes |
+| q               |        | gnus-summary-exit                                | yes  | yes |
+| r               |        | gnus-summary-reply                               | yes  | yes |
+| s               |        | gnus-summary-isearch-article                     | yes  | no  |
+| t               |        | gnus-summary-toggle-header                       | yes  | no  |
+| u               |        | gnus-summary-tick-article-forward                | yes  | no  |
+| x               |        | gnus-summary-limit-to-unread                     | yes  | yes |
+| DEL             |        | gnus-summary-prev-page                           | yes  | yes |
+| S-SPC           |        | gnus-summary-prev-page                           |      |     |
+| <M-down>        |        | gnus-summary-next-thread                         | yes  | no  |
+| <M-up>          |        | gnus-summary-prev-thread                         | yes  | no  |
+| <backtab>       |        | gnus-summary-widget-backward                     |      |     |
+| <delete>        |        | gnus-summary-prev-page                           |      |     |
+| C-c C-b         |        | gnus-bug                                         | no   | no  |
+| C-c C-d         |        | gnus-summary-describe-group                      | yes  | no  |
+| C-c C-f         |        | gnus-summary-mail-forward                        | yes  | yes |
+| C-c TAB         |        | gnus-info-find-node                              | no   |     |
+| C-c C-r         |        | gnus-summary-caesar-message                      | yes  | no  |
+| C-c C-s         |        | Prefix Command                                   | yes  | yes |
+| C-c C-v         |        | gnus-article-browse-html-article                 | yes  | yes |
+| C-c ESC         |        | Prefix Command                                   |      |     |
+| C-x C-s         |        | gnus-summary-reselect-current-group              | yes  | no  |
+| C-M-a           |        | gnus-summary-customize-parameters                | yes  | no  |
+| C-M-b           |        | gnus-summary-prev-thread                         | yes  | no  |
+| C-M-d           |        | gnus-summary-read-document                       | no   |     |
+| C-M-e           |        | gnus-summary-edit-parameters                     | yes  | no  |
+| C-M-f           |        | gnus-summary-next-thread                         |      |     |
+| C-M-h           |        | gnus-summary-hide-thread                         |      |     |
+| C-M-k           |        | gnus-summary-kill-thread                         |      |     |
+| C-M-l           |        | gnus-summary-lower-thread                        |      |     |
+| M-RET           |        | gnus-summary-scroll-down                         |      |     |
+| C-M-n           |        | gnus-summary-next-same-subject                   |      |     |
+| C-M-p           |        | gnus-summary-prev-same-subject                   |      |     |
+| C-M-s           |        | gnus-summary-show-thread                         |      |     |
+| C-M-t           |        | gnus-summary-toggle-threads                      |      |     |
+| C-M-u           |        | gnus-summary-up-thread                           |      |     |
+| M-#             |        | gnus-summary-unmark-as-processable               | yes  | yes |
+| M-&             |        | gnus-summary-universal-argument                  | yes  | yes |
+| M-*             |        | gnus-cache-remove-article                        | yes  | yes |
+| M-K             |        | gnus-summary-edit-global-kill                    | yes  | no  |
+| M-R             |        | gnus-summary-repeat-search-article-backward      |      |     |
+| M-S             |        | gnus-summary-repeat-search-article-forward       |      |     |
+| M-U             |        | gnus-summary-clear-mark-backward                 | yes  | no  |
+| M-^             |        | gnus-summary-refer-article                       | yes  | no  |
+| M-g             |        | gnus-summary-rescan-group                        | yes  | yes |
+| M-i             |        | gnus-symbolic-argument                           |      |     |
+| M-k             |        | gnus-summary-edit-local-kill                     | yes  | no  |
+| M-n             |        | gnus-summary-next-unread-subject                 |      |     |
+| M-p             |        | gnus-summary-prev-unread-subject                 |      |     |
+| M-r             |        | gnus-summary-search-article-backward             |      |     |
+| M-s             |        | gnus-summary-search-article-forward              |      |     |
+| M-t             |        | gnus-summary-toggle-display-buttonized           | yes  | yes |
+| M-u             |        | gnus-summary-clear-mark-forward                  | yes  | yes |
+| / *             |        | gnus-summary-limit-include-cached                |      |     |
+| / .             |        | gnus-summary-limit-to-unseen                     |      |     |
+| / /             |        | gnus-summary-limit-to-subject                    |      |     |
+| / A             |        | gnus-summary-limit-to-address                    |      |     |
+| / C             |        | gnus-summary-limit-mark-excluded-as-read         |      |     |
+| / D             |        | gnus-summary-limit-include-dormant               |      |     |
+| / E             |        | gnus-summary-limit-include-expunged              |      |     |
+| / M             |        | gnus-summary-limit-exclude-marks                 |      |     |
+| / N             |        | gnus-summary-insert-new-articles                 |      |     |
+| / R             |        | gnus-summary-limit-to-recipient                  |      |     |
+| / S             |        | gnus-summary-limit-to-singletons                 |      |     |
+| / T             |        | gnus-summary-limit-include-thread                |      |     |
+| / a             |        | gnus-summary-limit-to-author                     |      |     |
+| / b             |        | gnus-summary-limit-to-bodies                     |      |     |
+| / c             |        | gnus-summary-limit-exclude-childless-dormant     |      |     |
+| / d             |        | gnus-summary-limit-exclude-dormant               |      |     |
+| / h             |        | gnus-summary-limit-to-headers                    |      |     |
+| / m             |        | gnus-summary-limit-to-marks                      |      |     |
+| / n             |        | gnus-summary-limit-to-articles                   |      |     |
+| / o             |        | gnus-summary-insert-old-articles                 |      |     |
+| / p             |        | gnus-summary-limit-to-display-predicate          |      |     |
+| / r             |        | gnus-summary-limit-to-replied                    |      |     |
+| / s             |        | gnus-summary-limit-to-subject                    |      |     |
+| / t             |        | gnus-summary-limit-to-age                        |      |     |
+| / u             |        | gnus-summary-limit-to-unread                     |      |     |
+| / v             |        | gnus-summary-limit-to-score                      |      |     |
+| / w             |        | gnus-summary-pop-limit                           |      |     |
+| / x             |        | gnus-summary-limit-to-extra                      |      |     |
+| A TAB           |        | gnus-summary-widget-forward                      |      |     |
+| A RET           |        | gnus-summary-scroll-up                           |      |     |
+| A ESC           |        | Prefix Command                                   |      |     |
+| A SPC           |        | gnus-summary-next-page                           |      |     |
+| A <             |        | gnus-summary-beginning-of-article                |      |     |
+| A >             |        | gnus-summary-end-of-article                      |      |     |
+| A C             |        | gnus-summary-show-complete-article               |      |     |
+| A D             |        | gnus-summary-enter-digest-group                  |      |     |
+| A M             |        | gnus-mailing-list-insinuate                      |      |     |
+| A P             |        | gnus-summary-print-article                       |      |     |
+| A R             |        | gnus-summary-refer-references                    |      |     |
+| A S             |        | gnus-sticky-article                              |      |     |
+| A T             |        | gnus-summary-refer-thread                        |      |     |
+| A W             |        | gnus-warp-to-article                             |      |     |
+| A ^             |        | gnus-summary-refer-parent-article                |      |     |
+| A b             |        | gnus-summary-beginning-of-article                |      |     |
+| A e             |        | gnus-summary-end-of-article                      |      |     |
+| A g             |        | gnus-summary-show-article                        |      |     |
+| A n             |        | gnus-summary-next-page                           |      |     |
+| A p             |        | gnus-summary-prev-page                           |      |     |
+| A r             |        | gnus-summary-refer-parent-article                |      |     |
+| A s             |        | gnus-summary-isearch-article                     |      |     |
+| A t             |        | gnus-article-babel                               |      |     |
+| A DEL           |        | gnus-summary-prev-page                           |      |     |
+| A S-SPC         |        | gnus-summary-prev-page                           |      |     |
+| A <backtab>     |        | gnus-summary-widget-backward                     |      |     |
+| A <delete>      |        | gnus-summary-prev-page                           |      |     |
+| B ESC           |        | Prefix Command                                   |      |     |
+| B B             |        | gnus-summary-crosspost-article                   |      |     |
+| B I             |        | gnus-summary-create-article                      |      |     |
+| B c             |        | gnus-summary-copy-article                        |      |     |
+| B e             |        | gnus-summary-expire-articles                     |      |     |
+| B i             |        | gnus-summary-import-article                      |      |     |
+| B m             |        | gnus-summary-move-article                        |      |     |
+| B p             |        | gnus-summary-article-posted-p                    |      |     |
+| B q             |        | gnus-summary-respool-query                       |      |     |
+| B r             |        | gnus-summary-respool-article                     |      |     |
+| B t             |        | gnus-summary-respool-trace                       |      |     |
+| B w             |        | gnus-summary-edit-article                        |      |     |
+| B DEL           |        | gnus-summary-delete-article                      |      |     |
+| B <backspace>   |        | gnus-summary-delete-article                      |      |     |
+| B <delete>      |        | gnus-summary-delete-article                      |      |     |
+| G C-n           |        | gnus-summary-next-same-subject                   |      |     |
+| G C-p           |        | gnus-summary-prev-same-subject                   |      |     |
+| G ESC           |        | Prefix Command                                   |      |     |
+| G N             |        | gnus-summary-next-article                        |      |     |
+| G P             |        | gnus-summary-prev-article                        |      |     |
+| G b             |        | gnus-summary-best-unread-article                 |      |     |
+| G f             |        | gnus-summary-first-unread-article                |      |     |
+| G g             |        | gnus-summary-goto-subject                        |      |     |
+| G j             |        | gnus-summary-goto-article                        |      |     |
+| G l             |        | gnus-summary-goto-last-article                   |      |     |
+| G n             |        | gnus-summary-next-unread-article                 |      |     |
+| G o             |        | gnus-summary-pop-article                         |      |     |
+| G p             |        | gnus-summary-prev-unread-article                 |      |     |
+| H d             |        | gnus-summary-describe-group                      |      |     |
+| H h             |        | gnus-summary-describe-briefly                    |      |     |
+| H i             |        | gnus-info-find-node                              |      |     |
+| H v             |        | gnus-version                                     |      |     |
+| K C             |        | gnus-article-view-part-as-charset                |      |     |
+| K E             |        | gnus-article-encrypt-body                        |      |     |
+| K H             |        | gnus-article-browse-html-article                 |      |     |
+| K O             |        | gnus-article-save-part-and-strip                 |      |     |
+| K b             |        | gnus-summary-display-buttonized                  |      |     |
+| K c             |        | gnus-article-copy-part                           |      |     |
+| K d             |        | gnus-article-delete-part                         |      |     |
+| K e             |        | gnus-article-view-part-externally                |      |     |
+| K i             |        | gnus-article-inline-part                         |      |     |
+| K j             |        | gnus-article-jump-to-part                        |      |     |
+| K m             |        | gnus-summary-repair-multipart                    |      |     |
+| K o             |        | gnus-article-save-part                           |      |     |
+| K r             |        | gnus-article-replace-part                        |      |     |
+| K t             |        | gnus-article-view-part-as-type                   |      |     |
+| K v             |        | gnus-article-view-part                           |      |     |
+| K               |        | gnus-article-pipe-part                           |      |     |
+| M C-c           |        | gnus-summary-catchup-all                         |      |     |
+| M ESC           |        | Prefix Command                                   |      |     |
+| M SPC           |        | gnus-summary-clear-mark-forward                  |      |     |
+| M !             |        | gnus-summary-tick-article-forward                |      |     |
+| M #             |        | gnus-summary-mark-as-processable                 |      |     |
+| M ?             |        | gnus-summary-mark-as-dormant                     |      |     |
+| M B             |        | gnus-summary-remove-bookmark                     |      |     |
+| M C             |        | gnus-summary-catchup                             |      |     |
+| M H             |        | gnus-summary-catchup-to-here                     |      |     |
+| M K             |        | gnus-summary-kill-same-subject                   |      |     |
+| M M             |        | Prefix Command                                   |      |     |
+| M P             |        | gnus-uu-mark-map                                 |      |     |
+| M S             |        | gnus-summary-limit-include-expunged              |      |     |
+| M V             |        | gnus-summary-mscore-map                          |      |     |
+| M b             |        | gnus-summary-set-bookmark                        |      |     |
+| M c             |        | gnus-summary-clear-mark-forward                  |      |     |
+| M d             |        | gnus-summary-mark-as-read-forward                |      |     |
+| M e             |        | gnus-summary-mark-as-expirable                   |      |     |
+| M h             |        | gnus-summary-catchup-from-here                   |      |     |
+| M k             |        | gnus-summary-kill-same-subject-and-select        |      |     |
+| M r             |        | gnus-summary-mark-as-read-forward                |      |     |
+| M t             |        | gnus-summary-tick-article-forward                |      |     |
+| M x             |        | gnus-summary-mark-as-expirable                   |      |     |
+| O B             |        | gnus-summary-write-article-body-file             |      |     |
+| O F             |        | gnus-summary-write-article-file                  |      |     |
+| O P             |        | gnus-summary-muttprint                           |      |     |
+| O b             |        | gnus-summary-save-article-body-file              |      |     |
+| O f             |        | gnus-summary-save-article-file                   |      |     |
+| O h             |        | gnus-summary-save-article-folder                 |      |     |
+| O m             |        | gnus-summary-save-article-mail                   |      |     |
+| O o             |        | gnus-summary-save-article                        |      |     |
+| O p             |        | gnus-summary-pipe-output                         |      |     |
+| O r             |        | gnus-summary-save-article-rmail                  |      |     |
+| O v             |        | gnus-summary-save-article-vm                     |      |     |
+| S ESC           |        | Prefix Command                                   |      |     |
+| S B             |        | Prefix Command                                   |      |     |
+| S D             |        | gnus-send-bounce-map                             |      |     |
+| S F             |        | gnus-summary-followup-with-original              |      |     |
+| S L             |        | gnus-summary-reply-to-list-with-original         |      |     |
+| S N             |        | gnus-summary-followup-to-mail-with-original      |      |     |
+| S O             |        | Prefix Command                                   |      |     |
+| S R             |        | gnus-summary-reply-with-original                 |      |     |
+| S V             |        | gnus-summary-very-wide-reply-with-original       |      |     |
+| S W             |        | gnus-summary-wide-reply-with-original            |      |     |
+| S c             |        | gnus-summary-cancel-article                      |      |     |
+| S f             |        | gnus-summary-followup                            |      |     |
+| S i             |        | gnus-summary-news-other-window                   |      |     |
+| S m             |        | gnus-summary-mail-other-window                   |      |     |
+| S n             |        | gnus-summary-followup-to-mail                    |      |     |
+| S o             |        | Prefix Command                                   |      |     |
+| S p             |        | gnus-summary-post-news                           |      |     |
+| S r             |        | gnus-summary-reply                               |      |     |
+| S s             |        | gnus-summary-supersede-article                   |      |     |
+| S u             |        | gnus-uu-post-news                                |      |     |
+| S v             |        | gnus-summary-very-wide-reply                     |      |     |
+| S w             |        | gnus-summary-wide-reply                          |      |     |
+| S y             |        | gnus-summary-yank-message                        |      |     |
+| T ESC           |        | Prefix Command                                   |      |     |
+| T #             |        | gnus-uu-mark-thread                              |      |     |
+| T E             |        | gnus-summary-expire-thread                       |      |     |
+| T H             |        | gnus-summary-hide-all-threads                    |      |     |
+| T S             |        | gnus-summary-show-all-threads                    |      |     |
+| T T             |        | gnus-summary-toggle-threads                      |      |     |
+| T ^             |        | gnus-summary-reparent-thread                     |      |     |
+| T d             |        | gnus-summary-down-thread                         |      |     |
+| T h             |        | gnus-summary-hide-thread                         |      |     |
+| T i             |        | gnus-summary-raise-thread                        |      |     |
+| T k             |        | gnus-summary-kill-thread                         |      |     |
+| T l             |        | gnus-summary-lower-thread                        |      |     |
+| T n             |        | gnus-summary-next-thread                         |      |     |
+| T o             |        | gnus-summary-top-thread                          |      |     |
+| T p             |        | gnus-summary-prev-thread                         |      |     |
+| T s             |        | gnus-summary-show-thread                         |      |     |
+| T t             |        | gnus-summary-rethread-current                    |      |     |
+| T u             |        | gnus-summary-up-thread                           |      |     |
+| V C             |        | gnus-score-customize                             |      |     |
+| V F             |        | gnus-score-flush-cache                           |      |     |
+| V R             |        | gnus-summary-rescore                             |      |     |
+| V S             |        | gnus-summary-current-score                       |      |     |
+| V c             |        | gnus-score-change-score-file                     |      |     |
+| V e             |        | gnus-score-edit-current-scores                   |      |     |
+| V f             |        | gnus-score-edit-file                             |      |     |
+| V m             |        | gnus-score-set-mark-below                        |      |     |
+| V s             |        | gnus-summary-set-score                           |      |     |
+| V t             |        | gnus-score-find-trace                            |      |     |
+| V w             |        | gnus-score-find-favourite-words                  |      |     |
+| V x             |        | gnus-score-set-expunge-below                     |      |     |
+| W 6             |        | gnus-article-de-base64-unreadable                |      |     |
+| W A             |        | gnus-article-treat-ansi-sequences                |      |     |
+| W B             |        | gnus-article-add-buttons-to-head                 |      |     |
+| W C             |        | gnus-article-capitalize-sentences                |      |     |
+| W D             |        | gnus-summary-wash-display-map                    |      |     |
+| W E             |        | gnus-summary-wash-empty-map                      |      |     |
+| W G             |        | gnus-summary-wash-header-map                     |      |     |
+| W H             |        | gnus-summary-wash-highlight-map                  |      |     |
+| W L             |        | gnus-article-toggle-truncate-lines               |      |     |
+| W M             |        | gnus-summary-wash-mime-map                       |      |     |
+| W Q             |        | gnus-article-fill-long-lines                     |      |     |
+| W T             |        | gnus-summary-wash-time-map                       |      |     |
+| W U             |        | gnus-article-treat-non-ascii                     |      |     |
+| W W             |        | gnus-summary-wash-hide-map                       |      |     |
+| W Y             |        | gnus-summary-wash-deuglify-map                   |      |     |
+| W Z             |        | gnus-article-decode-HZ                           |      |     |
+| W a             |        | gnus-article-strip-headers-in-body               |      |     |
+| W b             |        | gnus-article-add-buttons                         |      |     |
+| W c             |        | gnus-article-remove-cr                           |      |     |
+| W d             |        | gnus-article-treat-dumbquotes                    |      |     |
+| W e             |        | gnus-article-emphasize                           |      |     |
+| W f             |        | gnus-article-display-x-face                      |      |     |
+| W g             |        | gnus-treat-smiley                                |      |     |
+| W h             |        | gnus-article-wash-html                           |      |     |
+| W i             |        | gnus-summary-idna-message                        |      |     |
+| W l             |        | gnus-summary-stop-page-breaking                  |      |     |
+| W m             |        | gnus-summary-morse-message                       |      |     |
+| W o             |        | gnus-article-treat-overstrike                    |      |     |
+| W p             |        | gnus-article-verify-x-pgp-sig                    |      |     |
+| W q             |        | gnus-article-de-quoted-unreadable                |      |     |
+| W r             |        | gnus-summary-caesar-message                      |      |     |
+| W s             |        | gnus-summary-force-verify-and-decrypt            |      |     |
+| W t             |        | gnus-summary-toggle-header                       |      |     |
+| W u             |        | gnus-article-unsplit-urls                        |      |     |
+| W v             |        | gnus-summary-verbose-headers                     |      |     |
+| W w             |        | gnus-article-fill-cited-article                  |      |     |
+| X B             |        | gnus-uu-decode-binhex                            |      |     |
+| X O             |        | gnus-uu-decode-save                              |      |     |
+| X P             |        | gnus-uu-decode-postscript-and-save               |      |     |
+| X S             |        | gnus-uu-decode-unshar-and-save                   |      |     |
+| X U             |        | gnus-uu-decode-uu-and-save                       |      |     |
+| X Y             |        | gnus-uu-decode-yenc                              |      |     |
+| X b             |        | gnus-uu-decode-binhex                            |      |     |
+| X m             |        | gnus-summary-save-parts                          |      |     |
+| X o             |        | gnus-uu-decode-save                              |      |     |
+| X p             |        | gnus-uu-decode-postscript                        |      |     |
+| X s             |        | gnus-uu-decode-unshar                            |      |     |
+| X u             |        | gnus-uu-decode-uu                                |      |     |
+| X v             |        | gnus-uu-extract-view-map                         |      |     |
+| Y c             |        | gnus-summary-insert-cached-articles              |      |     |
+| Y d             |        | gnus-summary-insert-dormant-articles             |      |     |
+| Y g             |        | gnus-summary-prepare                             |      |     |
+| Y t             |        | gnus-summary-insert-ticked-articles              |      |     |
+| Z C             |        | gnus-summary-catchup-all-and-exit                |      |     |
+| Z E             |        | gnus-summary-exit-no-update                      |      |     |
+| Z G             |        | gnus-summary-rescan-group                        |      |     |
+| Z N             |        | gnus-summary-next-group                          |      |     |
+| Z P             |        | gnus-summary-prev-group                          |      |     |
+| Z Q             |        | gnus-summary-exit                                |      |     |
+| Z R             |        | gnus-summary-reselect-current-group              |      |     |
+| Z Z             |        | gnus-summary-exit                                |      |     |
+| Z c             |        | gnus-summary-catchup-and-exit                    |      |     |
+| Z n             |        | gnus-summary-catchup-and-goto-next-group         |      |     |
+| Z p             |        | gnus-summary-catchup-and-goto-prev-group         |      |     |
+| Z s             |        | gnus-summary-save-newsrc                         |      |     |
+| C-c C-s C-a     |        | gnus-summary-sort-by-author                      |      |     |
+| C-c C-s C-c     |        | gnus-summary-sort-by-chars                       |      |     |
+| C-c C-s C-d     |        | gnus-summary-sort-by-date                        |      |     |
+| C-c C-s TAB     |        | gnus-summary-sort-by-score                       |      |     |
+| C-c C-s C-l     |        | gnus-summary-sort-by-lines                       |      |     |
+| C-c C-s RET     |        | Prefix Command                                   |      |     |
+| C-c C-s C-n     |        | gnus-summary-sort-by-number                      |      |     |
+| C-c C-s C-o     |        | gnus-summary-sort-by-original                    |      |     |
+| C-c C-s C-r     |        | gnus-summary-sort-by-random                      |      |     |
+| C-c C-s C-s     |        | gnus-summary-sort-by-subject                     |      |     |
+| C-c C-s C-t     |        | gnus-summary-sort-by-recipient                   |      |     |
+| C-c C-M-s       |        | gnus-summary-limit-include-expunged              |      |     |
+| A M-RET         |        | gnus-summary-scroll-down                         |      |     |
+| B C-M-e         |        | gnus-summary-expire-articles-now                 |      |     |
+| G M-n           |        | gnus-summary-next-unread-subject                 |      |     |
+| G M-p           |        | gnus-summary-prev-unread-subject                 |      |     |
+| M M !           |        | Prefix Command                                   |      |     |
+| M M ?           |        | Prefix Command                                   |      |     |
+| M M d           |        | Prefix Command                                   |      |     |
+| M M e           |        | Prefix Command                                   |      |     |
+| M M u           |        | Prefix Command                                   |      |     |
+| M V c           |        | gnus-summary-clear-above                         |      |     |
+| M V k           |        | gnus-summary-kill-below                          |      |     |
+| M V m           |        | gnus-summary-mark-above                          |      |     |
+| M V u           |        | gnus-summary-tick-above                          |      |     |
+| M P G           |        | gnus-uu-unmark-by-regexp                         |      |     |
+| M P R           |        | gnus-uu-mark-by-regexp                           |      |     |
+| M P S           |        | gnus-uu-mark-sparse                              |      |     |
+| M P T           |        | gnus-uu-unmark-thread                            |      |     |
+| M P U           |        | gnus-summary-unmark-all-processable              |      |     |
+| M P a           |        | gnus-uu-mark-all                                 |      |     |
+| M P b           |        | gnus-uu-mark-buffer                              |      |     |
+| M P g           |        | gnus-uu-unmark-region                            |      |     |
+| M P i           |        | gnus-uu-invert-processable                       |      |     |
+| M P k           |        | gnus-summary-kill-process-mark                   |      |     |
+| M P p           |        | gnus-summary-mark-as-processable                 |      |     |
+| M P r           |        | gnus-uu-mark-region                              |      |     |
+| M P s           |        | gnus-uu-mark-series                              |      |     |
+| M P t           |        | gnus-uu-mark-thread                              |      |     |
+| M P u           |        | gnus-summary-unmark-as-processable               |      |     |
+| M P v           |        | gnus-uu-mark-over                                |      |     |
+| M P w           |        | gnus-summary-save-process-mark                   |      |     |
+| M P y           |        | gnus-summary-yank-process-mark                   |      |     |
+| M M-#           |        | gnus-summary-unmark-as-processable               |      |     |
+| S D b           |        | gnus-summary-resend-bounced-mail                 |      |     |
+| S D e           |        | gnus-summary-resend-message-edit                 |      |     |
+| S D r           |        | gnus-summary-resend-message                      |      |     |
+| S O m           |        | gnus-uu-digest-mail-forward                      |      |     |
+| S O p           |        | gnus-uu-digest-post-forward                      |      |     |
+| S o m           |        | gnus-summary-mail-forward                        |      |     |
+| S o p           |        | gnus-summary-post-forward                        |      |     |
+| S B R           |        | gnus-summary-reply-broken-reply-to-with-original |      |     |
+| S B r           |        | gnus-summary-reply-broken-reply-to               |      |     |
+| S M-c           |        | gnus-summary-mail-crosspost-complaint            |      |     |
+| T M-#           |        | gnus-uu-unmark-thread                            |      |     |
+| T M-^           |        | gnus-summary-reparent-children                   |      |     |
+| W E A           |        | gnus-article-strip-all-blank-lines               |      |     |
+| W E a           |        | gnus-article-strip-blank-lines                   |      |     |
+| W E e           |        | gnus-article-strip-trailing-space                |      |     |
+| W E l           |        | gnus-article-strip-leading-blank-lines           |      |     |
+| W E m           |        | gnus-article-strip-multiple-blank-lines          |      |     |
+| W E s           |        | gnus-article-strip-leading-space                 |      |     |
+| W E t           |        | gnus-article-remove-trailing-blank-lines         |      |     |
+| W E w           |        | gnus-article-remove-leading-whitespace           |      |     |
+| W T e           |        | gnus-article-date-lapsed                         |      |     |
+| W T i           |        | gnus-article-date-iso8601                        |      |     |
+| W T l           |        | gnus-article-date-local                          |      |     |
+| W T o           |        | gnus-article-date-original                       |      |     |
+| W T p           |        | gnus-article-date-english                        |      |     |
+| W T s           |        | gnus-article-date-user                           |      |     |
+| W T u           |        | gnus-article-date-ut                             |      |     |
+| W T z           |        | gnus-article-date-ut                             |      |     |
+| W M b           |        | gnus-article-view-part                           |      |     |
+| W M c           |        | gnus-article-decode-charset                      |      |     |
+| W M h           |        | gnus-mime-buttonize-attachments-in-header        |      |     |
+| W M v           |        | gnus-mime-view-all-parts                         |      |     |
+| W M w           |        | gnus-article-decode-mime-words                   |      |     |
+| W D D           |        | gnus-article-remove-images                       |      |     |
+| W D W           |        | gnus-article-show-images                         |      |     |
+| W D d           |        | gnus-article-display-face                        |      |     |
+| W D f           |        | gnus-treat-from-picon                            |      |     |
+| W D g           |        | gnus-treat-from-gravatar                         |      |     |
+| W D h           |        | gnus-treat-mail-gravatar                         |      |     |
+| W D m           |        | gnus-treat-mail-picon                            |      |     |
+| W D n           |        | gnus-treat-newsgroups-picon                      |      |     |
+| W D s           |        | gnus-treat-smiley                                |      |     |
+| W D x           |        | gnus-article-display-x-face                      |      |     |
+| W G f           |        | gnus-article-treat-fold-headers                  |      |     |
+| W G n           |        | gnus-article-treat-fold-newsgroups               |      |     |
+| W G u           |        | gnus-article-treat-unfold-headers                |      |     |
+| W H a           |        | gnus-article-highlight                           |      |     |
+| W H c           |        | gnus-article-highlight-citation                  |      |     |
+| W H h           |        | gnus-article-highlight-headers                   |      |     |
+| W H s           |        | gnus-article-highlight-signature                 |      |     |
+| W W C-c         |        | gnus-article-hide-citation-maybe                 |      |     |
+| W W B           |        | gnus-article-strip-banner                        |      |     |
+| W W C           |        | gnus-article-hide-citation-in-followups          |      |     |
+| W W P           |        | gnus-article-hide-pem                            |      |     |
+| W W a           |        | gnus-article-hide                                |      |     |
+| W W b           |        | gnus-article-hide-boring-headers                 |      |     |
+| W W c           |        | gnus-article-hide-citation                       |      |     |
+| W W h           |        | gnus-article-hide-headers                        |      |     |
+| W W l           |        | gnus-article-hide-list-identifiers               |      |     |
+| W W s           |        | gnus-article-hide-signature                      |      |     |
+| W Y a           |        | gnus-article-outlook-repair-attribution          |      |     |
+| W Y c           |        | gnus-article-outlook-rearrange-citation          |      |     |
+| W Y f           |        | gnus-article-outlook-deuglify-article            |      |     |
+| W Y u           |        | gnus-article-outlook-unwrap-lines                |      |     |
+| X v B           |        | gnus-uu-decode-binhex-view                       |      |     |
+| X v O           |        | gnus-uu-decode-save-view                         |      |     |
+| X v P           |        | gnus-uu-decode-postscript-and-save-view          |      |     |
+| X v S           |        | gnus-uu-decode-unshar-and-save-view              |      |     |
+| X v U           |        | gnus-uu-decode-uu-and-save-view                  |      |     |
+| X v b           |        | gnus-uu-decode-binhex-view                       |      |     |
+| X v o           |        | gnus-uu-decode-save-view                         |      |     |
+| X v p           |        | gnus-uu-decode-postscript-view                   |      |     |
+| X v s           |        | gnus-uu-decode-unshar-view                       |      |     |
+| X v u           |        | gnus-uu-decode-uu-view                           |      |     |
+| C-c C-s RET C-d |        | gnus-summary-sort-by-most-recent-date            |      |     |
+| C-c C-s RET C-n |        | gnus-summary-sort-by-most-recent-number          |      |     |
+| M M e N         |        | gnus-summary-put-mark-as-expirable-next-unread   |      |     |
+| M M e P         |        | gnus-summary-put-mark-as-expirable-prev-unread   |      |     |
+| M M e e         |        | gnus-summary-put-mark-as-expirable               |      |     |
+| M M e n         |        | gnus-summary-put-mark-as-expirable-next          |      |     |
+| M M e p         |        | gnus-summary-put-mark-as-expirable-prev          |      |     |
+| M M ? ?         |        | gnus-summary-put-mark-as-dormant                 |      |     |
+| M M ? N         |        | gnus-summary-put-mark-as-dormant-next-unread     |      |     |
+| M M ? P         |        | gnus-summary-put-mark-as-dormant-prev-unread     |      |     |
+| M M ? n         |        | gnus-summary-put-mark-as-dormant-next            |      |     |
+| M M ? p         |        | gnus-summary-put-mark-as-dormant-prev            |      |     |
+| M M ! !         |        | gnus-summary-put-mark-as-ticked                  |      |     |
+| M M ! N         |        | gnus-summary-put-mark-as-ticked-next-unread      |      |     |
+| M M ! P         |        | gnus-summary-put-mark-as-ticked-prev-unread      |      |     |
+| M M ! n         |        | gnus-summary-put-mark-as-ticked-next             |      |     |
+| M M ! p         |        | gnus-summary-put-mark-as-ticked-prev             |      |     |
+| M M u N         |        | gnus-summary-put-mark-as-unread-next-unread      |      |     |
+| M M u P         |        | gnus-summary-put-mark-as-unread-prev-unread      |      |     |
+| M M u n         |        | gnus-summary-put-mark-as-unread-next             |      |     |
+| M M u p         |        | gnus-summary-put-mark-as-unread-prev             |      |     |
+| M M u u         |        | gnus-summary-put-mark-as-unread                  |      |     |
+| M M d N         |        | gnus-summary-put-mark-as-read-next-unread        |      |     |
+| M M d P         |        | gnus-summary-put-mark-as-read-prev-unread        |      |     |
+| M M d d         |        | gnus-summary-put-mark-as-read                    |      |     |
+| M M d n         |        | gnus-summary-put-mark-as-read-next               |      |     |
+| M M d p         |        | gnus-summary-put-mark-as-read-prev               |      |     |
