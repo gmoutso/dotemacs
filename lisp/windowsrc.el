@@ -160,3 +160,35 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key (kbd "C--") 'text-scale-decrease)
 ;; balance windows
 (global-set-key (kbd "C-x C-0") 'balance-windows)
+
+(defun kill-buffer-and-window-or-frame ()
+  "Kill current and delete its window. If sole window, then kill frame."
+  (interactive)
+  (if (one-window-p)
+      (progn (kill-buffer)
+	     (delete-frame))
+    (kill-buffer-and-window))
+  )
+(substitute-key-definition 'kill-buffer-and-window
+                              'kill-buffer-and-window-or-frame
+                              global-map)
+
+(defun dired-ediff-files ()
+  (interactive)
+  (let ((files (dired-get-marked-files))
+        (wnd (current-window-configuration)))
+    (if (<= (length files) 2)
+        (let ((file1 (car files))
+              (file2 (if (cdr files)
+                         (cadr files)
+                       (read-file-name
+                        "file: "
+                        (dired-dwim-target-directory)))))
+          (if (file-newer-than-file-p file1 file2)
+              (ediff-files file2 file1)
+            (ediff-files file1 file2))
+          (add-hook 'ediff-after-quit-hook-internal
+                    (lambda ()
+                      (setq ediff-after-quit-hook-internal nil)
+                      (set-window-configuration wnd))))
+      (error "no more than 2 files should be marked"))))

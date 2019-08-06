@@ -12,20 +12,18 @@
 ;;       (append python-environment-virtualenv
 ;;               '("--python" "python3")))
 ;(elpy-use-ipython)
-
-;; errors with ipython 5!
-;; "error in process filter: Args out of range "
-;; (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
-;; the setenv results to
-;; Warning (python): Your ‘python-shell-interpreter’ doesn’t seem to support readline, yet ‘python-shell-completion-native’ was t and "ipython" is not part of the ‘python-shell-completion-native-disabled-interpreters’ list.  Native completions have been disabled locally.
-;; note: I used ubuntu's version <5, rather than pip3!
-;; change: use it, because I sometimes use virtualenv with pip packages
-(setenv "IPY_TEST_SIMPLE_PROMPT" "1")
-
-;; Anaconda mode
-(require 'anaconda-mode)
 (add-hook 'python-mode-hook 'anaconda-mode)
 (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
+
+;; conda
+(require 'conda)
+;; if you want interactive shell support, include:
+(conda-env-initialize-interactive-shells)
+;; if you want eshell support, include:
+(conda-env-initialize-eshell)
+;; if you want auto-activation (see below for details), include:
+(conda-env-autoactivate-mode t)
+
 
 ;; Anaconda mode and auto-complete
 ;; has problems
@@ -33,24 +31,47 @@
 
 ;; jedi complete
 ;; (add-hook 'python-mode-hook 'jedi:setup) ; jedi is more than ac
-(add-hook 'python-mode-hook 'jedi:ac-setup) ; only set up ac
-(setq jedi:complete-on-dot t)                 ; optional
+;(add-hook 'python-mode-hook 'jedi:ac-setup) ; only set up ac
+;(setq jedi:complete-on-dot t)                 ; optional
 
 ;; Flycheck for python (jedi,pylint)
 ;(add-hook 'python-mode-hook 'flycheck-mode)
 ; also note this (flycheck-add-next-checker 'python-flake8 'python-pylint) for a hook
 
 ;; use ipython
-(setq python-shell-interpreter "ipython"
-       python-shell-interpreter-args "-i")
+(setenv "IPY_TEST_SIMPLE_PROMPT" "1")
+(defun local-python ()
+  "use local ipython interpreter"
+  (interactive)
+  (setq python-shell-interpreter "ipython"
+	python-shell-interpreter-args "-i")
+  (custom-set-variables
+   '(conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
+  (add-to-list 'python-shell-extra-pythonpaths "/home/moutsopoulosg/master/python")
+  )
+(local-python)
+
+(defun ted-banks ()
+  "use ted ipython interpreter"
+  (interactive)
+  ;; the following does not work
+  ;; solution: simply run-python from a tramp opened file
+  ;; (setq
+  ;; python-shell-interpreter "/ssh:ted:/home/moutsopoulosg/miniconda/envs/banks/bin/python"
+   ;; python-shell-interpreter-args "--simple-prompt")
+  (custom-set-variables
+   '(conda-anaconda-home "/ssh:ted:/home/moutsopoulosg/miniconda/"))
+  (add-to-list 'python-shell-extra-pythonpaths "/home/moutsopoulosg/master/python")
+  )
+
 
 ;; line mode for Python and other Python hacks
-(defun my-python-mode-hook ()
+(defun my-python-line-mode-hook ()
   (linum-mode 1)
   (line-number-mode t)
   (column-number-mode t)
   )
-(add-hook 'python-mode-hook 'my-python-mode-hook)
+(add-hook 'python-mode-hook 'my-python-line-mode-hook)
 
 ;; ;; run python script
 ;; (defun python-send-buffer-with-args (args)
@@ -62,14 +83,34 @@
 ;;       (python-send-buffer))))
 ;; ;(global-set-key "\C-c\C-a" 'python-send-buffer-with-args)
 
+(defun my-run-existing-jupyter ()
+  "Run latest jupyter notebook kernel."
+  (interactive)
+    (let ((python-shell-interpreter "jupyter-console")
+	  (python-shell-interpreter-args "--simple-prompt --existing")) ;;cannot find json! --ssh ted"))
+      (run-python)
+      (python-shell-switch-to-shell)
+      )
+    )
+
+(defun my-run-existing-ipython-with-connect-info (connect-info)
+  (interactive "sConnect-info:" connect-info)
+  (let (
+	 (python-shell-interpreter "ipython")
+	(python-shell-interpreter-args
+	 (concat "console --existing connect-info.json --ssh ted"))) ;;cannot find json! --ssh ted"))
+    (with-temp-file "connect-info.json" (insert connect-info))
+      (run-python)
+      (python-shell-switch-to-shell)
+      )
+  )
+
 (defun my-run-python (&optional new)
   "Runs or switches to python shell"
   (interactive)
   (run-python)
   (python-shell-switch-to-shell)
   )
-
-
 (with-eval-after-load "python"
 (define-key python-mode-map (kbd "C-c l") 'python-shell-send-defun)
 (define-key python-mode-map (kbd "C-c r") 'python-shell-send-region)
@@ -79,7 +120,7 @@
 (define-key python-mode-map (kbd "C-c C-p") 'my-run-python)
 )
 
-;; inteligent send region or line to python shell
+;;inteligent send region or line to python shell
 (defun python-shell-send-region-or-line nil
   "Sends from python-mode buffer to a python shell, intelligently.
 If a region is selected, then send region (also deselect region).
@@ -91,7 +132,7 @@ Else, send the current line (also move a line down)."
 	 )
 	(t
 	 (python-shell-send-current-statement)
-					;(next-line) (move-beginning-of-line nil)
+	 ;(next-line) (move-beginning-of-line nil)
 	 )))
 
 (defun python-shell-send-current-statement ()
@@ -107,6 +148,7 @@ Taken from elpy-shell-send-current-statement"
   (python-nav-end-of-statement)
   (cua-set-mark)(cua-set-mark)
   ;; (set-mark-command nil)
+  (if (eobp) (newline))
   (python-nav-forward-statement)
 ;; (next-line)
   ;; (move-beginning-of-line nil)
@@ -114,12 +156,82 @@ Taken from elpy-shell-send-current-statement"
 
 ;; change to tkagg in matplotlib, set ion
 ;; this is useful for virtualenv that lack qt or others
-(defun python-shell-mpl-use-tk ()
+;; (defun python-shell-mpl-use-tk ()
+;;   (interactive)
+;;   (python-shell-send-string "
+;; import matplotlib
+;; matplotlib.use('tkagg')
+;; import matplotlib.pyplot as plt
+;; plt.ion()
+;; print('plt ion with tkagg')" )
+;;   (message "plt is interactive with tk backend"))
+
+(require 'importmagic)
+(define-key importmagic-mode-map (kbd "C-c C-l") 'importmagic-fix-symbol-at-point)
+(defun setup-importmagic ()
   (interactive)
-  (python-shell-send-string "
-import matplotlib
-matplotlib.use('tkagg')
-import matplotlib.pyplot as plt
-plt.ion()
-print('plt ion with tkagg')" )
-  (message "plt is interactive with tk backend"))
+  (conda-env-activate conda-project-env-name)
+  (importmagic-mode 1)
+  (importmagic--async-add-dir "/home/moutsopoulosg/dev/master/python"))
+;; (add-hook 'python-mode-hook 'setup-importmagic)
+(defadvice importmagic--query-imports-for-statement-and-fix (after send-import-statement (statement) activate) (python-shell-send-string statement))
+
+
+;; (defun open-in-pycharm (arg)
+;;   "Open visited file in pycharm."
+;;   (interactive "P")
+;;   (when buffer-file-name
+;;     (shell-command (concat
+;;                     (cond
+;;                      ((and (not arg) (eq system-type 'darwin)) "open")
+;;                      ((and (not arg) (member system-type '(gnu gnu/linux gnu/kfreebsd))) "xdg-open")
+;;                      (t (read-shell-command "Open current file with: ")))
+;;                     " "
+;;                     (shell-quote-argument buffer-file-name)))))
+(defun open-in-pycharm ()
+  "Open visited file in pycharm."
+  (interactive)
+  (shell-command (concat "/home/moutsopoulosg/app/pycharm-community-2017.1.3/bin/pycharm.sh "
+" ~/dev/master/ --line " (format "%s" (line-number-at-pos)) " " (buffer-file-name))))
+
+(setq pythonx-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
+(defun pythonx-imenu-index-function ()
+  "Appends the imenu index created from default function with the imenu index created from expression."
+  (interactive)
+  (let ((mode-imenu (python-imenu-create-index))
+        (custom-imenu (imenu--generic-function pythonx-imenu-expression)))
+    (append custom-imenu mode-imenu)))
+(defun pythonx-imenu-merge-hook ()
+  "Set up imenu for python-x."
+  (interactive)
+  (setq imenu-create-index-function 'pythonx-imenu-index-function))
+(add-hook 'python-mode-hook 'pythonx-imenu-merge-hook)
+
+(defun my-inferior-python-autoreload-hook ()
+  (interactive)
+  (python-shell-send-string "%load_ext autoreload")
+  (python-shell-send-string "%autoreload 2")
+  )
+(add-hook 'inferior-python-mode-hook 'my-inferior-python-autoreload-hook)
+
+(with-eval-after-load "python"
+(define-key python-mode-map (kbd "M-p") 'python-shell-send-fold-or-section-and-step))
+
+(defun only-flycheck-warnings-hook ()
+  (interactive)
+  ;; (set-face-attribute 'flycheck-warning nil :underline nil)
+  ;; (set-face-attribute 'flycheck-fringe-warning nil :foreground (face-attribute 'fringe :background ))
+  )
+(setq test '())
+(setq test (append test '(("E501" . info) ;; line too long
+			  ("E231" . info) ;; missing whitespace after ",", ":", ...
+			  ("E291" . info) ;; trailing whitespace
+			  ("E201" . info) ;; whitespace after (
+			  ("E202" . info) ;; whitespace before )
+			  ("E201" . info) ;; whitespace after (
+			  )))
+;; (("^E9.*$" . error)
+;;  ("^F82.*$" . error)
+;;  ("^F83.*$" . error)
+;;  ("^D.*$" . info)
+;;  ("^N.*$" . info))

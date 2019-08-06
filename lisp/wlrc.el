@@ -164,10 +164,11 @@
 (setq mime-view-text/html-previewer 'shr
       shr-color-visible-luminance-min 75
       )
+
 (setq
  mime-play-find-every-situations nil
  mime-play-delete-file-immediately nil
- process-connection-type nil
+ process-connection-type t
  mime-view-mailcap-files '("~/.mailcap") ;; this needs to be done before SEMI is loade
  )
 
@@ -274,7 +275,7 @@
 ;;
 (setq
  ;; use gmail search on All Mail
- wl-quicksearch-folder "%[Google Mail]/All Mail:\"gmoutso@gmail.com\"/clear@imap.gmail.com:993!")
+ wl-quicksearch-folder "%[Gmail]/All Mail:\"george.moutsopoulos@ev.uk\"/clear@imap.gmail.com:993!")
 
 
 ;; default IMAP
@@ -286,15 +287,56 @@
 ;;       ;; For non ascii-characters in folder-names
 ;;       elmo-imap4-use-modified-utf7 t)
 
+;; SMTP
+;; (setq 
+;;  wl-smtp-connection-type 'starttls
+;;       wl-smtp-posting-port 587
+;;       wl-smtp-authenticate-type "plain"
+;;       wl-smtp-posting-user "gmoutso"
+;;       wl-smtp-posting-server "smtp.gmail.com"
+;;       wl-local-domain "gmail.com"
+;;       wl-message-id-domain "smtp.gmail.com")
+
+
+(setq wl-folder-check-async t)
+
+(setq
+ ;; All system folders (draft, trash, spam, etc) are placed in the
+ ;; [Google Mail]-folder, except inbox. "%" means it's an IMAP-folder
+ ;; wl-default-folder "%inbox"
+ wl-trash-folder "%[Gmail]/Bin:\"george.moutsopoulos@ev.uk\"/clear@imap.gmail.com:993!"
+ wl-draft-folder "%[Gmail]/Drafts:\"george.moutsopoulos@ev.uk\"/clear@imap.gmail.com:993!"
+ ;; ;; The below is not necessary when you send mail through Gmail's SMTP server,
+ ;; wl-fcc
+ ;; Mark sent messages as read
+ ;; (placed in the folder wl-fcc)
+ wl-fcc-force-as-read    t
+ ;; For auto-completing foldernames
+ wl-default-spec "%"
+ )
+
+(setq wl-draft-always-delete-myself t)
+
 ;;
 ;; Multiple SMTP
 ;;
 ;; wl-draft-parent-folder => %INBOX:myname/clear@imap.gmail.com:993
 (setq
  ;; my identities
- wl-from "George Moutsopoulos <gmoutso@gmail.com>"
+ wl-from "George Moutsopoulos <george.moutsopoulos@ev.uk>"
+ wl-smtp-posting-user "george.moutsopoulos@ev.uk"
+ wl-smtp-posting-server "smtp.gmail.com"
+ wl-smtp-authenticate-type "plain"
+ wl-smtp-connection-type 'ssl
+ wl-smtp-posting-port 465
+ wl-local-domain "gmail.com"
+ wl-message-id-domain "smtp.gmail.com"
+ )
+
+(setq
  wl-user-mail-address-list
- '("George Moutsopoulos <gmoutso@gmail.com>"
+ '("George Moutsopoulos <george.moutsopoulos@ev.uk>"
+   "George Moutsopoulos <gmoutso@gmail.com>"
    "George Moutsopoulos <gmoutso@yahoo.com>")
  ;; regexp matching
  wl-draft-config-alist
@@ -308,7 +350,17 @@
 	  (template . "gmail")))
  ;; templates: cycle with C-c C-j
  wl-template-alist
- '(("gmail"
+ '(("evalue"
+    (wl-from . "George Moutsopoulos <george.moutsopoulos@ev.uk>")
+    ("From" . wl-from)
+    (wl-smtp-posting-user . "george.moutsopoulos@ev.uk")
+    (wl-smtp-posting-server . "smtp.gmail.com")
+    (wl-smtp-authenticate-type . "plain")
+    (wl-smtp-connection-type . 'ssl)
+    (wl-smtp-posting-port . 465)
+    (wl-local-domain . "gmail.com")
+    (wl-message-id-domain . "smtp.gmail.com"))
+   ("gmail"
     (wl-from . "George Moutsopoulos <gmoutso@gmail.com>")
     ("From" . wl-from)
     (wl-smtp-posting-user . "gmoutso@gmail.com")
@@ -335,39 +387,11 @@
 ;; remove = instant removal (same as "D"), thrash = move to wl-trash-folder
 ;; string = move to string.
 (setq wl-dispose-folder-alist
-      '(("^%.*yahoo.*" . "%Trash:\"gmoutso@yahoo.com\"/clear@imap.mail.yahoo.com:993!")
-        ("^%.*gmail.*" . "%[Google Mail]/Bin:gmoutso/clear@imap.gmail.com:993!")
+      '(
+	("^%.*yahoo.*" . "%Trash:\"gmoutso@yahoo.com\"/clear@imap.mail.yahoo.com:993!")
+        ("^%.*gmail.*" . "%[Gmail]/Bin:george.moutsopoulos@ev.uk/clear@imap.gmail.com:993!")
         ))
 
-;; SMTP
-;; (setq 
-;;  wl-smtp-connection-type 'starttls
-;;       wl-smtp-posting-port 587
-;;       wl-smtp-authenticate-type "plain"
-;;       wl-smtp-posting-user "gmoutso"
-;;       wl-smtp-posting-server "smtp.gmail.com"
-;;       wl-local-domain "gmail.com"
-;;       wl-message-id-domain "smtp.gmail.com")
-
-
-(setq wl-folder-check-async t)
-
-(setq
- ;; All system folders (draft, trash, spam, etc) are placed in the
- ;; [Google Mail]-folder, except inbox. "%" means it's an IMAP-folder
- ;; wl-default-folder "%inbox"
- ;; wl-draft-folder   "%[Google Mail]/Drafts"
- ;; wl-trash-folder   "%[Google Mail]/Trash"
- ;; ;; The below is not necessary when you send mail through Gmail's SMTP server,
- ;; wl-fcc            "%[Google Mail]/Sent"
- ;; Mark sent messages as read
- ;; (placed in the folder wl-fcc)
- wl-fcc-force-as-read    t
- ;; For auto-completing foldernames
- wl-default-spec "%"
- )
-
-(setq wl-draft-always-delete-myself t)
 
 ;; ;;; @ bbdb
 ;; (setq mime-bbdb/use-mail-extr nil)
