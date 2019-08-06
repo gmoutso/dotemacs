@@ -47,7 +47,7 @@
 	python-shell-interpreter-args "-i")
   (custom-set-variables
    '(conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
-  (add-to-list 'python-shell-extra-pythonpaths "/home/moutsopoulosg/master/python")
+  ;; (add-to-list 'python-shell-extra-pythonpaths "/home/moutsopoulosg/master/python")
   )
 (local-python)
 
