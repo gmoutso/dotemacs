@@ -92,7 +92,7 @@
 (popwin-mode 1)
 (push '(" *undo-tree*" :width 0.3 :position right) popwin:special-display-config)
 ;(push '("^\\*anything.*\\*$" :regexp t) popwin:special-display-config)
-(push '(anaconda-mode-view-mode :dedicated t) popwin:special-display-config)
+;; (push '(anaconda-mode-view-mode :dedicated t) popwin:special-display-config)
 (push '(Man-mode :dedicated t) popwin:special-display-config)
 
 ;;

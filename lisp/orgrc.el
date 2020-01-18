@@ -103,7 +103,7 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '( ;;(ipython . t)
-   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t) (ein . t) (bein . t)
+   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t) 
    ))
 
 ;; plantuml with babel executable
@@ -400,7 +400,8 @@ ARG is passed through to `org-copy-schedule-today'."
     )
   (yank))
 
-(defun org-copy-df (beg end)
+(defun org-copy-to-tabs (beg end)
+  "copy org table. does not use line"
   (interactive "r")
   (copy-region-as-kill beg end)
   (with-temp-buffer
@@ -415,3 +416,27 @@ ARG is passed through to `org-copy-schedule-today'."
     )
   )
 
+(defun org-open-pdf  ()
+  "Open pdf file with same name"
+  (interactive)
+(org-open-file (expand-file-name
+		(concat
+		 (file-name-sans-extension
+		  (or (file-name-nondirectory buffer-file-name))) "." "pdf")
+		(file-name-directory buffer-file-name))))
+
+(defun org-paste-link-xclip ()
+  "Take a screenshot into a time stamped unique-named file in the
+same directory as the org-buffer and insert a link to this file."
+  (interactive)
+  (setq filename
+        (concat
+         (make-temp-name
+          (concat (buffer-file-name)
+                  "_"
+                  (format-time-string "%Y%m%d_%H%M%S_")) ) ".png"))
+  (call-process "xclip" nil `(:file ,filename) nil "-selection" "clipboard" "-t" "image/png" "-o")
+  (insert (concat "[[" filename "]]"))
+  (org-display-inline-images))
+
+(require 'ox-clip)

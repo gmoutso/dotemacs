@@ -1,10 +1,23 @@
 ;; helm
+(require 'helm-config)
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-r") 'helm-recentf)
-(global-set-key (kbd "C-x C-b") 'helm-buffers-list)
-(global-set-key (kbd "C-x C-f") 'find-file)
+(global-set-key (kbd "C-x C-b") 'helm-mini)
+(global-set-key (kbd "C-x C-l") 'helm-locate)
+(global-set-key (kbd "C-x /") 'helm-find)
+(global-set-key (kbd "C-h a") 'helm-apropos)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
+(define-key helm-buffer-map (kbd "M-d") 'helm-buffer-run-kill-buffers)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
 
-;; persistent viewing keys in minor mode
+;; ace
+(require 'ace-window)
+(global-set-key (kbd "C-x o") 'ace-window)
+
+;; treemacs
+(global-set-key (kbd "C-x C-t") 'treemacs)
+
+;; PERSISTENT viewing keys in minor mode
 (defvar my-keys-mode-map (make-keymap) "my-keys-mode keymap.")
 (define-minor-mode my-keys-mode
   "A minor mode with my keys."

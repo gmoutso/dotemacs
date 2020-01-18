@@ -22,7 +22,7 @@
 ;; if you want eshell support, include:
 (conda-env-initialize-eshell)
 ;; if you want auto-activation (see below for details), include:
-(conda-env-autoactivate-mode t)
+;; (conda-env-autoactivate-mode)
 
 
 ;; Anaconda mode and auto-complete
