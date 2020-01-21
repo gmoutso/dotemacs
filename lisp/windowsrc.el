@@ -16,73 +16,21 @@
 (define-key winner-mode-map (kbd "C-c <left>") nil)
 (define-key winner-mode-map  (kbd "C-x C-z") 'winner-undo)
 
-;;
-;; Windmove
-;;
-;; continuously move cursor in with arrows between windows
-(defun my-cont-windmove ()
-  "Continuously move cursor within windows using arrows"
-  (interactive)
-  (let ((map (make-sparse-keymap)))
-    (dolist (x '(("<up>" . windmove-up)
-                 ("<left>" . windmove-left)
-                 ("<down>" . windmove-down)
-                 ("<right>" . windmove-right)))
-      (define-key map (read-kbd-macro (car x)) (cdr x)))
-    (set-transient-map map t)))
+;; (variable-pitch-mode 0)
+;; (use-package mixed-pitch
+;;   :hook
+;;   ;; If you want it in all text modes:
+;;   (org-mode . mixed-pitch-mode))
+;; use variable pitch font
+;; (add-hook 'org-mode-hook 'variable-pitch-mode)
+;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+;; (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
+
 
 (global-set-key (kbd "C-x <up>")  'windmove-up )
 (global-set-key (kbd "C-x <down>") 'windmove-down )
 (global-set-key (kbd "C-x <left>")  'windmove-left )
 (global-set-key (kbd "C-x <right>") 'windmove-right )
-
-;; Similarly, one should be able to move a window's position continuously
-(global-set-key (kbd "C-x <S-up>")
-		(lambda () (interactive)
-		  (buf-move-up)
-		  (buf-move))
-		)
-(global-set-key (kbd "C-x <S-down>")
-		(lambda () (interactive)
-		  (buf-move-down)
-		  (buf-move))
-		)
-(global-set-key (kbd "C-x <S-left>")
-		(lambda ()
-		  (interactive)
-		  (buf-move-left)
-		  (buf-move))
-		)
-(global-set-key (kbd "C-x <S-right>")
-		(lambda ()
-		  (interactive)
-		  (buf-move-right)
-		  (buf-move))
-		)
-
-;; ;; Similarly, one should be able to move a window's position continuously
-;; (global-set-key (kbd "C-x <S-up>")
-;; 		(lambda () (interactive)
-;; 		  (buf-move-up)
-;; 		  (buf-move))
-;; 		)
-;; (global-set-key (kbd "C-x <S-down>")
-;; 		(lambda () (interactive)
-;; 		  (buf-move-down)
-;; 		  (buf-move))
-;; 		)
-;; (global-set-key (kbd "C-x <S-left>")
-;; 		(lambda ()
-;; 		  (interactive)
-;; 		  (buf-move-left)
-;; 		  (buf-move))
-;; 		)
-;; (global-set-key (kbd "C-x <S-right>")
-;; 		(lambda ()
-;; 		  (interactive)
-;; 		  (buf-move-right)
-;; 		  (buf-move))
-;; 		)
 
 ;;
 ;; popwin (close popup windows easily)
@@ -104,8 +52,6 @@
 
 Move point to the first non-whitespace character on this line.
 If point is already there, move to the beginning of the line.
-Effectively toggle between the first non-whitespace character and
-the beginning of the line.
 
 If ARG is not nil or 1, move forward ARG - 1 lines first.  If
 point reaches the beginning or end of the buffer, stop there."
@@ -123,10 +69,7 @@ point reaches the beginning or end of the buffer, stop there."
       (move-beginning-of-line 1))))
 
 ;; remap C-a to `smarter-move-beginning-of-line'
-;(global-set-key [remap move-beginning-of-line]
-;                'smarter-move-beginning-of-line)
 (global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
-
 
 (require 'newcomment)
 (defun move-end-of-code ()

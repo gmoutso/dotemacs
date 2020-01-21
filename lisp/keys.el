@@ -7,7 +7,6 @@
 (global-set-key (kbd "C-x /") 'helm-find)
 (global-set-key (kbd "C-h a") 'helm-apropos)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
-(define-key helm-buffer-map (kbd "M-d") 'helm-buffer-run-kill-buffers)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
 
 ;; ace

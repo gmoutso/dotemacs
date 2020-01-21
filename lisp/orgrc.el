@@ -9,8 +9,10 @@
 ;;(require 'org-tempo)
 (setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-(set-face-attribute 'org-table nil :inherit 'fixed-pitch)
 
+(use-package helm-org)
+(general-def org-mode-map
+  "C-c C-j" 'helm-org-in-buffer-headings)
 
 ;; mobile org
 (setq org-directory "~/Documents/org")
@@ -72,8 +74,6 @@
 ;; (require 'org-bullets)
 ;; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
-;; use variable pitch font
-(add-hook 'org-mode-hook 'variable-pitch-mode)
 
 ;; ;(require 'org-faces)
 ;; (eval-after-load 'org-faces '(progn
@@ -440,3 +440,29 @@ same directory as the org-buffer and insert a link to this file."
   (org-display-inline-images))
 
 (require 'ox-clip)
+
+;; (require 'org-link-edit)
+;; (defun jk/unlinkify ()
+;;   "Replace an org-link with the description, or if this is absent, the path."
+;;   (interactive)
+;;   (let ((eop (org-element-context)))
+;;     (when (eq 'link (car eop))
+;;       (message "%s" eop)
+;;       (let* ((start (org-element-property :begin eop))
+;;              (end (org-element-property :end eop))
+;;              (contents-begin (org-element-property :contents-begin eop))
+;;              (contents-end (org-element-property :contents-end eop))
+;;              (path (org-element-property :path eop))
+;;              (desc (and contents-begin
+;;                         contents-end
+;;                         (buffer-substring contents-begin contents-end))))
+;;         (setf (buffer-substring start end)
+;;               (concat (or desc path)
+;;                       (make-string (org-element-property :post-blank eop) ?\s)))))))
+
+(defun org-to-html-from-clipboard ()
+  "Convert clipboard contents from HTML to Org and then paste (yank).
+   https://emacs.stackexchange.com/a/12124/13752"
+  (interactive)
+  (kill-new (shell-command-to-string "xclip -o -t TARGETS | grep -q text/html && (xclip -o -t text/html | pandoc -f html -t json | pandoc -f json -t org) || xclip -o"))
+  (yank))
