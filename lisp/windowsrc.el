@@ -69,7 +69,7 @@ point reaches the beginning or end of the buffer, stop there."
       (move-beginning-of-line 1))))
 
 ;; remap C-a to `smarter-move-beginning-of-line'
-(global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
+;(global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
 
 (require 'newcomment)
 (defun move-end-of-code ()
@@ -94,7 +94,6 @@ point reaches the beginning or end of the buffer, stop there."
       (move-beginning-of-line nil)
       (move-end-of-code))))
 
-(global-set-key (kbd "C-e") 'smarter-move-end-of-line)
 
 ;;
 ;; zoom in/out
@@ -135,3 +134,10 @@ point reaches the beginning or end of the buffer, stop there."
                       (setq ediff-after-quit-hook-internal nil)
                       (set-window-configuration wnd))))
       (error "no more than 2 files should be marked"))))
+
+(require 'general)
+(general-define-key
+ :keymaps
+ 'python-mode
+ "C-a" 'smarter-move-beginning-of-line  ; so that visual-line remap works on other buffers
+ "C-e" 'smarter-move-end-of-line)

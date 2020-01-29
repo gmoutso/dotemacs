@@ -23,9 +23,6 @@
 (setq completion-styles `(basic partial-completion emacs22 initials
                                 ,(if (version<= emacs-version "27.0") 'helm-flex 'flex)))
 
-
-
-;; I don't know what the following is
 ;; (defun my-recentf-show-details (file)
 ;;   (append
 ;;    (list

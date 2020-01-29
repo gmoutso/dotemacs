@@ -466,3 +466,9 @@ same directory as the org-buffer and insert a link to this file."
   (interactive)
   (kill-new (shell-command-to-string "xclip -o -t TARGETS | grep -q text/html && (xclip -o -t text/html | pandoc -f html -t json | pandoc -f json -t org) || xclip -o"))
   (yank))
+
+;;
+;; work with pdf tools
+;;
+(use-package org-pdftools)
+(use-package org-noter)

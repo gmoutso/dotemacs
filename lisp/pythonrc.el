@@ -1,3 +1,10 @@
+(require 'use-package)
+(use-package general)
+(use-package jupyter-mode
+  :defer t
+  :config
+  (setq jupyter-eval-use-overlays nil))
+
 ;; using elpy for python
 ;; (elpy-enable)
 ;; (setq elpy-rpc-python-command "python3")
@@ -111,14 +118,7 @@
   (run-python)
   (python-shell-switch-to-shell)
   )
-(with-eval-after-load "python"
-(define-key python-mode-map (kbd "C-c l") 'python-shell-send-defun)
-(define-key python-mode-map (kbd "C-c r") 'python-shell-send-region)
-(define-key python-mode-map (kbd "C-c b") 'python-shell-send-buffer)
-;; needs define -region-or-line
-(define-key python-mode-map (kbd "<M-return>") 'python-shell-send-region-or-line)
-(define-key python-mode-map (kbd "C-c C-p") 'my-run-python)
-)
+
 
 ;;inteligent send region or line to python shell
 (defun python-shell-send-region-or-line nil
@@ -235,3 +235,11 @@ Taken from elpy-shell-send-current-statement"
 ;;  ("^F83.*$" . error)
 ;;  ("^D.*$" . info)
 ;;  ("^N.*$" . info))
+
+(general-def 'python python-mode-map
+  "C-c l" 'python-shell-send-defun
+  "C-c r" 'python-shell-send-region
+  "C-c b" 'python-shell-send-buffer
+  "<M-return>" 'python-shell-send-region-or-line
+  "C-c C-p"  'my-run-python
+  "C-c C-c" 'python-shell-send-region-or-line)

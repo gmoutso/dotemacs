@@ -45,4 +45,4 @@
 (define-key my-gdb-navigation-mode-map (kbd "c") 'gud-cont)
 
 ;; kill this buffer
-(global-set-key (kbd "C-x k") 'kill-this-buffer)
+(global-set-key (kbd "C-x k") 'kill-current-buffer)
