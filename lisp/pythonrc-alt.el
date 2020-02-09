@@ -1,8 +1,16 @@
 ;; pythonrc -- Summary
-;; configuration for python
+;; configuration for python using LSP
 ;;; Commentary:
 ;; None
 ;; Code
+(use-package lsp-python-ms
+  ;; :hook (python-mode . (lambda ()
+                          ;; (require 'lsp-python-ms)
+  ;; (lsp))) ; or lsp-deferred
+  :config
+  :custom
+  ;; (lsp-python-ms-extra-paths '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
+)
 (use-package general)
 (use-package jupyter
   :config
@@ -231,7 +239,7 @@
 (define-key importmagic-mode-map (kbd "C-c C-l") 'importmagic-fix-symbol-at-point)
 (defun setup-importmagic ()
   (interactive)
-  (conda-env-activate conda-env-current-name)
+  (conda-env-activate conda-project-env-name)
   (importmagic-mode 1)
   (importmagic--async-add-dir "/home/moutsopoulosg/dev/master/python"))
 ;; (add-hook 'python-mode-hook 'setup-importmagic)

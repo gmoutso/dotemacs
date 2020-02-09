@@ -177,7 +177,8 @@ more org rifle..\n"
    (("q" hydra-move-splitter-left "←")
     ("r" hydra-move-splitter-right "→")
     ("e" hydra-move-splitter-up "↑")
-    ("w" hydra-move-splitter-down "↓"))
+    ("w" hydra-move-splitter-down "↓")
+    ("_" balance-windows "balance"))
    "Create"
    (("0" delete-window "del")
     ("1" delete-other-windows "max")
@@ -198,7 +199,7 @@ more org rifle..\n"
   (("s" ace-swap-window "swap")
    ("f" helm-find-files "file")
    ("b" helm-mini "buffer")
-   ("_" balance-windows "balance"))
+   ("." toggle-window-dedicated "dedicate"))
   "Zoom"
    (("+" text-scale-increase "zoom in")
     ("-" text-scale-decrease "zoom out")

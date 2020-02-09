@@ -31,7 +31,10 @@
 (global-set-key (kbd "C-x <down>") 'windmove-down )
 (global-set-key (kbd "C-x <left>")  'windmove-left )
 (global-set-key (kbd "C-x <right>") 'windmove-right )
-
+;; move between frames
+;; (use-package framemove
+;;   :config
+;;     (setq framemove-hook-into-windmove nil))
 ;;
 ;; popwin (close popup windows easily)
 ;;
@@ -134,6 +137,17 @@ point reaches the beginning or end of the buffer, stop there."
                       (setq ediff-after-quit-hook-internal nil)
                       (set-window-configuration wnd))))
       (error "no more than 2 files should be marked"))))
+
+(defun toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: Can't touch this!"
+     "%s is up for grabs.")
+   (current-buffer)))
 
 (require 'general)
 (general-define-key
