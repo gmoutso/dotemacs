@@ -8,10 +8,37 @@
                           ;; (require 'lsp-python-ms)
   ;; (lsp))) ; or lsp-deferred
   :config
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp)))  ; or lsp-deferred
   :custom
-  ;; (lsp-python-ms-extra-paths '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
-)
-(use-package general)
+  (lsp-python-ms-extra-paths '("/home/moutsopoulosg/miniconda/envs/blade/bin"
+			       "/home/moutsopoulosg/dev/master/python"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/site-packages"))
+  )
+
+(use-package lsp-ui
+  :hook lsp-mode
+  :custom
+  (lsp-ui-doc-enable nil))
+
+(use-package lsp-mode
+  :custom
+  (lsp-prefer-flymake nil))  ;; if this causes problems, make none and enable flycheck with flake?
+
+(use-package flycheck
+  :hook (python-mode . flycheck-mode)
+  :config
+  ;; (spaceline-toggle-flycheck-info-off)
+  ;; (spaceline-toggle-flycheck-warning-off)
+  :custom
+  (flycheck-python-flake8-executable "python")
+  (flycheck-flake8rc "~/.emacs.d/lisp/flakerc")
+  ;; (flycheck-highlighting-mode nil) ;default is symbols
+  :custom-face
+  ;; (flycheck-warning ((t (:underline nil))))
+  )
+
 (use-package jupyter
   :config
   (setq jupyter-eval-use-overlays nil))
@@ -24,29 +51,14 @@
 
 ;; note that exec-path cannot have nil (current directory) or env-conda-activate will not work
 (use-package anaconda-mode
-  :hook python-mode
+  ;; :hook python-mode
   :custom
   (conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
 
 (use-package anaconda-eldoc-mode
-  :hook pyhon-mode)
-
-;; Flycheck for python (jedi,pylint)
-;(add-hook 'python-mode-hook 'flycheck-mode)
-; also note this (flycheck-add-next-checker 'python-flake8 'python-pylint) for a hook
-
-(use-package flycheck
-  :hook (python-mode . flycheck-mode)
-  :config
-  ;; (spaceline-toggle-flycheck-info-off)
-  ;; (spaceline-toggle-flycheck-warning-off)
-  :custom
-  (flycheck-python-flake8-executable "python")
-  (flycheck-flake8rc "~/.emacs.d/lisp/flakerc")
-  ;; (flycheck-highlighting-mode nil) ;default is symbols
-  :custom-face
-  (flycheck-warning ((t (:underline nil))))
+  ;; :hook pyhon-mode
   )
+
 
 ;; (general-def 'python-mode-map
 ;;   "M-p" (general-predicate-dispatch nil jupyter-repl-interaction-mode 'jupyter-send-fold-or-section-and-step)
