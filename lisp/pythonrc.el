@@ -14,21 +14,50 @@
   (yas-reload-all)
   (setq yas-triggers-in-field t))
 
+(defvar my-python-intellisense `my-python-load-intellisense-select "Which function to use for intellisense.
+E.g., anaconda-mode or lsp")
+(defun my-python-load-intellisense-select ()
+  "Select lsp or anaconda according to context (py or ipynb file)"
+  (cond ((file-remote-p default-directory) nil)
+	((and (boundp 'ein:notebook-mode) ein:notebook-mode) (anaconda-mode))
+	((and (boundp 'python-mode) (derived-mode-p 'python-mode)) (lsp))))
+(defun my-load-intellisense ()  "Load python intellisense" (funcall my-python-intellisense))
+(add-hook 'python-mode-hook 'my-load-intellisense)
+(add-hook 'ein:notebook-mode-hook 'my-load-intellisense)
+
 ;; note that exec-path cannot have nil (current directory) or env-conda-activate will not work
 (use-package anaconda-mode
-  :hook python-mode
+  :config
+  (conda-env-autoactivate-mode)
   :custom
   (conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
 
-(use-package anaconda-eldoc-mode
-  :hook pyhon-mode)
+;; (use-package anaconda-eldoc-mode)
 
-;; Flycheck for python (jedi,pylint)
-;(add-hook 'python-mode-hook 'flycheck-mode)
+(use-package lsp-python-ms
+  :config
+  ;; :hook lsp-mode ; what to put here?
+  ;; :hook (python-mode . (lambda ()
+  ;;                         (require 'lsp-python-ms)
+  ;;                         (lsp)))  ; or lsp-deferred
+  :custom
+  (lsp-python-ms-extra-paths '("/home/moutsopoulosg/miniconda/envs/blade/bin"
+			       "/home/moutsopoulosg/dev/master/python"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/site-packages"))
+  )
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-enable nil))
+
+(use-package lsp-mode
+  :custom
+  (lsp-prefer-flymake nil))  ;; if this causes problems, make none and enable flycheck
+
 ; also note this (flycheck-add-next-checker 'python-flake8 'python-pylint) for a hook
-
 (use-package flycheck
-  :hook (python-mode . flycheck-mode)
+  ;; :hook (python-mode . flycheck-mode)
   :config
   ;; (spaceline-toggle-flycheck-info-off)
   ;; (spaceline-toggle-flycheck-warning-off)
@@ -37,7 +66,7 @@
   (flycheck-flake8rc "~/.emacs.d/lisp/flakerc")
   ;; (flycheck-highlighting-mode nil) ;default is symbols
   :custom-face
-  (flycheck-warning ((t (:underline nil))))
+  ;; (flycheck-warning ((t (:underline nil))))
   )
 
 ;; (general-def 'python-mode-map

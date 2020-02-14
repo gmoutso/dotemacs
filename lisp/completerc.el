@@ -12,4 +12,4 @@
 (add-hook 'after-init-hook 'global-company-mode)
 (eval-after-load "company"
   '(add-to-list 'company-backends 'company-anaconda))
-(setq company-idle-delay nil)
+(setq company-idle-delay 2)

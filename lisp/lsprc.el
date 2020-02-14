@@ -8,9 +8,9 @@
                           ;; (require 'lsp-python-ms)
   ;; (lsp))) ; or lsp-deferred
   :config
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-python-ms)
-                          (lsp)))  ; or lsp-deferred
+  ;; :hook (python-mode . (lambda ()
+  ;;                         (require 'lsp-python-ms)
+  ;;                         (lsp)))  ; or lsp-deferred
   :custom
   (lsp-python-ms-extra-paths '("/home/moutsopoulosg/miniconda/envs/blade/bin"
 			       "/home/moutsopoulosg/dev/master/python"
@@ -54,10 +54,6 @@
   ;; :hook python-mode
   :custom
   (conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
-
-(use-package anaconda-eldoc-mode
-  ;; :hook pyhon-mode
-  )
 
 
 ;; (general-def 'python-mode-map
