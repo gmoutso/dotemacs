@@ -17,6 +17,7 @@
 					:candidates (list
 						     "-avz" "-rvz" "-n" "-u" "--delete" "--delete-excluded"
 						     "--exclude \".dexy/\" --exclude \".cache/\" --exclude \"*.pyc\" --exclude \"README.md\" --exclude \".trash\""
+						     "--exclude=\"/.*\""
 						     "-m --include=\"*/\" --include=\"*output/***\" --exclude=\"*\"")
 					:action (lambda (candidate) (helm-marked-candidates))))
 (defvar rsync-tree-history nil)
@@ -75,7 +76,7 @@
     ;;   (insert (concat "$ " command "\n"))
     ;;   )
     (message command)
-    (let (default-directory home-folder)
+    (let ((default-directory home-folder))
     (async-shell-command command "*rsync*"))
   ))
 

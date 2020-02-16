@@ -14,13 +14,15 @@
   (yas-reload-all)
   (setq yas-triggers-in-field t))
 
+(defun is-notebook-p ()
+  (and (boundp 'ein:notebook-mode) ein:notebook-mode))
 (defvar my-python-intellisense `my-python-load-intellisense-select "Which function to use for intellisense.
 E.g., anaconda-mode or lsp")
 (defun my-python-load-intellisense-select ()
   "Select lsp or anaconda according to context (py or ipynb file)"
   (cond ((file-remote-p default-directory) nil)
-	((and (boundp 'ein:notebook-mode) ein:notebook-mode) (anaconda-mode))
-	((and (boundp 'python-mode) (derived-mode-p 'python-mode)) (lsp))))
+	((is-notebook-p) (anaconda-mode))
+	(t (lsp-deferred))))
 (defun my-load-intellisense ()  "Load python intellisense" (funcall my-python-intellisense))
 (add-hook 'python-mode-hook 'my-load-intellisense)
 (add-hook 'ein:notebook-mode-hook 'my-load-intellisense)
@@ -94,15 +96,28 @@ E.g., anaconda-mode or lsp")
   (python-shell-extra-pythonpaths
     '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
   :general
-  ("M-p" (general-predicate-dispatch 'python-shell-send-fold-or-section-and-step jupyter-repl-interaction-mode 'jupyter-send-fold-or-section-and-step))
-  ("<M-return>" (general-predicate-dispatch nil jupyter-repl-interaction-mode 'jupyter-eval-line-or-region))
   ("C-c C-p"  (general-predicate-dispatch 'my-run-python jupyter-repl-interaction-mode 'jupyter-repl-pop-to-buffer))
   )
 
+(general-def 'python-mode-map
+  "<M-return>" (general-predicate-dispatch 'python-shell-send-fold-or-section-and-step
+	   jupyter-repl-interaction-mode 'jupyter-send-fold-or-section-and-step
+	   (is-notebook-p) 'ein:worksheet-execute-cell-and-goto-next)
+; "C-c l" 'python-shell-send-defun
+; "C-c r" 'python-shell-send-region
+; "C-c b" 'python-shell-send-buffer
+; "M-p" 'python-shell-send-fold-or-section-and-step
+  "C-c C-p"  (general-predicate-dispatch 'my-run-python
+	       jupyter-repl-interaction-mode 'jupyter-repl-pop-to-buffer
+	       (is-notebook-p) 'ein:shared-output-pop-to-buffer)
+  ;"C-c C-c" 'python-shell-send-region-or-line
+)
+
 (defun my-python-line-mode-hook ()
+  (unless (is-notebook-p)
   (linum-mode 1)
   (line-number-mode t)
-  (column-number-mode t))
+  (column-number-mode t)))
 (add-hook 'python-mode-hook 'my-python-line-mode-hook)
 
 ;; conda
@@ -284,6 +299,9 @@ E.g., anaconda-mode or lsp")
   (shell-command (concat "/home/moutsopoulosg/app/pycharm-community-2017.1.3/bin/pycharm.sh "
 " ~/dev/master/ --line " (format "%s" (line-number-at-pos)) " " (buffer-file-name))))
 
+;;
+;; add pythonx sections to imenu
+;;
 (setq pythonx-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
 (defun pythonx-imenu-index-function ()
   "Appends the imenu index created from default function with the imenu index created from expression."
@@ -292,7 +310,7 @@ E.g., anaconda-mode or lsp")
     (append custom-imenu mode-imenu)))
 (defun pythonx-imenu-merge-hook ()
   "Set up imenu for python-x."
-  (setq imenu-create-index-function 'pythonx-imenu-index-function))
+  (unless (is-notebook-p) (setq imenu-create-index-function 'pythonx-imenu-index-function)))
 (add-hook 'python-mode-hook 'pythonx-imenu-merge-hook)
 
 (defun my-inferior-python-autoreload-hook ()
