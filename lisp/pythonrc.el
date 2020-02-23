@@ -16,6 +16,8 @@
 
 (defun is-notebook-p ()
   (and (boundp 'ein:notebook-mode) ein:notebook-mode))
+(defun is-python-p ()
+  (derived-mode-p 'python-mode))
 (defvar my-python-intellisense `my-python-load-intellisense-select "Which function to use for intellisense.
 E.g., anaconda-mode or lsp")
 (defun my-python-load-intellisense-select ()
@@ -45,8 +47,16 @@ E.g., anaconda-mode or lsp")
   :custom
   (lsp-python-ms-extra-paths '("/home/moutsopoulosg/miniconda/envs/blade/bin"
 			       "/home/moutsopoulosg/dev/master/python"
-			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/site-packages"))
-  )
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python27.zip"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/plat-linux2"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/lib-tk"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/lib-old"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/lib-dynload"
+			       "/home/moutsopoulosg/.local/lib/python2.7/site-packages"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/site-packages"
+			       "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/site-packages/IPython/extensions"
+			       "/home/moutsopoulosg/.ipython")))
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
@@ -99,10 +109,10 @@ E.g., anaconda-mode or lsp")
   ("C-c C-p"  (general-predicate-dispatch 'my-run-python jupyter-repl-interaction-mode 'jupyter-repl-pop-to-buffer))
   )
 
-(general-def 'python-mode-map
+(general-def python-mode-map
   "<M-return>" (general-predicate-dispatch 'python-shell-send-fold-or-section-and-step
 	   jupyter-repl-interaction-mode 'jupyter-send-fold-or-section-and-step
-	   (is-notebook-p) 'ein:worksheet-execute-cell-and-goto-next)
+	   (is-notebook-p) 'ein:worksheet-execute-cell-and-goto-next-km)
 ; "C-c l" 'python-shell-send-defun
 ; "C-c r" 'python-shell-send-region
 ; "C-c b" 'python-shell-send-buffer
@@ -114,10 +124,10 @@ E.g., anaconda-mode or lsp")
 )
 
 (defun my-python-line-mode-hook ()
-  (unless (is-notebook-p)
-  (linum-mode 1)
-  (line-number-mode t)
-  (column-number-mode t)))
+  (cond ((is-notebook-p) (linum-mode -1))
+  ((is-python-p) (linum-mode 1)
+                 (line-number-mode t)
+                 (column-number-mode t))))
 (add-hook 'python-mode-hook 'my-python-line-mode-hook)
 
 ;; conda

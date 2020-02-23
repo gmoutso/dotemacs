@@ -17,6 +17,17 @@
 ;; mobile org
 (setq org-directory "~/Documents/org")
 
+;; (use-package org-download
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   ;; Add handlers for drag-and-drop when Org is loaded.
+;;   (with-eval-after-load 'org
+;;     (org-download-enable)))  ;; why not hook this into org-mode-hook?
+(use-package org-download
+  :hook (org-mode . org-download-enable)
+  )
+
 ;; make M-Ret not break heading content if cursor is not at the end of item
 (setq org-insert-heading-respect-content nil)
 
