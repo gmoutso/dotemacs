@@ -16,7 +16,6 @@
 \\usepackage{textcomp}
 \\usepackage{amssymb}
 \\usepackage{capt-of}
-% \\usepackage{hyperref}
 [NO-DEFAULT-PACKAGES]"
   ;; ("\\part{%s}" . "\\part*{%s}")
   ;; ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -48,3 +47,23 @@
   (interactive)
   (flet ((org-html--format-image (source attributes info) (my-org-html--format-image source attributes info)))
     (org-html-export-to-html)))
+
+(add-to-list 'org-latex-classes
+             '("screen"
+"\\documentclass[12pt]{article}
+\\usepackage{graphicx}
+\\usepackage{grffile}
+\\usepackage{longtable}
+\\usepackage{wrapfig}
+\\usepackage{rotating}
+\\usepackage[normalem]{ulem}
+\\usepackage{amsmath}
+\\usepackage{textcomp}
+\\usepackage{amssymb}
+\\usepackage{capt-of}
+\\usepackage[screen,centering]{geometry}
+\\usepackage{hyperref}
+[NO-DEFAULT-PACKAGES]"
+  ("\\section{%s}" . "\\section*{%s}")
+  ("\\subsection{%s}" . "\\subsection*{%s}")
+  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))

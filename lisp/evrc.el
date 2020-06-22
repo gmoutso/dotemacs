@@ -117,13 +117,14 @@
 ;; ssh port link
 ;;
 (defconst helm-source-ssh-port (helm-build-sync-source "remote"
-				 :candidates '(("8889 george ted" "ted" "8889")
-					       ("8888 george ted" "ted" "8888")
-					       ("8899 beowulf ted" "ted" "8899")
-					      ("8898 beowulf ted"  "ted" "8898")
-					      ("8888 george phil"  "phil" "8888")
-					      ("8889 george phil"  "phil" "8889")
-					      ("flower ted" "ted" "5555"))
+				 :candidates '(("8889 george bastille ted" "ted" "8889")
+					       ("8888 george banks ted" "ted" "8888")
+					       ("8899 beowulf clarke ted" "ted" "8899")
+					       ("8898 beowulf banks ted"  "ted" "8898")
+					       ("8897 beowulf drake ted"  "ted" "8897")
+					      ("8888 george banks phil"  "phil" "8888")
+					      ("8889 george bastille phil"  "phil" "8889")
+					      ("flower beowulf ted" "ted" "5555"))
 				 ))
 
 (defun ev-ssh-port ()
@@ -138,3 +139,28 @@
     ;; (async-shell-command (concat "ssh -NfL " port ":localhost:" port " " host))
     (start-process "ssh-forward-port" nil "ssh" "-NfL" (concat port ":localhost:" port) host)
     ))
+
+(use-package gtags
+  :custom
+  (gtags-rootdir "/home/moutsopoulosg/dev/master/python"))
+
+;; (use-package ggtags
+;;   :custom
+;;   (ggtags-navigation-mode nil)
+;;   (ggtags-enable-navigation-keys nil))
+
+;; (defun ev-ggtags ()
+;;   "Find global tags in dev/master/python from anywhere. Use C-u to specify tag."
+;;   (interactive)
+;;   (let ((default-directory "/home/moutsopoulosg/dev/master/python/")
+;; 	(current-prefix-arg '(4)))
+;;   (call-interactively 'ggtags-find-definition)))
+
+;; (defun ev-helm-tags ()
+;;   "Find global tags in dev/master/python from anywhere"
+;;   (interactive)
+;;   ;; (with-current-buffer (dired "/home/moutsopoulosg/dev/master/python/")
+;;   ;; (helm-gtags-select))
+;;   (let ((default-directory "/home/moutsopoulosg/dev/master/python/"))
+;;   (call-interactively 'helm-gtags-select)))
+

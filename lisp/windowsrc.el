@@ -72,7 +72,7 @@ point reaches the beginning or end of the buffer, stop there."
       (move-beginning-of-line 1))))
 
 ;; remap C-a to `smarter-move-beginning-of-line'
-;(global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
+(global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
 
 (require 'newcomment)
 (defun move-end-of-code ()

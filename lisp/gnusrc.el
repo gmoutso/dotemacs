@@ -12,7 +12,7 @@ user-full-name "George Moutsopoulos"
 message-send-mail-function 'smtpmail-send-it
 user-mail-address "gmoutso@gmail.com"
 smtpmail-starttls-credentials '(("smtp.gmail.com" "587" nil nil))
-smtpmail-auth-credentials (expand-file-name "~/.authinfo.gpg")
+smtpmail-auth-credentials nil ; (expand-file-name "~/.authinfo.gpg")
 smtpmail-default-smtp-server "smtp.gmail.com"
 smtpmail-smtp-server "smtp.gmail.com"
 smtpmail-smtp-service 587
@@ -20,6 +20,7 @@ smtpmail-stream-type  'starttls
 starttls-extra-arguments nil
 starttls-gnutls-program "/usr/bin/gnutls-cli"
 starttls-use-gnutls t
+mail-user-agent 'gnus-user-agent
 )
 
 ;;

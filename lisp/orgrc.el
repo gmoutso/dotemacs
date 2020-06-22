@@ -57,20 +57,6 @@
 ;;   (interactive)
 ;;   (org-open-link-from-string (format "[[notes:%s]]" (first (reftex-citation t)))))
 
-;; allow to send emails from org-mode
-(require 'org-mime)
-(setq org-mime-library 'semi)  ; mml for gnus, semi for wanderlust
-(setq org-mime-export-options '(:section-numbers nil
-                                  :with-author nil
-                                  :with-toc nil
-				  :with-sub-superscript nil))
-(setq org-mime-default-header "#+OPTIONS: latex:t toc:nil ^:nil\n")
-(defun org-mime-save ()
-    "org htmlize and save to drafts"
-    (interactive)
-    (org-mime-org-buffer-htmlize)
-    (wl-draft-save-and-exit)
-  )
 ;; org-mode beautiul as a word-processor
 ;; from http://www.howardism.org/Technical/Emacs/orgmode-wordprocessor.html
 ;;
@@ -119,7 +105,7 @@
 
 ;; plantuml with babel executable
 (setq org-plantuml-jar-path
-      (expand-file-name "~/app/plantuml.1.2017.15.jar"))
+      (expand-file-name "~/app/plantuml.1.2020.12.jar"))
 (setq plantuml-jar-path org-plantuml-jar-path)
 
 ;;; display/update images in the buffer after I evaluate
@@ -130,7 +116,7 @@
 
 ;;; key bindings
 (with-eval-after-load "org"
-  (define-key org-mode-map (kbd "C-c m") 'org-toggle-latex-fragment)
+  (define-key org-mode-map (kbd "C-c m") 'org-latex-preview)
   (define-key org-mode-map (kbd "C-c l t") 'org-toggle-link-display)
 					;use narrow instead C-x n s/b/e/w
 					;(define-key org-mode-map (kbd "C-c b") 'org-tree-to-indirect-buffer)
@@ -152,30 +138,30 @@
  org-agenda-span 2
  ;; start the week from today
  org-agenda-start-on-weekday nil
- ;; in global todo do not ignore entries
+ ;; in global todo do not ignore some scheduled
  org-agenda-todo-ignore-scheduled nil;'all
  ;;
- ;; (setq ‘org-agenda-todo-ignore-with-date t)
+ ;; org-agenda-todo-ignore-with-date t
  ;;
  ;; skip scheduling line if same entry shows because of a (near) deadline
- org-agenda-skip-scheduled-if-deadline-is-shown t
+ org-agenda-skip-scheduled-if-deadline-is-shown nil
  ;;
  ;; The symbol ‘pre-scheduled’ eliminates the deadline prewarning only prior to the scheduled date
  ;; if a near-future deadline appears and you reschedule it for the future, the deadline entry will then be hidden
- org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled
+ org-agenda-skip-deadline-prewarning-if-scheduled nil ;'pre-scheduled
  ;;
  ;; hide entries with deadline/scheduled today or in the future that are done
  ;; note that entries deadline/scheduled in the passed that are done are hidden always anyway
  ;; the purpose of letting this nil is for a happy feeling
- org-agenda-skip-deadline-if-done t
- org-agenda-skip-scheduled-if-deadline-is-shown t
+ org-agenda-skip-deadline-if-done nil
+ org-agenda-skip-scheduled-if-deadline-is-shown nil
  ;;
  ;; skip scheduled delay when entry also has a deadline
  ;; org-agenda-skip-scheduled-delay-if-deadline t
  ;;
  ;; agenda custom views
  org-agenda-custom-commands
- '(("n" "Agenda and unscheduled TODOs"
+ '(("n" "Agenda and TODOs"
   ((agenda "")
    (alltodo "" (
 		;; (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
@@ -238,18 +224,22 @@
 ;; org-capture templates
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline org-todo-file "Tasks")
-	 "* TODO %?\n %a" :kill-buffer t)
-        ;;("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
+	 "* TODO %?\n" :kill-buffer t)
+        ;; ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
 	;;  "* %?\nEntered on %U\n  %i\n  %a")
 	("n" "Note" entry (file org-default-notes-file)
 	 "* %?\n %a" :kill-buffer t)
+	("j" "Journal" entry (function org-journal-find-location)
+                               "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
 	;("c" "Clipboard note" entry (file nil)
 	; "* %?\n %x %i" :kill-buffer t)
 	;("e" "Empty note" entry (file nil) "" :empty-lines 1 :kill-buffer t)
-	("s" "Source Code Snippet" entry
-         (file nil)
-         ;; Prompt for tag and language
-         "* %^{header description}\n#+BEGIN_SRC %^{language|ipython|c++|shell} \n %i %? \n#+END_SRC")))
+	;; ("s" "Source Code Snippet" entry
+        ;;  (file nil)
+        ;;  ;; Prompt for tag and language
+        ;;  "* %^{header description}\n#+BEGIN_SRC %^{language|ipython|c++|shell} \n %i %? \n#+END_SRC")
+	)
+      )
 ;; also include the file to refile as header level 1
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
@@ -336,6 +326,17 @@ ARG is passed through to `org-copy-schedule-today'."
 ;;                               C-c C-f to view next entry
 (require 'org-journal)
 (setq org-journal-dir (file-name-as-directory (expand-file-name "journal" org-directory)))
+(defun org-journal-find-location ()
+  ;; Open today's journal, but specify a non-nil prefix argument in order to
+  ;; inhibit inserting the heading; org-capture will insert the heading.
+  (org-journal-new-entry t)
+  ;; Position point on the journal's top-level heading so that org-capture
+  ;; will add the new entry as a child entry.
+  (goto-char (point-min)))
+;; (setq org-capture-templates '(("j" "Journal entry" entry (function org-journal-find-location)
+                               ;; "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")))
+
+
 
 ;; howardism.org journal solution
 ;; (defun get-journal-file-today ()
@@ -481,5 +482,54 @@ same directory as the org-buffer and insert a link to this file."
 ;;
 ;; work with pdf tools
 ;;
-(use-package org-pdftools)
 (use-package org-noter)
+(use-package org-pdftools
+  :hook (org-load . org-pdftools-setup-link))
+(use-package org-noter-pdftools
+  :after org-noter
+  :config
+  (with-eval-after-load 'pdf-annot
+    (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+
+;;
+;; org clock and agenda
+;;
+;; shortcuts to change clock in agenda
+
+(use-package org-clock-convenience)
+  ;; :ensure t
+  ;; :bind (:map org-agenda-mode-map
+  ;;  	   ("<S-up>" . org-clock-convenience-timestamp-up)
+  ;;  	   ("<S-down>" . org-clock-convenience-timestamp-down)
+  ;;  	   ("<C-f>" . org-clock-convenience-fill-gap)
+  ;;  	   ("<M-f>" . org-clock-convenience-fill-gap-both)))
+(general-def org-agenda-mode-map
+  "<S-up>" 'org-clock-convenience-timestamp-up
+  "<S-down>" 'org-clock-convenience-timestamp-down
+  "<C-f>" 'org-clock-convenience-fill-gap
+  "<M-f>" 'org-clock-convenience-fill-gap-both)
+
+;; show log to use this
+(setq org-agenda-start-with-log-mode t
+      org-agenda-use-time-grid nil)
+;; shortcut to clock in from helm-org-agenda-files-headings
+(defun dfeich/helm-org-clock-in (marker)
+  "Clock into the item at MARKER"
+  (with-current-buffer (marker-buffer marker)
+    (goto-char (marker-position marker))
+    (org-clock-in)))
+(eval-after-load 'helm-org
+  '(nconc helm-org-headings-actions
+          (list
+           (cons "Clock into task" #'dfeich/helm-org-clock-in))))
+;; graphic in agenda
+(use-package org-timeline :ensure t)
+(add-hook 'org-agenda-finalize-hook 'org-timeline-insert-timeline :append)
+;; clock in with mru
+(use-package org-mru-clock
+  :ensure t
+  :bind* (("C-c C-x i" . org-mru-clock-in)
+          ("C-c C-x j" . org-mru-clock-select-recent-task))
+  :init
+  (setq org-mru-clock-how-many 100))
+(setq org-mru-clock-files #'org-agenda-files)

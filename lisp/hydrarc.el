@@ -71,7 +71,7 @@ more org rifle..\n"
     ("li" org-insert-link  "insert")
     ("lt" org-toggle-link-display "toggle")
     ("ii" org-toggle-inline-images "inline image")
-    ;; ("f" org-footnote-new "footnote")
+    ("if" org-footnote-new "footnote")
     ;; ("o" org-open-at-point  "open link")
     )
    "Jump"
@@ -84,7 +84,7 @@ more org rifle..\n"
    ( ;("nb" org-narrow-to-block "narrow block")
     ; ("nw" widen "widen")
     ("v" org-open-pdf "view pdf")
-    ("e" org-latex-export-to-pdf "export pdf" :exit nil))
+    ("e" org-latex-export-to-pdf "export pdf"))
    ))
 
 ;; (defhydra hydra-rifle (:exit t)
@@ -246,3 +246,72 @@ _m_ (_M_): set mark (jump)                 _q_: quit
   ("]" forward-sexp)
   ("a" smarter-move-beginning-of-line)
   ("q" nil))
+
+
+;; Hydra for org agenda (graciously taken from Spacemacs)
+(major-mode-hydra-define org-agenda-mode
+  (:exit nil :quit-key ("q" "<escape>"))
+  ("Headline"
+  (("hA" org-agenda-archive-default "archive")
+  ("hk" org-agenda-kill "kill")
+  ("hp" org-agenda-priority "priority")
+  ("hr" org-agenda-refile "refile")
+  ("h:" org-agenda-set-tags "tags")
+  ("ht" org-agenda-todo "todo"))
+  "Visit"
+  (("o"   link-hint-open-link "open" :exit t)
+  ("TAB" org-agenda-goto "goto" :exit t)
+  ("SPC" org-agenda-show-and-scroll-up "show")
+  ("RET" org-agenda-switch-to "switch" :exit t))
+  "Date"
+  (("dt" org-agenda-date-prompt "timestamp")
+  ("dd" org-agenda-deadline "deadline")
+  ("+" org-agenda-do-date-later "later")
+  ("-" org-agenda-do-date-earlier "earlier")
+  ("ds" org-agenda-schedule "schedule"))
+  "View"
+  (("vd" org-agenda-day-view "day")
+  ("vw" org-agenda-week-view "week")
+  ("vt" org-agenda-fortnight-view "fortnight")
+  ("vm" org-agenda-month-view "month")
+  ("vy" org-agenda-year-view "year")
+  ("vn" org-agenda-later "later")
+  ("vp" org-agenda-earlier "earlier")
+  ("vr" org-agenda-reset-view "reset"))
+  "Toggle"
+  (("ta" org-agenda-archives-mode "archive")
+  ("tA" (org-agenda-archives-mode 'files) "archive files")
+  ("tr" org-agenda-clockreport-mode "report")
+  ("tf" org-agenda-follow-mode "follow")
+  ("tl" org-agenda-log-mode "log")
+  ("td" org-agenda-toggle-diary "diary"))
+  "Filter"
+  (("fc" org-agenda-filter-by-category "category")
+  ("fx" org-agenda-filter-by-regexp "reg")
+  ("ft" org-agenda-filter-by-tag "tag")
+  ("fr" org-agenda-filter-by-tag-refine "refine")
+  ("fh" org-agenda-filter-by-top-headline "headline")
+  ("fd" org-agenda-filter-remove-all "reset"))
+  "Other"
+  (("gd" org-agenda-goto-date "goto date")
+  ("." org-agenda-goto-today "goto today")
+  ("gr" org-agenda-redo "redo"))))
+
+(major-mode-hydra-define python-mode (:exit t :quit-key ("q" "c" "<escape>"))
+  ("Jupyter"
+   (("l" jupyter-server-list-kernels "list kernels")
+    ("a" jupyter-repl-associate-buffer "associate"))
+   "Navigate"
+   (("i" helm-imenu "imenu")
+    ("nbe" python-nav-forward-block "forward block")
+    ("nba" python-nav-backward-block "backward block")
+    ("nfe" python-nav-backward-defun "backward defun")
+    ("nu"  python-nav-backward-up-list "up list"))
+   "Code"
+   (("f" flycheck-list-errors "flycheck")
+    ("g" gtags-find-tag "gtags")
+    ("e" conda-env-activate "activate env"))
+   "LSP"
+   (("Lss" lsp "lsp")
+    ("Lhg" lsp-ui-doc-glance "doc glance"))
+   ))

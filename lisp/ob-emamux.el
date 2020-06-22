@@ -1,8 +1,8 @@
 ;;; ob-emamux.el --- org-babel tmux support via emamux -*- lexical-binding: t -*-
 
-;; Author: Jack Kamm
-;; Maintainer: Jack Kamm
-;; Version: 0.1.0
+;; Author: Jack Kamm, George Moutsopoulos
+;; Maintainer: George Moutsopoulos
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "24.3") (emamux "0.14"))
 ;; Homepage: https://github.com/jackkamm/ob-emamux/
 ;; Keywords: comm, literate programming, tmux

@@ -528,8 +528,9 @@
 
   
 ;; Use orgstruct++-mode in the draft buffer
+;; orgstruct does not exist in org anymore
 ;; (add-hook 'mail-mode-hook 'turn-on-orgstruct)
-(add-hook 'mail-mode-hook 'turn-on-orgstruct++)
+;; (add-hook 'mail-mode-hook 'turn-on-orgstruct++)
 
 (setq mime-acting-situation-example-list
       '((((type . text)
