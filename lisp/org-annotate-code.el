@@ -1,6 +1,5 @@
 ;;; org-annotate-code.el --- Annotate code using org-capture
-
-;; Copyright (C) 2029
+;; Copyright (C) 2020
 
 ;; Author: George Moutsopoulos <gmoutso@gmail.com>
 ;; Version: 1.0
@@ -23,126 +22,93 @@
   :type 'string
   :group 'org-annotate-code)
 
-(defun org-annotate-code-search-or-create-level (heading id)
-       (interactive)
-       (condition-case nil
-         (org-link-search (concat "#" id))
-	 (error
-	  (goto-char (point-min))
-	  (org-insert-heading '(4))
-	  (insert heading)
-	  (org-set-property "CUSTOM_ID"  id)))
-       )
-
 (defun org-annotate-code-info-at-point-python ()
   (interactive)
   (let*
   ((searchmatch 
   (save-excursion
     (python-nav-beginning-of-defun)
-    (search-forward-regexp "^ *\\(def\\) \\([[:alnum:]_]*\\)(" (line-end-position))
+    (search-forward-regexp "^ *\\(?:\\(?2:\\(?:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)\\)(\\|\\(?2:\\(?1:[[:alnum:]_]*\\) *=\\)\\)" (line-end-position))
     ))
-   (type (match-string-no-properties 1))
-   (name (match-string-no-properties 2))
+   (searchname (match-string-no-properties 2))
+   (name (match-string-no-properties 1))
    )
-  '(:type type
-	  :name name
-	  :filename (buffer-file-name)
-	  :module (file-name-base (buffer-file-name))
-	  :searchname (concat type " " name)
-	  ;; :word (substring-no-properties (thing-at-point 'word))
-	  ;; :sentence substring-no-properties (thing-at-point 'sentence)
-	  )
-  )
-  )
+  (list :name name
+    :filename (buffer-file-name)
+    :module (file-name-base (buffer-file-name))
+    :searchname searchname
+    )))
 
 (defun org-annotate-code-info-at-point-unknown ()
-  (interactive)
-  '(:filename (buffer-file-name)
-    :module (file-name-base (buffer-file-name))
-    :searchname (line-number-at-pos)
-    :name (substring-no-properties (thing-at-point 'word))
-    :line (substring-no-properties (thing-at-point 'sentence)))
+  (let* ((filename (buffer-file-name))
+	 (module (file-name-nondirectory filename))
+	 (lineno (line-number-at-pos))
+	 (searchname (format "%s" lineno))
+	 (symbol (thing-at-point 'symbol t))
+	 (name (if symbol
+		   (format "%s at line %s" symbol lineno)
+		 (format "line %s" lineno))))
+  (list :filename filename
+    :module module
+    :searchname searchname
+    :name name
+  )))
+
+(defun org-annotate-code-search-or-create-level (heading id)
+  (condition-case nil
+      (org-link-search (concat "#" id))
+    (error
+     (goto-char (point-min))
+     (org-insert-heading '(4))
+     (insert heading)
+     (org-set-property "CUSTOM_ID"  id)))
   )
 
-(defun org-annotate-code-goto-or-insert-twolevels (path L1link L1description L2link L2description &optional line)
+(defun org-annotate-code-search-or-create-twolevels (heading1 link1 heading2 link2 &optional line)
   "Locate or insert org-mode heading levels 1 and 2. Return position of second level."
-  (let
-      (headline1 (org-link-make-string L1link L1description))
-      (headline2 (org-link-make-string L2link L2description)
-   (with-current-buffer (find-file path)
-   ;(set-buffer path)
-   (unless (derived-mode-p 'org-mode)
-     (org-display-warning
-      (format "Capture requirement: switching buffer %S to Org mode"
-	      (current-buffer)))
-     (org-mode))
-   (widen)
-   (goto-char (point-min))
-   ;; insert first
-   (if (re-search-forward (format org-complex-heading-regexp-format
-					(regexp-quote headline1)) ;; get line of any level
-				nil t)
-       (beginning-of-line)
-     ;; (goto-char (point-min))
-     ;; (org-insert-heading 4 nil t)
-     ;; (insert headline1))
-   (goto-char (point-max))
-     (unless (bolp) (insert "\n"))
-     (insert "* " headline1)  ;; default is level1
-     (beginning-of-line))
-   ;; insert second
-   (org-narrow-to-subtree)
-   (if (re-search-forward (format org-complex-heading-regexp-format
-					(regexp-quote headline2))
-			  nil t)
-    (end-of-line)
-    (end-of-line)
-    (org-insert-heading '(4))
-    (org-do-demote)
-    (insert headline2)
-     )
-   (widen)
-   (insert "\n")
-   (if line
-       (insert line "\n"))
-   (point)
-)))
+  (widen)
+  (goto-char (point-min))
+  ;; insert first
+  (org-annotate-code-search-or-create-level heading1 link1)
+  ;; insert second
+  (org-narrow-to-subtree)
+  (org-annotate-code-search-or-create-level heading2 link2)
+  (org-demote)
+  (org-narrow-to-subtree)
+  (goto-char (point-max))
+  (widen)
+  (point)
+  )
+
+(defcustom org-annotate-code-info-alist '((python-mode . org-annotate-code-info-at-point-python))
+  "Custom info parsers"
+  :group 'org-annotate-code)
+
+(defun org-annotate-code-predicate-mode-cons (carcon)
+  "Helper function to return cdr if mode is car"
+(if (derived-mode-p (car carcon)) (cdr carcon)))
+(defun org-annotate-code-choose-info-function ()
+  "Return approprate function from info alist according to mode"
+    (cond ((cl-some 'org-annotate-code-predicate-mode-cons org-annotate-code-info-alist))
+     (t 'org-annotate-code-info-at-point-unknown)))
 
 ;;;###autoload
-(defun org-annotate-code-capture-finding-location ()
-  (cond ((eq major-mode python-mode)
-	 (let* ((plist (org-annotate-code-info-at-point-python))
-		(filename (plist-get plist :filename))
-		(name (plist-get plist :name))
-		(type (plist-get plist :type))
-		(module (plist-get plist :module))
-		(searchname (plist-get plist :searchname))
-		(L1link (concat "file:" filename))
-		(L2link (concat "file:" filename "::" searchname))
-		;; (line (plist-get plist :sentence))
-		)
-	   (org-annotate-code-goto-or-insert-twolevels org-annotate-code-org-file
-						    L1link module L2link name))
+(defun org-annotate-code-capture-finding-location (&optional org-file)
+  (let* (
+	 (plist (funcall (org-annotate-code-choose-info-function)))
+	 (filename (plist-get plist :filename))
+	 (name (plist-get plist :name))
+	 (module (plist-get plist :module))
+	 (searchname (plist-get plist :searchname))
+	 (link1 (org-link-make-string (concat "file:" filename)))
+	 (link2 (org-link-make-string (concat "file:" filename "::" searchname)))
+	 (org-file (or org-file org-annotate-code-org-file))
+	 (the-buffer (org-capture-target-buffer org-file))
 	 )
-	t (let* ((plist (org-annotate-code-info-at-point-unknown))
-		(filename (plist-get plist :filename))
-		(name (plist-get plist :name))
-		(type (plist-get plist :type))
-		(module (plist-get plist :module))
-		(searchname (plist-get plist :searchname))
-		(L1link (concat "file:" filename))
-		(L2link (concat "file:" filename "::" searchname))
-		(line (plist-get plist :type))
-		(level1 (org-link-make-string (concat "file:" filename) module))
-		(level2 (org-link-make-string (concat "file:" filename "::" lineno) line))
-		)
-		(L1link (concat "file:" filename))
-		(L2link (concat "file:" filename "::" searchname))
-		;; (line (plist-get plist :sentence))
-		)
-	   (org-annotate-code-goto-or-insert-twolevels org-annotate-code-org-file
-						    L1link module L2link name line))
-)
+    (set-buffer the-buffer)
+    (org-annotate-code-search-or-create-twolevels module link1 name link2)
+    ))
+
 
 (provide 'org-annotate-code)
+
