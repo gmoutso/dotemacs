@@ -144,6 +144,12 @@
   :custom
   (gtags-rootdir "/home/moutsopoulosg/dev/master/python"))
 
+;; workspace links
+(defvar workspace-folder "~/workspace/moutsopoulosg")
+(defun org-workspace-follow (path)
+  (find-file (format "%s/%s" (abbreviate-file-name workspace-folder) path)))
+(org-link-set-parameters "workspace" :follow #'org-workspace-follow)
+
 ;; (use-package ggtags
 ;;   :custom
 ;;   (ggtags-navigation-mode nil)
