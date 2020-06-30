@@ -303,10 +303,7 @@ _m_ (_M_): set mark (jump)                 _q_: quit
     ("a" jupyter-repl-associate-buffer "associate"))
    "Navigate"
    (("i" helm-imenu "imenu")
-    ("nbe" python-nav-forward-block "forward block")
-    ("nba" python-nav-backward-block "backward block")
-    ("nfe" python-nav-backward-defun "backward defun")
-    ("nu"  python-nav-backward-up-list "up list"))
+    ("n" hydra-navigate-python "navigate"))
    "Code"
    (("f" flycheck-list-errors "flycheck")
     ("g" gtags-find-tag "gtags")
@@ -315,3 +312,40 @@ _m_ (_M_): set mark (jump)                 _q_: quit
    (("Lss" lsp "lsp")
     ("Lhg" lsp-ui-doc-glance "doc glance"))
    ))
+
+;; python-nav-forward-block "forward block")
+;; ("nba" python-nav-backward-block "backward block")
+;; ("nfe" python-nav-backward-defun "backward defun")
+;; ("nu"  python-nav-backward-up-list "up list")
+
+(defhydra hydra-navigate-python (:color red
+                          :hint nil)
+  "
+^→^/^←^               ^↑^/^↓^              ^↑^/^↓^  
+_→_/_←_: character    _p_/_n_: line        _j_/_k_: scroll   
+_w_/_W_: word         _{_/_}_: defun   
+_s_/_S_: statement    _]_/_[_: block       
+_e_/_a_: end/beg      _<_/_>_: buffer
+_m_ (_M_): set mark (jump)                 _q_: quit
+"
+  ("<right>" forward-char)
+  ("<left>" backward-char)
+  ("w" forward-word)
+  ("W" backward-word)
+  ("n" next-line)
+  ("p" previous-line)
+  ("s" python-nav-beginning-of-statement)
+  ("S" python-nav-end-of-statement)
+  ("}" python-nav-beginning-of-defun)
+  ("{" python-nav-end-of-defun)
+  ("m" org-mark-ring-push)
+  ("M" org-mark-ring-goto)
+  ("j" scroll-up-line)
+  ("k" scroll-down-line)
+  ("<" beginning-of-buffer)
+  (">" end-of-buffer)
+  ("e" smarter-move-end-of-line)
+  ("[" python-nav-beginning-of-block)
+  ("]" python-nav-end-of-block)
+  ("a" smarter-move-beginning-of-line)
+  ("q" nil))
