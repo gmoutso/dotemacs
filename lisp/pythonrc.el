@@ -89,10 +89,9 @@
 ;;
 (use-package anaconda-mode
   :config
-  (conda-env-autoactivate-mode)
+  ;; (conda-env-autoactivate-mode)
   (anaconda-eldoc-mode)
-  :custom
-  (conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
+  )
 
 ;;
 ;; flycheck
@@ -144,9 +143,18 @@
 	 (column-number-mode t))))
 (add-hook 'python-mode-hook 'my-python-line-mode-hook)
 
-;; conda
+;; (require 'conda)
+;; (custom-set-variables '(conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
+;; (conda-env-initialize-interactive-shells)
+;; ;; if you want eshell support, include:
+;; (conda-env-initialize-eshell)
+;; ;; if you want auto-activation (see below for details), include:
+;; (conda-env-autoactivate-mode)
+(setq conda-env-home-directory "/home/moutsopoulosg/miniconda/")
 (use-package conda
   :hook eshell python
+  :custom
+  (conda-anaconda-home "/home/moutsopoulosg/miniconda/")
   :config
   ;; if you want interactive shell support, include:
   (conda-env-initialize-interactive-shells)

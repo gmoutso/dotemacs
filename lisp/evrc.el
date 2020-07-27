@@ -140,15 +140,19 @@
     (start-process "ssh-forward-port" nil "ssh" "-NfL" (concat port ":localhost:" port) host)
     ))
 
-(use-package gtags
-  :custom
-  (gtags-rootdir "/home/moutsopoulosg/dev/master/python"))
+;; (use-package gtags
+;;   :custom
+;;   (gtags-rootdir "/home/moutsopoulosg/dev/master/python"))
 
 ;; workspace links
 (defvar workspace-folder "~/workspace/moutsopoulosg")
 (defun org-workspace-follow (path)
-  (find-file (format "%s/%s" (abbreviate-file-name workspace-folder) path)))
-(org-link-set-parameters "workspace" :follow #'org-workspace-follow)
+  (find-file (format "%s%s" (file-name-as-directory workspace-folder) path)))
+(defun org-workspace-complete ()
+  (concat "workspace:"(file-relative-name (read-file-name "File: " (file-name-as-directory workspace-folder)) workspace-folder)))
+(org-link-set-parameters "workspace"
+			 :follow 'org-workspace-follow
+			 :complete 'org-workspace-complete)
 
 ;; (use-package ggtags
 ;;   :custom

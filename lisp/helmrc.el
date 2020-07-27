@@ -39,4 +39,4 @@
 ;;         :ff-transformer-show-only-basename nil
 ;;         :buffer "*helm recentf*")
 
-(general-def helm-buffer-map "M-d" 'helm-buffer-run-kill-buffers)
+(general-def helm-buffer-map "M-d" 'helm-buffer-run-kill-persistent)

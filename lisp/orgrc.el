@@ -9,7 +9,7 @@
 ;;(require 'org-tempo)
 (setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-
+(use-package ox-beamer)
 (use-package helm-org)
 (general-def org-mode-map
   "C-c C-j" 'helm-org-in-buffer-headings)
@@ -100,8 +100,10 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '( ;;(ipython . t)
-   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t) 
+   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
+   (jupyter . t)
    ))
+(setq ob-async-no-async-languages-alist '("jupyter-python" "jupyter-julia"))
 
 ;; plantuml with babel executable
 (setq org-plantuml-jar-path
@@ -223,23 +225,26 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 ;; org-capture templates
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+headline org-todo-file "Tasks")
-	 "* TODO %?\n" :kill-buffer t)
+      '(("i" "Insert file to index" entry (file "./index.org") "* %f\n%?")
+	("a" "Annotate" plain (function org-annotate-code-capture-finding-location) "%?")
+	("w" "Annotate word" plain (function org-annotate-word-capture-finding-location) "%?")
+	("p" "Annotate python" plain (function org-annotate-python-capture-finding-location) "%?")
+	("t" "Todo" entry (file+headline org-todo-file "Tasks") "* TODO %?\n" :kill-buffer t)
         ;; ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
 	;;  "* %?\nEntered on %U\n  %i\n  %a")
-	("n" "Note" entry (file org-default-notes-file)
-	 "* %?\n %a" :kill-buffer t)
+	("n" "Note" entry (file org-default-notes-file) "* %?\n %a" :kill-buffer t)
 	("j" "Journal" entry (function org-journal-find-location)
-                               "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
-	;("c" "Clipboard note" entry (file nil)
-	; "* %?\n %x %i" :kill-buffer t)
-	;("e" "Empty note" entry (file nil) "" :empty-lines 1 :kill-buffer t)
-	;; ("s" "Source Code Snippet" entry
-        ;;  (file nil)
-        ;;  ;; Prompt for tag and language
-        ;;  "* %^{header description}\n#+BEGIN_SRC %^{language|ipython|c++|shell} \n %i %? \n#+END_SRC")
-	)
-      )
+	 "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
+	("r" "Roam" plain (function org-roam--capture-get-point)
+	 "%?"
+	 :file-name "%<%Y%m%d%H%M%S>-${slug}"
+	 :head "#+TITLE: ${title}\n"
+	 :unnarrowed t)
+	))
+(setq org-roam-directory "~/Documents/org/roam")
+(setq org-capture-templates-contexts '(("p" ((in-mode . "python-mode")))))
+(use-package org-annotate-word)
+(use-package org-annotate-python)
 ;; also include the file to refile as header level 1
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
@@ -533,3 +538,4 @@ same directory as the org-buffer and insert a link to this file."
   :init
   (setq org-mru-clock-how-many 100))
 (setq org-mru-clock-files #'org-agenda-files)
+
