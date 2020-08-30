@@ -101,7 +101,7 @@
  'org-babel-load-languages
  '( ;;(ipython . t)
    (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
-   (jupyter . t)
+   ;; (jupyter . t)
    ))
 (setq ob-async-no-async-languages-alist '("jupyter-python" "jupyter-julia"))
 
@@ -489,7 +489,7 @@ same directory as the org-buffer and insert a link to this file."
 ;;
 (use-package org-noter)
 (use-package org-pdftools
-  :hook (org-load . org-pdftools-setup-link))
+  :hook (org-mode . org-pdftools-setup-link))
 (use-package org-noter-pdftools
   :after org-noter
   :config

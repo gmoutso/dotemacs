@@ -302,19 +302,21 @@ _m_ (_M_): set mark (jump)                 _q_: quit
 
 (major-mode-hydra-define python-mode (:exit t :quit-key ("q" "c" "<escape>"))
   ("Jupyter"
-   (("l" jupyter-server-list-kernels "list kernels")
-    ("a" jupyter-repl-associate-buffer "associate"))
+   (("jl" jupyter-server-list-kernels "list kernels")
+    ("ja" jupyter-repl-associate-buffer "associate"))
    "Buffer"
-   (("i" helm-imenu "imenu")
-    ("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
+   (("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
+    ("i" helm-imenu "imenu")
     )
    "Code"
    (("f" flycheck-list-errors "flycheck")
     ("g" gtags-find-tag "gtags")
-    ("e" conda-env-activate "activate env"))
+    ("e" conda-env-activate "activate env")
+    )
    "LSP"
-   (("L" lsp "lsp")
-    ("d" lsp-ui-doc-glance "doc glance"))
+   (("ll" lsp "LSP")
+    ("ld" lsp-ui-doc-glance "document")
+    ("ls" lsp-signature-activate "signature"))
    ))
 
 ;; python-nav-forward-block "forward block")
@@ -322,7 +324,7 @@ _m_ (_M_): set mark (jump)                 _q_: quit
 ;; ("nfe" python-nav-backward-defun "backward defun")
 ;; ("nu"  python-nav-backward-up-list "up list")
 
-(defhydra hydra-navigate-python-full (:color red :hint nil)
+(defhydra hydra-navigate-python-full (:color red :hint nil :exit nil)
   "
 ^⬎^/^⬑^              ^←^/^→^               ^↑^/^↓^              ^↑^/^↓^  
 _→_/_←_: character    _S_/_s_: statement    _(_/_)_: statement   _j_/_k_: scroll   
@@ -371,16 +373,19 @@ _m_/_M_: mark (jump)
 
 (defun hydra-backward-symbol ()
   (forward-symbol (-1)))
-(defhydra hydra-navigate-python (:color red :hint nil :exit nil)
+(defun hydra-interactive-python-nav-beginning-of-defun ()
+  (interactive)
+  (python-nav-beginning-of-defun))
+(defhydra hydra-navigate-python (:exit nil :color red :hint nil)
   "
 ^⬎^/^⬑^               ^↑^/^↓^               ^↑^/^↓^  
-_→_/_←_: symbol        _↑_/_↓_: statement    _j_/_k_: scroll   
-_)_/_(_: statement     _{_/_}_: defun        _N_/_n_: narrow
+_)_/_(_: statement     _↑_/_↓_: statement    _j_/_k_: scroll   
+_f_/_F_: defun         _{_/_}_: defun        _w_/_n_: narrow
 _u_/_e_: up (end)      _[_/_]_: block        _<_/_>_: buffer
-_m_/_M_: mark (jump)                         _q_/_Q_: quit (back)
+_→_/_←_: symbol        _m_/_M_: mark (jump)  _q_/_Q_: quit (back)
 "
   ("<right>" forward-symbol)
-  ("<left>" hydrabackward-symbol)
+  ("<left>" hydra-backward-symbol)
   ; statement
   ("(" python-nav-beginning-of-statement)
   (")" python-nav-end-of-statement)
@@ -389,6 +394,8 @@ _m_/_M_: mark (jump)                         _q_/_Q_: quit (back)
   ; defun
   ("{" python-nav-backward-defun)
   ("}" python-nav-forward-defun)
+  ("F" hydra-interactive-python-nav-beginning-of-defun)
+  ("f" python-nav-end-of-defun)
   ; block
   ("e" python-nav-end-of-block)
   ("[" python-nav-backward-block)
@@ -397,7 +404,7 @@ _m_/_M_: mark (jump)                         _q_/_Q_: quit (back)
   ("u" python-nav-backward-up-list)
   ; other
   ("n" narrow-to-defun)
-  ("N" widen)
+  ("w" widen)
   ("m" org-mark-ring-push)
   ("M" org-mark-ring-goto)
   ("j" scroll-up-line)
@@ -405,4 +412,8 @@ _m_/_M_: mark (jump)                         _q_/_Q_: quit (back)
   ("<" beginning-of-buffer)
   (">" end-of-buffer)
   ("q" nil :exit t)
-  ("Q" (hera-pop) :exit t))
+  ("Q" (hera-pop) :exit t)
+  ("C-<down>" forward-paragraph)
+  ("C-<up>" backward-paragraph)
+  ("<SPC>" View-scroll-half-page-forward)
+  ("S-<SPC>" View-scroll-half-page-backward))

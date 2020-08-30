@@ -117,14 +117,15 @@
 ;; ssh port link
 ;;
 (defconst helm-source-ssh-port (helm-build-sync-source "remote"
-				 :candidates '(("8889 george bastille ted" "ted" "8889")
+				 :candidates '(
+					       ("8889 george bastille phil"  "phil" "8889")
+					       ("8898 beowulf banks ted"  "ted" "8898")
+					       ("8889 george bastille ted" "ted" "8889")
 					       ("8888 george banks ted" "ted" "8888")
 					       ("8899 beowulf clarke ted" "ted" "8899")
-					       ("8898 beowulf banks ted"  "ted" "8898")
 					       ("8897 beowulf drake ted"  "ted" "8897")
-					      ("8888 george banks phil"  "phil" "8888")
-					      ("8889 george bastille phil"  "phil" "8889")
-					      ("flower beowulf ted" "ted" "5555"))
+					       ("8888 george banks phil"  "phil" "8888")
+					       ("flower beowulf ted" "ted" "5555"))
 				 ))
 
 (defun ev-ssh-port ()

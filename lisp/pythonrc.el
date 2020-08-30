@@ -161,7 +161,7 @@
   ;; if you want eshell support, include:
   (conda-env-initialize-eshell)
   ;; if you want auto-activation (see below for details), include:
-  (conda-env-autoactivate-mode)
+  ;; (conda-env-autoactivate-mode)
   )
 
 (defun my-run-python (&optional new)
