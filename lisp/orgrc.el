@@ -103,7 +103,6 @@
    (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
    ;; (jupyter . t)
    ))
-(setq ob-async-no-async-languages-alist '("jupyter-python" "jupyter-julia"))
 
 ;; plantuml with babel executable
 (setq org-plantuml-jar-path
