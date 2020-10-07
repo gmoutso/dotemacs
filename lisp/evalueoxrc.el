@@ -4,6 +4,7 @@
 (add-to-list 'org-latex-classes
              '("evalue"
 "\\documentclass[10pt]{article}
+\\usepackage{amsthm}
 \\usepackage{brex-base}
 \\usepackage{brex-xtras}
 \\usepackage{graphicx}
