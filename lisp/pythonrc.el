@@ -42,17 +42,17 @@
   ;;                         (lsp)))  ; or lsp-deferred
   :custom
   (lsp-python-ms-extra-paths 
-   '(;"/home/moutsopoulosg/miniconda/envs/blade/bin"
+   '(;"/home/moutsopoulosg/anaconda3/envs/blade/bin"
      "/home/moutsopoulosg/dev/master/python"
-   					;"/home/moutsopoulosg/miniconda/envs/blade/lib/python27.zip"
-     "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7"
-   					;"/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/plat-linux2"
-   					;"/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/lib-tk"
-   					;"/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/lib-old"
-   					;"/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/lib-dynload"
+   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python27.zip"
+     "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7"
+   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/plat-linux2"
+   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/lib-tk"
+   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/lib-old"
+   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/lib-dynload"
    					;"/home/moutsopoulosg/.local/lib/python2.7/site-packages"
-     "/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/site-packages"
-   					;"/home/moutsopoulosg/miniconda/envs/blade/lib/python2.7/site-packages/IPython/extensions"
+     "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/site-packages"
+   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/site-packages/IPython/extensions"
    					;"/home/moutsopoulosg/.ipython"
      )
 			     ))
@@ -144,17 +144,17 @@
 (add-hook 'python-mode-hook 'my-python-line-mode-hook)
 
 ;; (require 'conda)
-;; (custom-set-variables '(conda-anaconda-home "/home/moutsopoulosg/miniconda/"))
+;; (custom-set-variables '(conda-anaconda-home "/home/moutsopoulosg/anaconda3/"))
 ;; (conda-env-initialize-interactive-shells)
 ;; ;; if you want eshell support, include:
 ;; (conda-env-initialize-eshell)
 ;; ;; if you want auto-activation (see below for details), include:
 ;; (conda-env-autoactivate-mode)
-(setq conda-env-home-directory "/home/moutsopoulosg/miniconda/")
+(setq conda-env-home-directory "/home/moutsopoulosg/anaconda3/")
 (use-package conda
   :hook eshell python
   :custom
-  (conda-anaconda-home "/home/moutsopoulosg/miniconda/")
+  (conda-anaconda-home "/home/moutsopoulosg/anaconda3/")
   :config
   ;; if you want interactive shell support, include:
   (conda-env-initialize-interactive-shells)
