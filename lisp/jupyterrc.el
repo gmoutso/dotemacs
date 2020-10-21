@@ -1,6 +1,21 @@
 (use-package jupyter
+  :after (ob-jupyter ob-python)
   :config
-  (setq jupyter-eval-use-overlays nil))
+  (setq jupyter-api-authentication-method 'password)
+  (setq jupyter-eval-use-overlays nil)
+  (setq org-babel-default-header-args:jupyter-python '((:session . "/jpy:localhost#8888:py")
+                                                       (:kernel . "conda-env-edge-py")
+                                                       (:async . "yes")
+						       (:pandoc t)))
+  (add-to-list 'savehist-additional-variables 'jupyter-server-kernel-names)
+  (setq ob-async-no-async-languages-alist '("jupyter-python"))
+  (add-to-list 'org-structure-template-alist '("j" . "src jupyter-python")))
+
+(use-package jupyter-tramp)
+
+(conda-env-activate "bastille")
+(use-package ob-jupyter
+    :after (ob))
 
 ;;
 ;; jupyter repl
@@ -37,15 +52,3 @@ screenful, the region is temporarily highlighted according to
     (jupyter-eval-region start end)
     (python-forward-fold-or-section)))
 
-(eval-after-load 'org '(add-to-list 'org-structure-template-alist '("j" . "src jupyter-python")))
-
-;; (require 'ob-jupyter)
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '( ;;(ipython . t)
-   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
-   ;; (jupyter . t) ???
-   ))
-
-(setq ob-async-no-async-languages-alist '("jupyter-python" "jupyter-julia"))
