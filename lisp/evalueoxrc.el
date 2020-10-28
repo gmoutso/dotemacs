@@ -1,5 +1,9 @@
 (require 'ox)
 (require 'ox-latex)
+(setq org-latex-listings t)
+(add-to-list 'org-latex-packages-alist '("" "listings"))
+(add-to-list 'org-latex-packages-alist '("" "color"))
+(add-to-list 'org-latex-listings-langs '(jupyter-python "Python"))
 
 (add-to-list 'org-latex-classes
              '("evalue"
@@ -17,6 +21,21 @@
 \\usepackage{textcomp}
 \\usepackage{amssymb}
 \\usepackage{capt-of}
+\\usepackage{color}
+\\usepackage{listings}
+\\definecolor{mygreen}{rgb}{0,0.6,0}
+\\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\\lstdefinestyle{customc}{
+  backgroundcolor=\\color{white},
+  basicstyle=\\footnotesize,        % the size of the fonts that are used for the code
+  commentstyle=\\color{mygreen},    % comment style
+  keywordstyle=\\color{blue},       % keyword style
+  numberstyle=\tiny\\color{mygray}, % the style that is used for the line-numbers
+  stringstyle=\\color{mymauve},     % string literal style
+}
+\\lstset{style=customc}
+
 [NO-DEFAULT-PACKAGES]"
   ;; ("\\part{%s}" . "\\part*{%s}")
   ;; ("\\chapter{%s}" . "\\chapter*{%s}")
