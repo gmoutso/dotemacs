@@ -8,7 +8,7 @@
     (let ((here (point))
 	  (beg (org-with-wide-buffer
 		(org-with-limited-levels (or (outline-previous-heading) (point-min))))))
-	   (count-matches "^ *#\\+begin_src" beg here)))
+	   (let ((case-fold-search nil))(count-matches "^ *#\\+begin_src" beg here))))
 
 (defun gm/org-babel-tangle-collect-this-block ()
   "Tangle this block with correct counter.
@@ -46,7 +46,7 @@ As in org-babel-tangle-collect-blocks but with counter."
 	       (org-fill-template
 		org-babel-tangle-comment-format-beg link-data))))
 
-(defun gm/tangle-and-goto-tangled-block ()
+(defun gm/tangle-and-goto-block ()
   "Goes to the tangled file at the source block. Will use the orglink description as a search only."
   (interactive)
   (let ((filename (expand-file-name (first (org-babel-tangle))))
@@ -54,3 +54,17 @@ As in org-babel-tangle-collect-blocks but with counter."
     (string-match "\\[\*.*]" orglink)
     (org-open-file filename t nil (match-string-no-properties 0 orglink))))
 
+(defun gm/detangle-and-goto-block ()
+  "Detangle and go to block at point. Unfortunately all languages must be the same in org file."
+  (interactive)
+  (let* ((link (save-excursion
+		(end-of-line)
+		(search-backward-regexp "\\[\\[[^]]*\\]\\[[^]:]*:\\(?1:[[:digit:]]+\\)\\]\\]")
+		(match-string-no-properties 0)))
+	 (number (string-to-number (match-string-no-properties 1)))
+	 )
+    (message "is number %s or string %s" (numberp number) (stringp number))
+    (org-babel-detangle)
+    (org-open-link-from-string link)
+    (let ((case-fold-search nil)) (search-forward-regexp "^ *#\\+begin_src" nil nil number))
+    (beginning-of-line)))
