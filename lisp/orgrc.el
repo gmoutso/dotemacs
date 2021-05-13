@@ -1,3 +1,7 @@
+(use-package org-variable-pitch)
+(add-hook 'after-init-hook 'org-variable-pitch-setup)
+(add-hook 'org-mode-hook 'org-variable-pitch-minor-mode)
+
 ;; needs to be set before org is loaded
 (setq org-list-allow-alphabetical t)
 ;; respect content always
@@ -14,6 +18,7 @@
 (general-def org-mode-map
   "C-c C-j" 'helm-org-in-buffer-headings)
 
+(setq org-adapt-indentation nil)
 ;; mobile org
 (setq org-directory "~/Documents/org")
 
@@ -135,10 +140,10 @@
 
 
 (setq
- ;; I want to see today and tomorrow by default (was 'week)
- org-agenda-span 2
- ;; start the week from today
- org-agenda-start-on-weekday nil
+ ;; I want to see week # was today and tomorrow by default (was 'week)
+ org-agenda-span 'fortnight
+ ;; do not start the week from today (opposite: start on Monday)
+ org-agenda-start-on-weekday 1
  ;; in global todo do not ignore some scheduled
  org-agenda-todo-ignore-scheduled nil;'all
  ;;
@@ -149,13 +154,13 @@
  ;;
  ;; The symbol ‘pre-scheduled’ eliminates the deadline prewarning only prior to the scheduled date
  ;; if a near-future deadline appears and you reschedule it for the future, the deadline entry will then be hidden
- org-agenda-skip-deadline-prewarning-if-scheduled nil ;'pre-scheduled
+ ;; aka show shedules only?
+ org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled;'pre-scheduled
  ;;
  ;; hide entries with deadline/scheduled today or in the future that are done
  ;; note that entries deadline/scheduled in the passed that are done are hidden always anyway
  ;; the purpose of letting this nil is for a happy feeling
  org-agenda-skip-deadline-if-done nil
- org-agenda-skip-scheduled-if-deadline-is-shown nil
  ;;
  ;; skip scheduled delay when entry also has a deadline
  ;; org-agenda-skip-scheduled-delay-if-deadline t
@@ -216,22 +221,24 @@
 (setq-default
  org-todo-file "~/Documents/org/todo.org"
  org-default-notes-file "~/Documents/org/notes.org")
-(setq
- ;; this is usually overriden from custom variables in init.el
- org-agenda-files (list org-todo-file org-default-notes-file)
- )
 (setq org-refile-targets '((org-agenda-files . (:maxlevel . 2))))
 (global-set-key (kbd "C-c c") 'org-capture)
 ;; org-capture templates
 (setq org-capture-templates
-      '(("i" "Insert file to index" entry (file "./index.org") "* %f\n%?")
-	("a" "Annotate" plain (function org-annotate-code-capture-finding-location) "%?")
-	("w" "Annotate word" plain (function org-annotate-word-capture-finding-location) "%?")
-	("p" "Annotate python" plain (function org-annotate-python-capture-finding-location) "%?")
-	("t" "Todo" entry (file+headline org-todo-file "Tasks") "* TODO %?\n" :kill-buffer t)
+      '(;("i" "Insert file to index" entry (file+headline "./README.org" "index") "* %f\n%?")
+	("i" "Index this file" plain (function org-annotate-index-capture-finding-location) "%?"
+	 :unnarrowed t :kill-buffer t)
+	;; ("a" "Annotate" plain (function org-annotate-code-capture-finding-location) "%?")
+	;; ("w" "Annotate word" plain (function org-annotate-word-capture-finding-location) "%?")
+	("p" "annotate Python" plain (function org-annotate-python-capture-finding-location) "%?" :unnarrowed t)
+	("f" "describe project Folder" plain (function org-annotate-projects-capture-finding-location) "%?" :unnarrowed t)
+	("t" "Todo" entry (file+headline org-todo-file "Tasks") "* TODO %?\n"
+	 :kill-buffer t)
         ;; ("j" "Journal" entry (file+datetree "~/Dropbox/org/journal.org")
 	;;  "* %?\nEntered on %U\n  %i\n  %a")
 	("n" "Note" entry (file org-default-notes-file) "* %?\n %a" :kill-buffer t)
+	("l" "work Log" entry (file "~/Documents/org/worklog.org")
+	 "* %? \n:LOGBOOK: \n:CREATED: %T \n:END:\n")
 	("j" "Journal" entry (function org-journal-find-location)
 	 "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
 	("r" "Roam" plain (function org-roam--capture-get-point)
@@ -240,10 +247,12 @@
 	 :head "#+TITLE: ${title}\n"
 	 :unnarrowed t)
 	))
+
 (setq org-roam-directory "~/Documents/org/roam")
 (setq org-capture-templates-contexts '(("p" ((in-mode . "python-mode")))))
 (use-package org-annotate-word)
 (use-package org-annotate-python)
+(use-package org-annotate-projects)
 ;; also include the file to refile as header level 1
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
@@ -442,9 +451,9 @@ ARG is passed through to `org-copy-schedule-today'."
 		(file-name-directory buffer-file-name))))
 
 (defun org-paste-link-xclip ()
-  "Take a screenshot into a time stamped unique-named file in the
-same directory as the org-buffer and insert a link to this file."
-  (interactive)
+  "Save an image in clipboard, eg a screenshot, into a time stamped unique-named file 
+in the same directory as the org-buffer and insert a link to this file."
+g  (interactive)
   (setq filename
         (concat
          (make-temp-name
@@ -537,4 +546,169 @@ same directory as the org-buffer and insert a link to this file."
   :init
   (setq org-mru-clock-how-many 100))
 (setq org-mru-clock-files #'org-agenda-files)
+
+;;
+;; source blocks
+;;
+(defun gm/org-id-new ()
+  "Re-purposing `org-id' hit a snag when colons were forbidden in Source-Block
+  names. Adding support for a user-defined Org-Id separator would have fixed
+  this but with no benefit to Org-Id. So this function removes the colon
+  instead. Taken from https://github.com/grettke/help
+ "
+  (interactive)
+  (let* ((gend (org-id-new "SCR"))
+         (newid (replace-regexp-in-string ":" "_" gend)))
+    newid))
+
+(defun gm/org-add-src-name-maybe ()
+  "If it doesn't have a NAME property then add one and
+   assign it a UUID."
+  (interactive)
+  (let* ((name (help/org-id-new))
+	 (element (org-element-at-point))
+	 (issrc (eq (org-element-type element) 'src-block))
+	 (nameexist (org-element-property :name element)))
+      (when (and (not nameexist) issrc)
+	(save-excursion
+	  (let ((case-fold-search nil)) (search-backward-regexp "#\\+begin_src"))
+	  (beginning-of-line)
+	  (insert "#+name: " name "\n")))))
+
+;; (advice-add 'org-insert-structure-template :after #'gm/org-add-src-name-maybe)
+;; (advice-remove 'org-insert-structure-template #'gm/org-add-src-name-maybe)
+
+(defun gm/org-find-definition-at-point ()
+  (interactive)
+  (let* ((word (word-at-point t))
+	 (regex (format "^ *\\(?:def *%s(\\|class *%s(\\|%s *=\\)" word word word))
+	 (ncount (count-matches regex (point-min) (point-max))))
+    (cond ((eq ncount 0) (message "No definition for %s" word))
+	  ((eq ncount 1) (progn (goto-char (point-min))
+				(search-forward-regexp regex nil t)
+				(message "Found unique definition for %s" word)))
+	  ((> ncount 1) (occur regex)))))
+
+(defun gm/org-cut-and-dump-to-section ()
+  "If return is presses then cut active region and paste to org-goto location."
+  (interactive)
+  (save-excursion
+    (let ((beg (region-beginning))
+	  (end (region-end)))
+      (deactivate-mark)
+      (org-goto)
+    (when (and (use-region-p) (eq org-goto-exit-command 'return))
+	(kill-region beg end)
+	(end-of-line)
+	(let ((case-fold-search nil)) (search-forward-regexp "^\\** "))
+	(beginning-of-line)
+	(insert "\n")
+	(yank)
+	(insert "\n")))))
+
+(defun gm/org-show-image-files ()
+  (interactive)
+  (swiper "\\[\\[file:.*\\(?:png\\)"))
+
+;;
+;; attach in the exported pdf a file
+;; (\usepackage{attachfile2} is needed)
+;;
+
+(org-link-set-parameters
+   "attachfile"
+   :follow
+   (lambda (link-string) (org-open-file link-string))
+   :complete
+   (lambda ()
+     (concat "attachfile:" (abbreviate-file-name (expand-file-name (read-file-name "File: ")))))
+   :export
+   ;; formatting
+   (lambda (keyword desc format)
+     (cond
+      ((eq format 'html) (source-data-uri desc keyword)); no output for html
+      ((eq format 'latex)
+       ;; write out the latex command
+       (format "\\textattachfile[description={attached file %s}, author={%s}, color=1 0 0]{%s}{%s}" keyword  "George Moutsopoulos" keyword desc)))))
+
+(defun source-data-uri (desc source)
+    "Encode the string in SOURCE to a data uri."
+    (format
+     "<a class=\"org-source\" href=\"data:text/plain;charset=US-ASCII;base64,%s\">%s</a>"
+     (base64-encode-string source) (or desc "source")))
+
+(require 'ox-ipynb)
+
+;;
+;; Make preview image color background different to default face
+;; (so one can see axes etc in orgmode)
+;;
+
+(defcustom gm/org-inline-image-background nil
+  "The color used as the default background for inline images.
+  When nil, use the default face background."
+  :group 'org
+  :type '(choice color (const nil)))
+
+(defun gm/create-image-with-background-color (args)
+  "Specify background color of Org-mode inline image through modify `ARGS'."
+  (let* ((file (car args))
+         (type (cadr args))
+         (data-p (caddr args))
+         (props (cdddr args)))
+    ;; get this return result style from `create-image'
+    (append (list file type data-p)
+            (list :background gm/org-inline-image-background) ;(face-background 'default))
+            props)))
+
+(advice-add 'create-image :filter-args
+            #'gm/create-image-with-background-color)
+
+(defun gm/org-tab-config ()
+  "org python code blocks get tabs converted to spaces and moreover a tab may even be two python indents (8 spaces). 
+The scr code special edit is fine at first, but going back to org-mode makes the conversion.
+This happens when src block is not aligned the edge (eg begin in column 2). 
+Turning off the use of tab in org-mode stops this conversion."
+   (setq indent-tabs-mode nil)
+   (setq tab-width 4)
+   )
+(add-hook 'org-mode-hook 'gm/org-tab-config)
+
+(use-package helm-org-ql)
+(use-package helm-rg)
+(use-package org-z
+  :config
+  (org-z-mode 1))
+
+;; Org ID Properties
+(defun gm/org-id-remove-entry ()
+"Remove/delete the ID entry and update the databases.
+Update the `org-id-locations' global hash-table, and update the
+`org-id-locations-file'.  `org-id-track-globally' must be `t`."
+(interactive)
+  (save-excursion
+    (org-back-to-heading t)
+    (when (org-entry-delete (point) "ID")
+      (org-id-update-id-locations nil 'silent))))
+
+
+(defun gm/org-id-remove-all-buffer-entries ()
+"Remove/delete all ID entry and update the databases.
+Update the `org-id-locations' global hash-table, and update the
+`org-id-locations-file'.  `org-id-track-globally' must be `t`."
+(interactive)
+    (if (or (org-map-entries '(org-entry-delete (point) "ID") nil 'file))
+	(org-id-update-id-locations nil 'silent)))
+
+(defun gm/org-ispell ()
+  "Configure `ispell-skip-region-alist' for `org-mode'."
+  (make-local-variable 'ispell-skip-region-alist)
+  (add-to-list 'ispell-skip-region-alist '(org-property-drawer-re))
+  (add-to-list 'ispell-skip-region-alist '("~" "~"))
+  (add-to-list 'ispell-skip-region-alist '("=" "="))
+  (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_SRC" . "^#\\+END_SRC"))
+  ) 
+(add-hook 'org-mode-hook #'gm/org-ispell)
+(require 'company)
+(add-to-list 'company-backends 'company-ispell)
 

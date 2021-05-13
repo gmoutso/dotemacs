@@ -302,15 +302,17 @@ version was incorrectly modifying them."
          ;; levels otherwise. This one outputs exactly the level that is listed.
 	 ;; Also, I modify the table exporters here to get a markdown table for
 	 ncolumns
-	 (nrules 0)
 	 (org-html-text-markup-alist '((bold . "<b>%s</b>")
 				       (code . "<code>%s</code>")
 				       (italic . "<i>%s</i>")
 				       (strike-through . "<del>%s</del>")
 				       (underline . "<u>%s</u>")
-				       (verbatim . "<code>%s</code>")))  	; we overwrite the underline
+				       (verbatim . "<code>%s</code>")))	; we overwrite the underline
+
+	 ;; In here we temporarily define many export functions to fine-tune the markdown we get.
          (md (cl-letf (((symbol-function 'org-md-headline)
 			(lambda (HEADLINE CONTENTS INFO)
+			  "changed to get the right number of # for the heading level."
 			  (concat
 			   (cl-loop for i to (org-element-property :level HEADLINE)
 				    concat "#")
@@ -320,22 +322,13 @@ version was incorrectly modifying them."
 			    'md t '(:with-toc nil :with-tags nil)))))
 		       ((symbol-function 'org-export-get-relative-level)
                         (lambda (headline info)
+			  "changed to get the level number of a headline. we need the absolute level."
 			  (org-element-property :level headline)))
+		       ;; Tables are kind of special
 		       ((symbol-function 'org-html-table-cell)
 			(lambda (table-cell contents info)
 			  (s-concat  (org-trim (or contents "")) "|")))
-		       ((symbol-function 'org-html-table-row)
-			(lambda (table-row contents info)
-			  (cond
-			   ((eq (org-element-property :type table-row) 'standard)
-			    (setq ncolumns (- (s-count-matches "|" contents) 1))
-			    (concat "| " contents))
-			   ;; I think this is what the rule/horizontal lines are
-			   (t
-			    (if (not (= 0 nrules))
-				nil
-			      (setq nrules (+ 1 nrules))
-			      (concat "|---" (cl-loop for i to (- ncolumns 1) concat "|---") "|"))))))
+		       ((symbol-function 'org-html-table-row) 'ox-ipynb--export-table-row)
 		       ((symbol-function 'org-html-table)
 			(lambda (table-cell contents info)
 			  (replace-regexp-in-string "\n\n" "\n" (or contents "")))))
@@ -375,6 +368,32 @@ version was incorrectly modifying them."
       nil)))
 
 
+(defun ox-ipynb--export-table-row  (table-row contents info)
+  "Custom function to create a markdown string from a TABLE-ROW.
+Note, this works a row at a time in a table, and does not store
+information about how many horizontal rules there are. In simple
+markdown, which we use here, you can only have one rule in the
+header. If you wanted a fancier table, you should export it as
+html I think. That is not currently supported.
+"
+  (let (ncolumns
+	(contents (org-no-properties contents)))
+    (cond
+     ((eq (org-element-property :type table-row) 'standard)
+      ;; for a regular row, it seems the opening | is not included in contents
+      (concat "| " contents))
+
+     ;; A rule in org looks like |---+---| we count the number of columns
+     ;; assuming it looks like this
+     ((eq (org-element-property :type table-row) 'rule)
+      (setq contents (buffer-substring (org-element-property :begin table-row)
+				       (org-element-property :end table-row)))
+      (setq ncolumns (+ (s-count-matches "+" contents) 1))
+      (if (= 1 ncolumns)
+	  "|---|"
+	(concat "|---" (cl-loop for i to (- ncolumns 2) concat "|---") "|"))))))
+
+
 (defun ox-ipynb-export-keyword-cell ()
   "Make a markdown cell containing org-file keywords and values."
   (let* ((all-keywords (org-element-map (org-element-parse-buffer)
@@ -385,17 +404,17 @@ version was incorrectly modifying them."
          (ipynb-keywords (cdr (assoc "OX-IPYNB-KEYWORD-METADATA" all-keywords)))
          (include-keywords (mapcar 'upcase (split-string (or ipynb-keywords ""))))
          (keywords (cl-loop for key in include-keywords
-                         if (assoc key all-keywords)
-                         collect (cons key (or (cdr (assoc key all-keywords)) "")))))
+                            if (assoc key all-keywords)
+                            collect (cons key (or (cdr (assoc key all-keywords)) "")))))
 
     (setq keywords
           (cl-loop for (key . value) in keywords
-                collect
-                (format "- %s: %s\n"
-                        key
-                        (replace-regexp-in-string
-                         "<\\|>" ""
-                         (or value "")))))
+                   collect
+                   (format "- %s: %s\n"
+                           key
+                           (replace-regexp-in-string
+                            "<\\|>" ""
+                            (or value "")))))
     (when keywords
       `((cell_type . "markdown")
         (metadata . ,(make-hash-table))
@@ -417,11 +436,9 @@ those exist, default to ipython."
 	       'src-block
 	     (lambda (src)
 	       (unless (string= "none"
-				(plist-get
-				 (read
-				  (format "(%s)"
-					  (org-element-property :parameters src)))
-				 :exports))
+				(cdr (assq :exports
+				           (org-babel-parse-header-arguments
+					    (org-element-property :parameters src)))))
 		 (org-element-property :language src)))
 	     nil t)
 	   "ipython")))
@@ -513,7 +530,7 @@ nil:END:"  nil t)
 
 
   ;; Now we parse the buffer.
-  (let* ((cells (if (ox-ipynb-export-keyword-cell) (list (ox-ipynb-export-keyword-cell)) '()))
+  (let* ((cells '())
          (ox-ipynb-language (ox-ipynb-get-language))
          (metadata `(metadata . ((org . ,(let* ((all-keywords (org-element-map (org-element-parse-buffer)
                                                                   'keyword
@@ -535,6 +552,33 @@ nil:END:"  nil t)
          result-end
          end
          data)
+
+    ;; Do we need a title cell?
+    (let* ((keywords (org-element-map (org-element-parse-buffer)
+			 'keyword
+		       (lambda (key)
+			 (cons (org-element-property :key key)
+			       (org-element-property :value key)))))
+	   (title (cdr (assoc "TITLE" keywords)))
+	   (author (cdr (assoc "AUTHOR" keywords)))
+	   (date (cdr (assoc "DATE" keywords)))
+	   title-string
+	   cell)
+      (when title
+	(setq title_string (format "%s\n%s\n\n" title (make-string (length title) ?=)))
+	(when author
+	  (setq title_string (format "%s**Author:** %s\n\n" title_string author)))
+	(when date
+	  (setq title_string (format "%s**Date:** %s\n\n" title_string date)))
+
+	(push `((cell_type . "markdown")
+		(metadata . ,(make-hash-table))
+		(source . ,title_string))
+	      cells)))
+
+    ;; Next keyword cells
+    (let ((kws (ox-ipynb-export-keyword-cell)))
+      (when kws (push kws cells)))
 
     (setq src-blocks (org-element-map (org-element-parse-buffer) 'src-block
                        (lambda (src)
@@ -639,6 +683,7 @@ nil:END:"  nil t)
                    (when-let ((md (ox-ipynb-export-markdown-cell (s-trim s))))
                      (push md cells))))))
 
+
     (setq data (append
                 `((cells . ,(reverse cells)))
                 (list metadata)
@@ -740,11 +785,9 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 		 'src-block
 	       (lambda (src)
 		 (when (string= "none"
-				(plist-get
-				 (read
-				  (format "(%s)"
-					  (org-element-property :parameters src)))
-				 :exports))
+				(cdr (assq :exports
+				           (org-babel-parse-header-arguments
+					    (org-element-property :parameters src)))))
 		   src))))
 	    do
 	    (goto-char (org-element-property :begin src))

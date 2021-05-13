@@ -32,37 +32,34 @@
 ;;
 ;; lsp
 ;;
+(use-package lsp-mode
+  :hook (python-mode . lsp-deferred)
+  :commands (lsp lsp-deferred))
+
 (use-package lsp-python-ms
   ;; :hook lsp-mode ; what to put here?
-  ;; :hook (python-mode . (lambda ()
-  ;;                         (require 'lsp-python-ms)
-  ;;                         (lsp)))  ; or lsp-deferred
   :custom
   (lsp-python-ms-extra-paths 
-   '(;"/home/moutsopoulosg/anaconda3/envs/blade/bin"
-     "/home/moutsopoulosg/dev/master/python"
-   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python27.zip"
+   '("/home/moutsopoulosg/dev/master/python"
      "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7"
-   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/plat-linux2"
-   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/lib-tk"
-   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/lib-old"
-   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/lib-dynload"
-   					;"/home/moutsopoulosg/.local/lib/python2.7/site-packages"
      "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/site-packages"
-   					;"/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/site-packages/IPython/extensions"
-   					;"/home/moutsopoulosg/.ipython"
-     )
-			     ))
+     )))
+
+(use-package lsp-pyright
+  ;; :custom
+  ;; (lsp-pyright-multi-root nil)
+  )
+
+;; (add-to-list 'lsp-disabled-clients 'pyright)
 
 (use-package lsp-ui
   ;; :hook (lsp-mode . lsp-ui-mode)
   :commands lsp-ui-mode
   :custom
-  (lsp-ui-doc-enable nil))
+  (lsp-ui-doc-enable t)
+  (focus-follows-mouse nil)
+  )
 
-(use-package lsp-mode
-  ; :hook (python-mode . lsp-deferred)
-  :commands (lsp lsp-deferred))
 
 (use-package helm-lsp :commands helm-lsp-workspace-symbol)
 
@@ -102,8 +99,8 @@
 (use-package python
   :init
   (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
-  :config
-  (helm-gtags-mode)  ;; gtags --gtagslabel=pygments with ~/.globalrc coppied
+  ;; :config
+  ;; (helm-gtags-mode)  ;; gtags --gtagslabel=pygments with ~/.globalrc coppied
   ;; :custom
   ;; (python-shell-interpreter "ipython") (python-shell-interpreter-args "-i")
   ;; (python-shell-interpreter "python")  ; ipython does not not exist eg for pydoc
@@ -268,3 +265,51 @@
 ;; ;; (add-hook 'python-mode-hook 'setup-importmagic)
 ;; (defadvice importmagic--query-imports-for-statement-and-fix (after send-import-statement (statement) activate) (python-shell-send-string statement))
 
+;; work with helm-etags-select
+(defun gm/etags-python-helm-process-candidate (candidate)
+  "Return list of MODULE and OBJECT of an helm-etags-select CANDIDATE."
+  (let* ((split (helm-grep-split-line candidate))
+         (fname (car split)) ; 1st
+	 (linum (string-to-number (cadr split))) ; 2nd
+	 (elm   (s-trim (cl-caddr split))) ; 3d
+	 (tagpattern "\\(?:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)(")
+	 (elmpattern (string-match tagpattern  elm))
+	 (object (match-string 1 elm))  ; class/function name
+	 (modulepattern "\\(?:\\(?:src\\|python\\|cython\\)/\\)?\\(?1:.*\\)\\.py")
+	 (modulematch (string-match modulepattern fname))
+	 (module (replace-regexp-in-string "/" "." (match-string-no-properties 1 fname)))
+	 )
+    (list module object)))
+(defun gm/etags-python-helm-action-insert-import (candidate)
+  "Action to insert an import statement one line above using helm-etags-select source."
+  (let* ((p (gm/etags-python-helm-process-candidate candidate))
+	   (module (car p))
+	   (object (cadr p))
+	   (string (concat "from " module " import " object "\n")))
+    (save-excursion
+      (beginning-of-line)
+      (insert string)
+      )))
+(defun gm/etags-python-helm-action-insert-symbol (candidate)
+    "Action to insert symbol using helm-etags-select source."
+  (let* ((p (gm/etags-python-helm-process-candidate candidate))
+	   (module (car p))
+	   (object (cadr p)))
+    (insert (concat " " object))))
+(defun gm/etags-python-helm-advice (source)
+  "Add actions for python insertion to helm-etags-select"
+  (helm-add-action-to-source "Insert import" 'gm/etags-python-helm-action-insert-import source)
+  (helm-add-action-to-source "Insert symbol" 'gm/etags-python-helm-action-insert-symbol source)
+  (helm-add-action-to-source "Insert import and symbol" (lambda (c)
+							  (gm/etags-python-helm-action-insert-import c)
+							  (gm/etags-python-helm-action-insert-symbol c))
+			     source)
+  source)
+;; the following does not seem to work?
+(advice-add 'helm-etags-build-source :filter-return #'gm/etags-python-helm-advice)
+; the following adds to helm-etags-select source (once built initially?)
+(defun gm/etags=python-helm-add-action-post-build ()
+(helm-add-action-to-source "Insert import" 'gm/etags-python-helm-action-insert-import helm-source-etags-select)
+(helm-add-action-to-source "Insert symbol" 'gm/etags-python-helm-action-insert-symbol helm-source-etags-select))
+; do it
+(gm/etags=python-helm-add-action-post-build)

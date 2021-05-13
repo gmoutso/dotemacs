@@ -72,10 +72,14 @@ more org rifle..\n"
    "Links"
    (("ls" org-store-link  "store")
     ("li" org-insert-link  "insert")
-    ("lt" org-toggle-link-display "toggle")
-    ("ii" org-toggle-inline-images "inline image")
     ("if" org-footnote-new "footnote")
     ;; ("o" org-open-at-point  "open link")
+    )
+   "Visibility"
+   (("tl" org-toggle-link-display "toggle links")
+    ("ti" org-toggle-inline-images "toggle images")
+    ("ts" org-hide-block-all "hide blocks")
+     
     )
    "Jump"
    (("h" helm-org-in-buffer-headings "headings")
@@ -88,6 +92,8 @@ more org rifle..\n"
     ; ("nw" widen "widen")
     ("v" org-open-pdf "view pdf")
     ("e" org-latex-export-to-pdf "export pdf"))
+   "Jupyter"
+   (("jl" jupyter-server-list-kernels "list kernels"))
    ))
 
 ;; (defhydra hydra-rifle (:exit t)

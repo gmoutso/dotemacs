@@ -6,7 +6,7 @@
                                   :with-toc nil
 				  :with-sub-superscript nil))
 (setq org-mime-default-header "#+OPTIONS: latex:t toc:nil ^:nil\n")
-(defun org-mime-save ()
+(defun gm/save-org-buffer-to-email-drafts ()
     "org htmlize and save to drafts"
     (interactive)
     (org-mime-org-buffer-htmlize)

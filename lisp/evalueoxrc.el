@@ -35,8 +35,11 @@
   stringstyle=\\color{mymauve},     % string literal style
 }
 \\lstset{style=customc}
-
-[NO-DEFAULT-PACKAGES]"
+\\usepackage{attachfile2}
+[DEFAULT-PACKAGES]
+[PACKAGES]
+[EXTRA]
+"
   ;; ("\\part{%s}" . "\\part*{%s}")
   ;; ("\\chapter{%s}" . "\\chapter*{%s}")
   ("\\section{%s}" . "\\section*{%s}")
@@ -85,6 +88,6 @@
             (file-name-nondirectory source))))
 (defun my-org-html-export-with-inline ()
   (interactive)
-  (flet ((org-html--format-image (source attributes info) (my-org-html--format-image source attributes info)))
+  (cl-flet ((org-html--format-image (source attributes info) (my-org-html--format-image source attributes info)))
     (org-html-export-to-html)))
 

@@ -27,23 +27,6 @@
 			     (if (string-prefix-p (expand-file-name "~/dev/master/")  default-directory)  ;; if current directory in dev/master
 				 default-directory "~/dev/master/")))
 
-(defun ev-tramp-this (filename host)
-  "Convert filename to tramp version on evalue space.
-
-   host is of the form ~/ or beowulf@ted:
-   filename must be in a /home/someones/ and can be tramped"
-  (let* ((filename (if (file-remote-p filename)
-		       (file-local-name filename)
-		     (expand-file-name filename)
-		     ))
-	 (is-remote-host (string-match-p ".*:" host))
-	 (host (if is-remote-host
-		   (concat "/ssh:" host)
-		    host))
-	 (filename (replace-regexp-in-string "^/home/[^/]*/" host filename nil nil))
-	 )
-    (expand-file-name filename)
-    ))
 
 ;;
 ;; rsync a whole tree
@@ -83,16 +66,41 @@
 ;;
 ;; open with tramp this
 ;;
-(defun ev-tramp-here (arg &optional init-directory)
+(defun ev-tramp-this (filename host)
+  "Convert filename to tramp version on evalue space.
+
+   host is either ~/ or of the form [user@]host: eg beowulf@ted:
+   the filename might start with /home/someones/ or some other absolute path from /"
+  (let* ((is-remote-host (string-match-p ".*:" host))
+	 (is-remote-file (file-remote-p filename))
+	 (filelocal (expand-file-name (file-local-name filename))))
+    (concat (if is-remote-host "/ssh:") host (replace-regexp-in-string "^/home/[^/]*/" "" filelocal))))
+
+
+(defun gm/match-replace-gather-select (origin mrlist)
+  "MRLIST is a list of triplets of the form (MATCH REGEX REPLACE)."
+  (helm :sources (helm-build-sync-source "hosts"
+		   :candidates (cl-loop for (match regex replace) in mrlist
+							  if (string-match-p match origin) collect
+							  (replace-regexp-in-string regex replace origin))
+		   :fuzzy-match t)
+	:buffer "*helm evalue*"))
+
+(defun ev-tramp-here ()
   "Open the current file/dir in an evalue host."
   (interactive)
-  (let* ((filename (or buffer-file-name dired-directory default-directory))
+  (let* ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
 	 (host (helm :sources helm-source-rsync-tree-hosts
 		     :prompt "Host: "
 		     :buffer "*helm host from*"))
-	 (filename (ev-tramp-this filename host))
-	 )
-    (find-file filename)
+	 (is-remote-host (string-match-p ".*:" host))
+	 (is-remote-file (file-remote-p filename)))
+    ;; special conditions
+    (if (string-match-p "workspace" filename)
+	(cond ((and (not is-remote-file) is-remote-host) (setq filename (replace-regexp-in-string "/home/moutsopoulosg/workspace" "/spool/workspace" filename)))
+	      ((and (not is-remote-host) is-remote-file) (setq filename (replace-regexp-in-string "/spool/workspace" "/home/moutsopoulosg/workspace" filename)))))
+    ;; end special conditions
+    (find-file (ev-tramp-this filename host))
     ))
 
 ;;
@@ -105,9 +113,10 @@
 	(candidates (mapcar (lambda (x) (replace-regexp-in-string ".prf" "" x nil t)) pfd))
 	(selection (helm :sources (helm-build-sync-source "name"
 				    :candidates candidates)
+			 :input "w"
 			 :buffer "*helm unison*"))
 	;; (switches (split-string-and-unquote args)
-	(termbuf (make-term "unison" "/home/moutsopoulosg/.local/bin/unison" nil selection)))
+	(termbuf (make-term "unison" "/home/moutsopoulosg/.local/bin/unison" nil selection "-auto")))
     (set-buffer termbuf)
     (term-mode)
     (term-char-mode)
@@ -167,11 +176,8 @@
 ;; 	(current-prefix-arg '(4)))
 ;;   (call-interactively 'ggtags-find-definition)))
 
-;; (defun ev-helm-tags ()
-;;   "Find global tags in dev/master/python from anywhere"
-;;   (interactive)
-;;   ;; (with-current-buffer (dired "/home/moutsopoulosg/dev/master/python/")
-;;   ;; (helm-gtags-select))
-;;   (let ((default-directory "/home/moutsopoulosg/dev/master/python/"))
-;;   (call-interactively 'helm-gtags-select)))
-
+(defun gm/ev-find-definition ()
+  "Find global tags from anywhere"
+  (interactive)
+  (visit-tags-table "/home/moutsopoulosg/dev/master/TAGS" t)
+  (helm-etags-select nil))

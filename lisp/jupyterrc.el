@@ -1,3 +1,4 @@
+(conda-env-activate "blade")
 (use-package jupyter
   :after (ob-jupyter ob-python)
   :config
@@ -10,12 +11,14 @@
   (add-to-list 'savehist-additional-variables 'jupyter-server-kernel-names)
   (setq ob-async-no-async-languages-alist '("jupyter-python"))
   (add-to-list 'org-structure-template-alist '("j" . "src jupyter-python")))
-
 (use-package jupyter-tramp)
-
-(conda-env-activate "bastille")
-(use-package ob-jupyter
-    :after (ob))
+(require 'ob-jupyter)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '( ;(ipython . t)
+   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
+   (jupyter . t)
+   ))
 
 ;;
 ;; jupyter repl
