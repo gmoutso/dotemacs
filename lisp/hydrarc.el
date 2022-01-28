@@ -72,19 +72,21 @@ more org rifle..\n"
    "Links"
    (("ls" org-store-link  "store")
     ("li" org-insert-link  "insert")
-    ("if" org-footnote-new "footnote")
+    ("lf" org-footnote-new "footnote")
     ;; ("o" org-open-at-point  "open link")
     )
    "Visibility"
    (("tl" org-toggle-link-display "toggle links")
     ("ti" org-toggle-inline-images "toggle images")
     ("ts" org-hide-block-all "hide blocks")
+    ("ri" gm/org-resize-images "resize images")
      
     )
    "Jump"
-   (("h" helm-org-in-buffer-headings "headings")
-    ("r" helm-org-rifle-current-buffer "rifle")
-    ("s" helm-occur "search")
+   (("jh" helm-org-in-buffer-headings "headings")
+    ("jr" helm-org-rifle-current-buffer "rifle")
+    ("jo" helm-occur "occur")
+    ("ji" gm/org-show-image-files "images")
      ;("ne" hydra-navigate "navigate emacs")
     )
    "Ox"
@@ -93,7 +95,8 @@ more org rifle..\n"
     ("v" org-open-pdf "view pdf")
     ("e" org-latex-export-to-pdf "export pdf"))
    "Jupyter"
-   (("jl" jupyter-server-list-kernels "list kernels"))
+   (("jl" jupyter-server-list-kernels "list kernels")
+    ("j." gm/org-find-definition-at-point "org def"))
    ))
 
 ;; (defhydra hydra-rifle (:exit t)
@@ -378,7 +381,8 @@ _m_/_M_: mark (jump)
   ("Q" (hera-pop) :exit t))
 
 (defun hydra-backward-symbol ()
-  (forward-symbol (-1)))
+  (interactive)
+  (forward-symbol -1))
 (defun hydra-interactive-python-nav-beginning-of-defun ()
   (interactive)
   (python-nav-beginning-of-defun))

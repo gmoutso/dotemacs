@@ -11,6 +11,7 @@
   (add-to-list 'savehist-additional-variables 'jupyter-server-kernel-names)
   (setq ob-async-no-async-languages-alist '("jupyter-python"))
   (add-to-list 'org-structure-template-alist '("j" . "src jupyter-python")))
+
 (use-package jupyter-tramp)
 (require 'ob-jupyter)
 (org-babel-do-load-languages
@@ -54,4 +55,5 @@ screenful, the region is temporarily highlighted according to
       (python--vhl-full-lines start end 1 1))
     (jupyter-eval-region start end)
     (python-forward-fold-or-section)))
+
 

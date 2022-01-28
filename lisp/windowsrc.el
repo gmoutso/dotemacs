@@ -1,13 +1,15 @@
 ;;
 ;; scrolling
 ;;
-;; Turn on horizontal scrolling with mouse wheel
-;; (global-set-key (kbd "<mouse-6>") '(lambda ()
-;;                                      (interactive)
-;;                                      (scroll-right 4)))
-;; (global-set-key (kbd "<mouse-7>") '(lambda ()
-;;                                      (interactive)
-;;                                      (scroll-left 4)))
+;; see also keys.el!!!
+;; (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+(pixel-scroll-mode)
+;; (good-scroll-mode)
+(setq pixel-dead-time 0) ; Never go back to the old scrolling behaviour.
+(setq pixel-resolution-fine-flag t) ; Scroll by number of pixels instead of lines (t = frame-char-height pixels).
+(setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
+(setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
+
 
 ;;
 ;; winner undo
@@ -16,6 +18,26 @@
 (define-key winner-mode-map (kbd "C-c <left>") nil)
 (define-key winner-mode-map  (kbd "C-x C-z") 'winner-undo)
 
+(global-set-key (kbd "C-x z") 'bury-buffer)
+(global-set-key  (kbd "C-x <down>") 'bury-buffer)
+(defun gm/helm-switch-to-tab-line-tab-buffer ()
+    (interactive) 
+  ;; (let ((candidates (mapcar (lambda (buff) (cons (buffer-name buff) buff)) (tab-line-tabs-window-buffers))))
+  ;;   (helm :sources
+  ;; 	  (helm-build-sync-source "Window buffers"
+  ;;           :candidates candidates
+  ;; 	    :fuzzy-match t
+  ;; 	    :action '(("switch" . switch-to-buffer))))
+    ;; 	  )
+    (let ((candidates (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers))))
+      (helm :sources
+	    (helm-make-source "Window buffers" 'helm-source-buffers 
+	      :buffer-list (lambda () candidates)
+	      ))))
+
+
+
+(global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
 ;; (variable-pitch-mode 0)
 ;; (use-package mixed-pitch
 ;;   :hook
@@ -26,11 +48,19 @@
 ;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
 ;; (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
 
-
-(global-set-key (kbd "C-x <up>")  'windmove-up )
-(global-set-key (kbd "C-x <down>") 'windmove-down )
-(global-set-key (kbd "C-x <left>")  'windmove-left )
-(global-set-key (kbd "C-x <right>") 'windmove-right )
+(windmove-default-keybindings 'shift)
+;; https://orgmode.org/manual/Conflicts.html
+(with-eval-after-load 'org
+  (add-hook 'org-shiftup-final-hook 'windmove-up)
+  (add-hook 'org-shiftleft-final-hook 'windmove-left)
+  (add-hook 'org-shiftdown-final-hook 'windmove-down)
+  (add-hook 'org-shiftright-final-hook 'windmove-right))
+; (windmove-default-keybindings '(shift ctrl))
+;; (windmove-default-keybindings 'ctrl)
+;; (global-set-key (kbd "C-x <up>")  'windmove-up )
+;; (global-set-key (kbd "C-x <down>") 'windmove-down )
+;; (global-set-key (kbd "C-x <left>")  'windmove-left )
+;; (global-set-key (kbd "C-x <right>") 'next-buffer )
 ;; move between frames
 ;; (use-package framemove
 ;;   :config

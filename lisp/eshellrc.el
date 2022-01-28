@@ -52,7 +52,7 @@
 	 :command (list  "setsid" "-w" "kde-open5" (gm/tramp-to-kio filename))
 	 )
       (message "Cannot guess url to open."))))
-
+(define-key dired-mode-map [remap browse-url-of-dired-file] 'gm/kde-open)
 
 (defun gm/konsole ()
   (interactive)

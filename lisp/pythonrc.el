@@ -8,8 +8,6 @@
 ;; 1. Formalise gtags or simplify to etags
 ;; 2. Document flycheck or simplify to flymake
 ;; 3. project-wise loading of components
-;; 4. modern imenu and python-x
-(python-x-setup)
 (use-package general)
 
 ;;
@@ -34,7 +32,9 @@
 ;;
 (use-package lsp-mode
   :hook (python-mode . lsp-deferred)
-  :commands (lsp lsp-deferred))
+  :commands (lsp lsp-deferred)
+  :custom
+  (lsp-headerline-breadcrumb-enable nil))
 
 (use-package lsp-python-ms
   ;; :hook lsp-mode ; what to put here?
@@ -111,8 +111,27 @@
 ;;
 ;; python keys
 ;;
+(defun backward-symbol () (interactive) (forward-symbol -1))
 (general-def python-mode-map
-  "C-c C-p" 'my-run-python)
+  "C-c C-p" 'my-run-python
+  ;; navigation
+  "C-<right>" 'forward-symbol
+  "C-<left>" 'backward-symbol
+  "M-p" 'python-nav-backward-statement
+  "M-n" 'python-nav-forward-statement
+  "C-<down>" 'forward-paragraph
+  "C-<up>" 'backward-paragraph
+  "M-}" 'forward-paragraph
+  "M-{" 'backward-paragraph
+  "M-[" 'python-nav-backward-block
+  "M-]" 'python-nav-forward-block
+  "M-e" 'python-nav-forward-defun
+  "M-a" 'python-nav-backward-defun  ; kde stole this
+  ; "M-a" 'python-nav-backward-block
+  ; "M-e" 'python-nav-forward-block
+  "C-M-u" 'python-nav-backward-up-list
+   )
+
 ;; (general-def python-mode-map
 ;;   "<M-return>" (general-predicate-dispatch 'python-shell-send-fold-or-section-and-step
 ;; 	   jupyter-repl-interaction-mode 'jupyter-send-fold-or-section-and-step  ; maybe this should be local
@@ -123,79 +142,43 @@
 ;; )
 
 (defun my-python-line-mode-hook ()
-  (cond ((is-notebook-p) (linum-mode -1))
-	((is-python-p) (linum-mode 1)
-	 (line-number-mode t)
+  (cond ((is-notebook-p) (display-line-numbers-mode 0))
+	((is-python-p) (display-line-numbers-mode t)
+	 (display-line-numbers-mode t)
 	 (column-number-mode t))))
 (add-hook 'python-mode-hook 'my-python-line-mode-hook)
 
-;; (require 'conda)
-;; (custom-set-variables '(conda-anaconda-home "/home/moutsopoulosg/anaconda3/"))
-;; (conda-env-initialize-interactive-shells)
-;; ;; if you want eshell support, include:
-;; (conda-env-initialize-eshell)
-;; ;; if you want auto-activation (see below for details), include:
-;; (conda-env-autoactivate-mode)
-(setq conda-env-home-directory "/home/moutsopoulosg/anaconda3/")
 (use-package conda
   :hook eshell python
   :custom
   (conda-anaconda-home "/home/moutsopoulosg/anaconda3/")
+  (conda-env-home-directory "/home/moutsopoulosg/anaconda3/")  ; was in separate setq
   :config
   ;; if you want interactive shell support, include:
   (conda-env-initialize-interactive-shells)
   ;; if you want eshell support, include:
   (conda-env-initialize-eshell)
-  ;; if you want auto-activation (see below for details), include:
-  ;; (conda-env-autoactivate-mode)
+  ;; if you want auto-activation (add conda-project-env-name in .dir-locals), include:
+  ;; (conda-env-autoactivate-mode) or (eval . (conda-env-autoactivate-mode)) or add to python hook
   )
+(add-hook 'python-mode-hook 'conda-env-autoactivate-mode)
 
 (defun my-run-python (&optional new)
   "Runs or switches to python shell"
   (interactive)
-  (run-python)
+  (let ((python-shell-interpreter "ipython")
+        (python-shell-interpreter-args "-i --simple-prompt"))
+	(run-python))
   (python-shell-switch-to-shell)
+  (setq-local tab-width 4)
 )
 
-(defun python-move-down-and-newline ()
-  "Move to next line, creating if needed."
-  (python-nav-end-of-statement)
-  (cua-set-mark)(cua-set-mark)
-  (if (eobp) (newline))
-  (python-nav-forward-statement)
-  (python-nav-end-of-statement)
-  )
-
-(defun python-shell-send-current-statement ()
-  "Send current statement to Python shell and print result, then move down.
-   Taken from elpy-shell-send-current-statement"
-  (interactive)
-  (let ((beg (python-nav-beginning-of-statement))
-        (end (python-nav-end-of-statement)))
-    (python-shell-send-string (buffer-substring beg end)))
-  (python-move-down-and-newline)
-  )
 
 (defun open-in-pycharm ()
   "Open visited file in pycharm."
   (interactive)
   (shell-command (concat "/home/moutsopoulosg/app/pycharm-community-2017.1.3/bin/pycharm.sh "
 " ~/dev/master/ --line " (format "%s" (line-number-at-pos)) " " (buffer-file-name))))
-
-;;
-;; python-x
-;;
-(setq pythonx-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
-
-(defun pythonx-imenu-index-function ()
-  "Appends the imenu index created from default function with the imenu index created from expression."
-  (let ((mode-imenu (python-imenu-create-index))
-        (custom-imenu (imenu--generic-function pythonx-imenu-expression)))
-    (append custom-imenu mode-imenu)))
-(defun pythonx-imenu-merge-hook ()
-  "Set up imenu for python-x."
-  (unless (is-notebook-p) (setq imenu-create-index-function 'pythonx-imenu-index-function)))
-(add-hook 'python-mode-hook 'pythonx-imenu-merge-hook)
 
 (defun my-inferior-python-autoreload-hook ()
   (python-shell-send-string "%load_ext autoreload")
@@ -313,3 +296,95 @@
 (helm-add-action-to-source "Insert symbol" 'gm/etags-python-helm-action-insert-symbol helm-source-etags-select))
 ; do it
 (gm/etags=python-helm-add-action-post-build)
+
+;; defintions in buffer
+;; (defconst gm/top-pydef-regex
+;;   "^\\(?:\\(?2:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)(\\|\\(?1:[[:alnum:]_]*\\) *\\(?2:=\\)\\)"
+;;   "Class, def or variable definition regex.
+
+;; 1: object, 2: def|class|=")
+;; (defun gm/helm-occur-pydefs ()
+;;   (interactive)
+;;   (helm-occur "^[0-9]* \\(?:\\(?2:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)(\\|\\(?1:[[:alnum:]_]*\\) *\\(?2:=\\)\\)"))
+;; (defun gm/occur-pydefs ()
+;;   "Occur python definitions in buffer."
+;;   (interactive)
+;;   (occur gm/top-pydef-regex)
+;;   )
+
+(python-x-setup)
+
+(defun python-move-down-and-newline ()
+  "Move to next line, creating if needed."
+  (python-nav-end-of-statement)
+  (cua-set-mark)(cua-set-mark)
+  (if (eobp) (newline))
+  (python-nav-forward-statement)
+  (python-nav-end-of-statement)
+  )
+
+(defun python-shell-send-current-statement ()
+  "Send current statement to Python shell and print result, then move down.
+   Taken from elpy-shell-send-current-statement"
+  (interactive)
+  (let ((beg (python-nav-beginning-of-statement))
+        (end (python-nav-end-of-statement)))
+    (python-shell-send-string (buffer-substring beg end)))
+  (python-move-down-and-newline)
+  )
+
+
+(setq pythonx-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
+(defun pythonx-imenu-index-function ()
+  "Appends the imenu index created from default function with the imenu index created from expression."
+  (let ((mode-imenu (python-imenu-create-index))
+        (custom-imenu (imenu--generic-function pythonx-imenu-expression)))
+    (append custom-imenu mode-imenu)))
+(defun pythonx-imenu-merge-hook ()
+  "Set up imenu for python-x."
+  (unless (is-notebook-p) (setq imenu-create-index-function 'pythonx-imenu-index-function)))
+(add-hook 'python-mode-hook 'pythonx-imenu-merge-hook)
+
+(defun gm/to_open_dataarray (beginning end)
+  (interactive "*r")
+  (let ((beginning (if (region-active-p) beginning (point-at-bol)))
+	(end (if (region-active-p) end (point-at-eol)))
+	(regex "\\([a-zA-Z0-9_]*\\)\.to_netcdf(\\([^)]*\\))")
+	(replace "\\1 = xr.open_dataarray(\\2)"))
+    (setq end (copy-marker end))
+    (save-match-data
+      (save-excursion
+	(goto-char beginning)
+	(while (re-search-forward regex end t)
+          (replace-match replace))))
+  (set-marker end nil)))
+
+(defun gm/to_open_dataset (beginning end)
+  (interactive "*r")
+  (let ((beginning (if (region-active-p) beginning (point-at-bol)))
+	(end (if (region-active-p) end (point-at-eol)))
+	(regex "\\([a-zA-Z0-9_]*\\)\.to_netcdf(\\([^)]*\\))")
+	(replace "\\1 = xr.open_dataset(\\2)"))
+    (setq end (copy-marker end))
+    (save-match-data
+      (save-excursion
+	(goto-char beginning)
+	(while (re-search-forward regex end t)
+          (replace-match replace))))
+  (set-marker end nil)))
+
+
+(defun gm/to_to_netcdf (beginning end)
+  (interactive "*r")
+  (let ((beginning (if (region-active-p) beginning (point-at-bol)))
+	(end (if (region-active-p) end (point-at-eol)))
+	(regex "\\([a-zA-Z0-9_]*\\) *= *xr\.open_data\\(?:array\\|set\\)(\\([^)]*\\))")
+	(replace "\\1.to_netcdf(\\2)"))
+    (setq end (copy-marker end))
+    (save-match-data
+      (save-excursion
+	(goto-char beginning)
+	(while (re-search-forward regex end t)
+          (replace-match replace))))
+  (set-marker end nil)))
+

@@ -1,6 +1,6 @@
 (use-package org-variable-pitch)
-(add-hook 'after-init-hook 'org-variable-pitch-setup)
-(add-hook 'org-mode-hook 'org-variable-pitch-minor-mode)
+(add-hook 'org-mode-hook #'org-variable-pitch-minor-mode)
+(add-hook 'after-init-hook #'org-variable-pitch-setup)
 
 ;; needs to be set before org is loaded
 (setq org-list-allow-alphabetical t)
@@ -32,6 +32,7 @@
 (use-package org-download
   :hook (org-mode . org-download-enable)
   )
+
 
 ;; make M-Ret not break heading content if cursor is not at the end of item
 (setq org-insert-heading-respect-content nil)
@@ -105,7 +106,7 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '( ;;(ipython . t)
-   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
+   (shell . t) (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
    ;; (jupyter . t)
    ))
 
@@ -145,26 +146,25 @@
  ;; do not start the week from today (opposite: start on Monday)
  org-agenda-start-on-weekday 1
  ;; in global todo do not ignore some scheduled
- org-agenda-todo-ignore-scheduled nil;'all
+ org-agenda-todo-ignore-scheduled 10; nil;'all
  ;;
  ;; org-agenda-todo-ignore-with-date t
  ;;
  ;; skip scheduling line if same entry shows because of a (near) deadline
- org-agenda-skip-scheduled-if-deadline-is-shown nil
+ org-agenda-skip-scheduled-if-deadline-is-shown t
  ;;
  ;; The symbol ‘pre-scheduled’ eliminates the deadline prewarning only prior to the scheduled date
- ;; if a near-future deadline appears and you reschedule it for the future, the deadline entry will then be hidden
- ;; aka show shedules only?
  org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled;'pre-scheduled
  ;;
  ;; hide entries with deadline/scheduled today or in the future that are done
- ;; note that entries deadline/scheduled in the passed that are done are hidden always anyway
+ ;; note entries deadline/scheduled in the past that are done are hidden always
  ;; the purpose of letting this nil is for a happy feeling
- org-agenda-skip-deadline-if-done nil
+ org-agenda-skip-deadline-if-done t
  ;;
  ;; skip scheduled delay when entry also has a deadline
  ;; org-agenda-skip-scheduled-delay-if-deadline t
- ;;
+ )
+(setq
  ;; agenda custom views
  org-agenda-custom-commands
  '(("n" "Agenda and TODOs"
@@ -190,11 +190,11 @@
 ;; (load-file "org-span.el")
 
 ;; org-mode shortcuts
-(add-hook 'org-mode-hook
-	  (lambda()
-	    (setq line-spacing '0.25)
-	    )
-	  )
+(defun gm/org-hooks ()
+  (setq line-spacing '0.25)
+  ; (iscroll-mode)
+  )
+(add-hook 'org-mode-hook 'gm/org-hooks)
 
 ;;
 ;; org-publish projects
@@ -565,24 +565,32 @@ g  (interactive)
   "If it doesn't have a NAME property then add one and
    assign it a UUID."
   (interactive)
-  (let* ((name (help/org-id-new))
+  (let* ((name (gm/org-id-new))
 	 (element (org-element-at-point))
 	 (issrc (eq (org-element-type element) 'src-block))
+	 (isjupy (member (org-element-property :language element) '("jupyter-python")))
 	 (nameexist (org-element-property :name element)))
-      (when (and (not nameexist) issrc)
+      (when (and (not nameexist) issrc isjupy)
 	(save-excursion
 	  (let ((case-fold-search nil)) (search-backward-regexp "#\\+begin_src"))
 	  (beginning-of-line)
 	  (insert "#+name: " name "\n")))))
 
-;; (advice-add 'org-insert-structure-template :after #'gm/org-add-src-name-maybe)
-;; (advice-remove 'org-insert-structure-template #'gm/org-add-src-name-maybe)
+(defun gm/org-find-definition-at-point (&optional ask)
+  "Find defition of symbol at point within the current org document.
 
-(defun gm/org-find-definition-at-point ()
+If ASK then ask for the symbol to find."
+  (interactive "P")
+  (let ((word (if ask (read-from-minibuffer "Symbol: ") (symbol-at-point))))
+  (gm/org-find-definition word)))
+
+(defun gm/org-find-definition (&optional word)
+  "Find defition of WORD within the current org document."
   (interactive)
-  (let* ((word (word-at-point t))
-	 (regex (format "^ *\\(?:def *%s(\\|class *%s(\\|%s *=\\)" word word word))
+  (let* ((word (or word (read-from-minibuffer "Symbol: ")))
+	 (regex (format "^ *\\(?:def *%s(\\|class *%s\\|%s *=\\)" word word word))
 	 (ncount (count-matches regex (point-min) (point-max))))
+    (push-mark)
     (cond ((eq ncount 0) (message "No definition for %s" word))
 	  ((eq ncount 1) (progn (goto-char (point-min))
 				(search-forward-regexp regex nil t)
@@ -700,15 +708,52 @@ Update the `org-id-locations' global hash-table, and update the
     (if (or (org-map-entries '(org-entry-delete (point) "ID") nil 'file))
 	(org-id-update-id-locations nil 'silent)))
 
-(defun gm/org-ispell ()
-  "Configure `ispell-skip-region-alist' for `org-mode'."
-  (make-local-variable 'ispell-skip-region-alist)
-  (add-to-list 'ispell-skip-region-alist '(org-property-drawer-re))
-  (add-to-list 'ispell-skip-region-alist '("~" "~"))
-  (add-to-list 'ispell-skip-region-alist '("=" "="))
-  (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_SRC" . "^#\\+END_SRC"))
-  ) 
-(add-hook 'org-mode-hook #'gm/org-ispell)
-(require 'company)
-(add-to-list 'company-backends 'company-ispell)
+;; (defun gm/org-ispell ()
+;;   "Configure `ispell-skip-region-alist' for `org-mode'."
+;;   (make-local-variable 'ispell-skip-region-alist)
+;;   (add-to-list 'ispell-skip-region-alist '(org-property-drawer-re))
+;;   (add-to-list 'ispell-skip-region-alist '("~" "~"))
+;;   (add-to-list 'ispell-skip-region-alist '("=" "="))
+;;   (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_SRC" . "^#\\+END_SRC"))
+;;   ) 
+;; (add-hook 'org-mode-hook #'gm/org-ispell)
+;; (require 'company)
+;; (add-to-list 'company-backends 'company-ispell)
 
+(defun gm/org-resize-images ()
+  "Resize images in this buffer and redisplay."
+  (interactive)
+  (let ((org-image-actual-width (helm :sources (helm-build-sync-source "Size" :candidates '(("large" . 1200)
+							    ("medium" . 800)
+							    ("small" . 500))))
+				))
+    (org-redisplay-inline-images)))
+(defun gm/org-set-size-images ()
+  "Resize images in this session and redisplay.
+
+To make this permanent, use customize `org-image-actual-width'."
+  (interactive)
+  (setq org-image-actual-width (helm :sources (helm-build-sync-source "Size" :candidates '(("large" . 1200)
+							    ("medium" . 800)
+							    ("small" . 500)))))
+  (org-redisplay-inline-images))
+
+;; Helm will show you the car of each cell, but return the cdr of the selected entry. 
+
+
+;; Decorating Jupyter blocks
+;; make dataframe output not have a RESULTS drawer by adding org-table property to results
+;; you need to manually add :table t in block
+(defun gm/jupyter-org-table-string-maybe (func type value params)
+  "Add org-table property to pandoc output if table in PARAMS"
+  (let ((str (funcall func type value params)))
+    (if (alist-get :table params)
+      (jupyter-org-table-string str)
+      str)))
+(advice-add 'jupyter-org-export-block-or-pandoc :around #'gm/jupyter-org-table-string-maybe)
+;; automatically add a #+NAME: above a source block
+(defun gm/org-add-src-name-maybe-advice (&rest dumby) (gm/org-add-src-name-maybe))
+(advice-add 'jupyter-org-insert-src-block :after #'gm/org-add-src-name-maybe-advice)
+(advice-add 'org-insert-structure-template :after #'gm/org-add-src-name-maybe-advice)
+;; (advice-remove 'org-insert-structure-template 'gm/org-add-src-name-maybe-advice)
+;; (advice-remove 'jupyter-org-insert-src-block  'gm/org-add-src-name-maybe-advice)

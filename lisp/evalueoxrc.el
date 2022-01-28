@@ -8,9 +8,9 @@
 (add-to-list 'org-latex-classes
              '("evalue"
 "\\documentclass[10pt]{article}
+\\usepackage{amsmath}
+\\usepackage{spring21-light}
 \\usepackage{amsthm}
-\\usepackage{brex-base}
-\\usepackage{brex-xtras}
 \\usepackage{graphicx}
 \\usepackage{grffile}
 \\usepackage{longtable}

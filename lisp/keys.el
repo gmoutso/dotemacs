@@ -27,13 +27,25 @@
   (if (not (eq (car (car minor-mode-map-alist)) 'my-keys-mode))
       (let ((mykeys (assq 'my-keys-mode minor-mode-map-alist)))
         (assq-delete-all 'my-keys-mode minor-mode-map-alist)
+        (add-to-list 'minor-mode-map-alist mykeys)))
+  (if (not (eq (car (car minor-mode-map-alist)) 'scroll-all-pdf-mode))
+      (let ((mykeys (assq 'scroll-all-pdf-mode minor-mode-map-alist)))
+        (assq-delete-all 'scroll-all-pdf-mode minor-mode-map-alist)
         (add-to-list 'minor-mode-map-alist mykeys))))
 (ad-activate 'load)
-(define-key my-keys-mode-map (kbd "M-j") 'scroll-up-line)
-(defun scroll-down-line-two ()
-  (interactive)
-  (scroll-down-line 2))
-(define-key my-keys-mode-map (kbd "M-k") 'scroll-down-line-two)
+
+;;; Scrolling.
+;; (defun gm/scroll-up-line () (interactive) (iscroll-up))
+;; (defun gm/scroll-down-line () (interactive) (iscroll-down))
+(defun gm/scroll-up-line () (interactive) (scroll-up 1))
+(defun gm/scroll-down-line () (interactive) (scroll-down 1))
+;; (defun gm/scroll-down-line-two ()  (interactive)  ;; (scroll-down-line 2)
+       ;; (iscroll-down 2))
+(define-key my-keys-mode-map (kbd "M-j") 'gm/scroll-up-line)
+(define-key my-keys-mode-map (kbd "M-k") 'gm/scroll-down-line)
+;; (define-key my-keys-mode-map (kbd "M-j") 'good-scroll-up)
+;; (define-key my-keys-mode-map (kbd "M-k") 'good-scroll-down)
+
 (defun my-minibuffer-setup-hook ()
   (my-keys-mode 0))
 (add-hook 'minibuffer-setup-hook 'my-minibuffer-setup-hook)
@@ -49,3 +61,4 @@
 
 ;; kill this buffer
 (global-set-key (kbd "C-x k") 'kill-current-buffer)
+

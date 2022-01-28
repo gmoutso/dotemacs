@@ -76,3 +76,22 @@ image-mode buffers."
 		 (file-name-extension image-file)
 		 image-file)))))
     (message "Copied %s" image-file)))
+
+
+
+;; remove cua-scrolling
+(defun gm/set-cua-scroll ()
+     (interactive)
+(define-key cua-global-keymap [remap scroll-up]	#'cua-scroll-up)
+(define-key cua-global-keymap [remap scroll-down]	#'cua-scroll-down)
+(define-key cua-global-keymap [remap scroll-up-command]   #'cua-scroll-up)
+(define-key cua-global-keymap [remap scroll-down-command] #'cua-scroll-down)
+)
+(defun gm/unset-cua-scroll ()
+(define-key cua-global-keymap [remap scroll-up]	nil)
+(define-key cua-global-keymap [remap scroll-down] nil)
+(define-key cua-global-keymap [remap scroll-up-command] nil)
+(define-key cua-global-keymap [remap scroll-down-command] nil)
+)
+(gm/unset-cua-scroll)
+

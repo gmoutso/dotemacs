@@ -13,6 +13,7 @@
 (spaceline-helm-mode 1)
 (spaceline-toggle-buffer-size-off)
 (spaceline-toggle-buffer-encoding-abbrev-off)
+(spaceline-toggle-buffer-position-off)
 ;; (setq spaceline-face-func '(cond
 ;;      ((eq 'face1 face) (if active 'powerline-active1 'powerline-inactive1))
 ;;      ((eq 'face2 face) (if active 'mode-line 'mode-line-inactive))
@@ -20,7 +21,7 @@
 ;;      ((eq 'highlight face) (if active    
 ;;                                (funcall spaceline-highlight-face-func)
 ;;                              'powerline-inactive1))))
-(set-face-foreground 'powerline-active1 "white")
+; (set-face-foreground 'powerline-active1 "white")
 
 ;; diminish: hide some minor modes
 (require 'delight)
