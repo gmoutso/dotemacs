@@ -17,26 +17,19 @@
 (winner-mode 1)
 (define-key winner-mode-map (kbd "C-c <left>") nil)
 (define-key winner-mode-map  (kbd "C-x C-z") 'winner-undo)
-
 (global-set-key (kbd "C-x z") 'bury-buffer)
 (global-set-key  (kbd "C-x <down>") 'bury-buffer)
+
+
+(defun gm/tab-line-buffer-names () (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
+(defclass gm/helm-source-tab-line-buffers (helm-source-buffers) ())
 (defun gm/helm-switch-to-tab-line-tab-buffer ()
     (interactive) 
-  ;; (let ((candidates (mapcar (lambda (buff) (cons (buffer-name buff) buff)) (tab-line-tabs-window-buffers))))
-  ;;   (helm :sources
-  ;; 	  (helm-build-sync-source "Window buffers"
-  ;;           :candidates candidates
-  ;; 	    :fuzzy-match t
-  ;; 	    :action '(("switch" . switch-to-buffer))))
-    ;; 	  )
-    (let ((candidates (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers))))
-      (helm :sources
-	    (helm-make-source "Window buffers" 'helm-source-buffers 
-	      :buffer-list (lambda () candidates)
-	      ))))
-
-
-
+    (let* ((candidates (gm/tab-line-buffer-names)) ;; note needs to call this outside helm
+	   ;; ie (before helm is called)
+	   (source (helm-make-source "Window buffers" 'gm/helm-source-tab-line-buffers
+		     :buffer-list (lambda () candidates))))
+      (helm :sources source)))
 (global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
 ;; (variable-pitch-mode 0)
 ;; (use-package mixed-pitch
