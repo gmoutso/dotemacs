@@ -20,17 +20,41 @@
 (global-set-key (kbd "C-x z") 'bury-buffer)
 (global-set-key  (kbd "C-x <down>") 'bury-buffer)
 
-
+;;
+;; tab-line-mode
+;;
 (defun gm/tab-line-buffer-names () (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
+(defun gm/tab-line-bury-marked-buffers-action (_ignore)
+  (let* ((bufs (helm-marked-candidates))
+         (killed-bufs (cl-count-if 'bury-buffer bufs)))
+    (when (buffer-live-p helm-buffer)
+      (with-helm-buffer
+        (setq helm-marked-candidates nil
+              helm-visible-mark-overlays nil)))
+    (message "Bury %s buffer(s)" killed-bufs)))
+(defun gm/tab-line-bury-marked-buffers-run-action ()
+  "Run bury buffer action from `helm-source-buffers-list'."
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action 'gm/tab-line-bury-marked-buffers-action)))
+(put 'gm/tab-line-bury-marked-buffers-run-action 'helm-only t)
 (defclass gm/helm-source-tab-line-buffers (helm-source-buffers) ())
 (defun gm/helm-switch-to-tab-line-tab-buffer ()
     (interactive) 
     (let* ((candidates (gm/tab-line-buffer-names)) ;; note needs to call this outside helm
-	   ;; ie (before helm is called)
 	   (source (helm-make-source "Window buffers" 'gm/helm-source-tab-line-buffers
-		     :buffer-list (lambda () candidates))))
+		     :buffer-list (lambda () candidates)
+		     :action (helm-make-actions
+			      "Bury buffers" 'gm/tab-line-bury-marked-buffers-action))))
+      (helm-add-action-to-source "Bury buffers" 'gm/tab-line-bury-marked-buffers-action source)
       (helm :sources source)))
 (global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
+
+;;
+;; tab-bar-mode
+;;
+(defun tab-bar-rename-after-create (&rest _) (call-interactively #'tab-bar-rename-tab))
+(add-hook 'tab-bar-tab-post-open-functions 'tab-bar-rename-after-create)
 ;; (variable-pitch-mode 0)
 ;; (use-package mixed-pitch
 ;;   :hook

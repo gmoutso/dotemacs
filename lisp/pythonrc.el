@@ -4,6 +4,8 @@
 ;; None
 ;; Code
 
+
+;; sudo apt install python-is-python3 needed for lsp-python-ms on banks?
 ;; TODO
 ;; 1. Formalise gtags or simplify to etags
 ;; 2. Document flycheck or simplify to flymake

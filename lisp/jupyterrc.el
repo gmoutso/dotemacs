@@ -57,3 +57,8 @@ screenful, the region is temporarily highlighted according to
     (python-forward-fold-or-section)))
 
 
+;; https://github.com/nnicandro/emacs-jupyter/issues/366
+;; garbled errors
+(defun display-ansi-colors ()
+  (ansi-color-apply-on-region (point-min) (point-max)))
+(add-hook 'org-babel-after-execute-hook #'display-ansi-colors)

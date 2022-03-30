@@ -325,7 +325,8 @@ _m_ (_M_): set mark (jump)                 _q_: quit
    "LSP"
    (("ll" lsp "LSP")
     ("ld" lsp-ui-doc-glance "document")
-    ("ls" lsp-signature-activate "signature"))
+    ("ls" lsp-signature-activate "signature")
+    ("s" lsp-treemacs-symbols "symbols"))
    ))
 
 ;; python-nav-forward-block "forward block")
