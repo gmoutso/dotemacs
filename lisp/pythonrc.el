@@ -115,7 +115,6 @@
 ;;
 (defun backward-symbol () (interactive) (forward-symbol -1))
 (general-def python-mode-map
-  "C-c C-p" 'my-run-python
   ;; navigation
   "C-<right>" 'forward-symbol
   "C-<left>" 'backward-symbol
@@ -150,30 +149,16 @@
 	 (column-number-mode t))))
 (add-hook 'python-mode-hook 'my-python-line-mode-hook)
 
-(use-package conda
-  :hook eshell python
-  :custom
-  (conda-anaconda-home "/home/moutsopoulosg/anaconda3/")
-  (conda-env-home-directory "/home/moutsopoulosg/anaconda3/")  ; was in separate setq
-  :config
-  ;; if you want interactive shell support, include:
-  (conda-env-initialize-interactive-shells)
-  ;; if you want eshell support, include:
-  (conda-env-initialize-eshell)
-  ;; if you want auto-activation (add conda-project-env-name in .dir-locals), include:
-  ;; (conda-env-autoactivate-mode) or (eval . (conda-env-autoactivate-mode)) or add to python hook
-  )
-(add-hook 'python-mode-hook 'conda-env-autoactivate-mode)
 
-(defun my-run-python (&optional new)
-  "Runs or switches to python shell"
-  (interactive)
-  (let ((python-shell-interpreter "ipython")
-        (python-shell-interpreter-args "-i --simple-prompt"))
-	(run-python))
-  (python-shell-switch-to-shell)
-  (setq-local tab-width 4)
-)
+;; (defun my-run-python (&optional new)
+;;   "Runs or switches to python shell"
+;;   (interactive)
+;;   (let ((python-shell-interpreter "ipython")
+;;         (python-shell-interpreter-args "-i --simple-prompt"))
+;; 	(run-python))
+;;   (python-shell-switch-to-shell)
+;;   (setq-local tab-width 4)
+;; )
 
 
 (defun open-in-pycharm ()
@@ -336,16 +321,19 @@
   )
 
 
-(setq pythonx-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
-(defun pythonx-imenu-index-function ()
+; (setq gm/python-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
+(setq gm/python-imenu-expression '(("Sections"
+				    "^#+ *%+ *\\(.*\\)"
+				    1)))
+(defun gm/python-imenu-index-function ()
   "Appends the imenu index created from default function with the imenu index created from expression."
   (let ((mode-imenu (python-imenu-create-index))
-        (custom-imenu (imenu--generic-function pythonx-imenu-expression)))
+        (custom-imenu (imenu--generic-function gm/python-imenu-expression)))
     (append custom-imenu mode-imenu)))
-(defun pythonx-imenu-merge-hook ()
+(defun gm/python-imenu-merge-hook ()
   "Set up imenu for python-x."
-  (unless (is-notebook-p) (setq imenu-create-index-function 'pythonx-imenu-index-function)))
-(add-hook 'python-mode-hook 'pythonx-imenu-merge-hook)
+  (setq imenu-create-index-function 'gm/python-imenu-index-function))
+(add-hook 'python-mode-hook 'gm/python-imenu-merge-hook)
 
 (defun gm/to_open_dataarray (beginning end)
   (interactive "*r")
@@ -390,3 +378,58 @@
           (replace-match replace))))
   (set-marker end nil)))
 
+(require 'nadvice)
+(defun run-python-locally (&rest args)
+  ;; https://emacs.stackexchange.com/questions/17753/make-run-python-etc-use-local-python
+  ;; interactive wrappers are not as simple as a simple call
+  (interactive (advice-eval-interactive-spec
+                       (cadr (interactive-form #'run-python))))
+  (let ((default-directory user-emacs-directory))
+    (conda-env-activate)
+    (apply #'run-python args)))
+
+(defun run-python-remotely (&rest args)
+  (interactive (advice-eval-interactive-spec
+                       (cadr (interactive-form #'run-python))))
+  (let* ((host (completing-read "host:" '("phil" "ted" "beowulf@ted")))
+	 (env (completing-read "environment:" '("banks" "dick" "egan") nil t nil nil "banks"))
+	 (python-shell-interpreter (if (string-equal env "banks") "python" "ipython"))
+	 (python-shell-interpreter-args (if (string-equal env "banks") "-i" "--simple-prompt -i"))
+	 (env-dir (format "/ssh:%s:miniconda/envs/%s" host env))
+	 (default-directory (format "/ssh:%s:" host))
+	 )
+    (pythonic-activate env-dir)
+    (apply #'run-python args)
+    (python-shell-switch-to-shell)
+  ))
+
+(defun gm/get-relative-pyroot-filename ()
+  "Return filename."
+  (let* ((pyroot (expand-file-name (flycheck-python-find-project-root 'checker_)))
+	 (filename
+	  (cond ((derived-mode-p 'dired-mode)
+		 (dired-get-filename nil t))
+		((buffer-file-name)
+		 (buffer-file-name))
+		((null (buffer-file-name))
+		 (user-error "Current buffer is not associated with a file."))
+		(t
+		 (buffer-file-name)))))
+    (file-relative-name filename pyroot)))
+
+(defun gm/copy-file-location-pydef ()
+  (interactive)
+  (let* ((filename (gm/get-relative-pyroot-filename))
+	 (dotted-filename (string-replace "/" "." filename))
+	 (module (replace-regexp-in-string "\\.py$" "" dotted-filename))
+	 (pydef (python-info-current-defun))
+	 (module-pydef (concatenate 'string module pydef)))
+    (kill-new module-pydef)
+    (message "coppied: %s" module-pydef)))
+
+(defun gm/copy-file-location-fileno ()
+  (interactive)
+  (let* ((filename (gm/get-relative-pyroot-filename))
+	 (filename-lineno (format "%s:%s" filename (number-to-string (line-number-at-pos)))))
+    (kill-new filename-lineno)
+    (message "coppied: %s" filename-lineno)))

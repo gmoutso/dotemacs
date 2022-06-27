@@ -10,6 +10,7 @@
 (setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
 (setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
 
+(scroll-bar-mode nil)
 
 ;;
 ;; winner undo
@@ -202,3 +203,4 @@ buffer in current window."
  'python-mode
  "C-a" 'smarter-move-beginning-of-line  ; so that visual-line remap works on other buffers
  "C-e" 'smarter-move-end-of-line)
+

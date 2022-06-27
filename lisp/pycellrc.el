@@ -16,3 +16,4 @@
   (let ((map code-cells-mode-map))
     ;; Overriding other minor mode bindings requires some insistence...
     (define-key map [remap jupyter-eval-line-or-region] 'code-cells-eval)))
+

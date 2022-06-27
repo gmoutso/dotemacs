@@ -24,14 +24,6 @@
 ;;
 ;; open xlsx files in emacs as html
 ;;
-(defun gm/xlsx-to-html-string (filename &optional output-buffer)
-  (let ((command (concat
-		  "xlsxname=" filename "\n"
-		  "htmlname=${xlsxname%.xlsx}.html\n"
-		  "libreoffice --headless --convert-to html $xlsxname 2>/dev/null >/dev/null\n"
-		  "cat $htmlname\n"
-		  "rm $htmlname")))
-    (shell-command command output-buffer)))
 (defun gm/eaf-open-xlsx (&optional filename)
   (interactive)
   (let* ((filename (or filename (dired-get-filename)))
@@ -45,11 +37,18 @@
       (setq-local browse-url-temp-file-name temp-file)
       (add-hook 'kill-buffer-hook 'browse-url-delete-temp-file)
       (rename-buffer filename t))))
+(defun gm/xlsx-to-html-string (filename &optional output-buffer)
+  (let ((command (concat
+		  "xlsxname=" filename "\n"
+		  "htmlname=${xlsxname%.xlsx}.html\n"
+		  "libreoffice --headless --convert-to html $xlsxname 2>/dev/null >/dev/null\n"
+		  "cat $htmlname\n"
+		  "rm $htmlname")))
+    (shell-command command output-buffer)))
 (defun gm/shr-open-xlsx (&optional filename)
   (interactive)
   (let ((filename (or filename (dired-get-filename))))
   (with-temp-buffer
       (gm/xlsx-to-html-string filename (current-buffer))
       (shr-render-buffer (current-buffer)))))
-
 

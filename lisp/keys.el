@@ -62,3 +62,12 @@
 ;; kill this buffer
 (global-set-key (kbd "C-x k") 'kill-current-buffer)
 
+;; Which key intergration
+;; https://github.com/justbur/emacs-which-key/issues/306
+(use-package which-key)
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook 'which-key-mode)
+  (which-key-mode))
+(which-key-mode)
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))

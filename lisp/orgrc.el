@@ -15,8 +15,6 @@
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 (use-package ox-beamer)
 (use-package helm-org)
-(general-def org-mode-map
-  "C-c C-j" 'helm-org-in-buffer-headings)
 
 (setq org-adapt-indentation nil)
 ;; mobile org
@@ -102,6 +100,7 @@
 ;; use <p[tab] for python block
 (eval-after-load 'org '(add-to-list 'org-structure-template-alist '("p" . "src python")))
 (eval-after-load 'org '(add-to-list 'org-structure-template-alist '("d" . "src dot")))
+;; ob-ipython incompatible with emacs-jupyter
 ;; (require 'ob-ipython)
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -122,15 +121,17 @@
 
 
 ;;; key bindings
-(with-eval-after-load "org"
-  (define-key org-mode-map (kbd "C-c m") 'org-latex-preview)
-  (define-key org-mode-map (kbd "C-c l t") 'org-toggle-link-display)
-					;use narrow instead C-x n s/b/e/w
-					;(define-key org-mode-map (kbd "C-c b") 'org-tree-to-indirect-buffer)
-  (define-key org-mode-map (kbd "C-c C-.") 'org-time-stamp)
-     ;; (define-key org-mode-map (kbd "C-c a") 'org-agenda)
-     )
-(define-key global-map "\C-ca" 'org-agenda)
+(use-package org
+  :bind (("C-c l s"  . org-store-link)
+	 (:map org-mode-map
+               (("C-c m" . org-latex-preview)
+		("C-c l t" . org-toggle-link-display)
+		("C-c l i" . org-insert-link)
+		("C-c C-." . org-time-stamp)
+		("C-c C-j" . helm-org-in-buffer-headings)
+	       ))))
+(use-package org-agenda
+  :bind (("C-a" . org-agenda)))
 
 ;; when cycling TODO->DONE insert a CLOSED timestamp
 (setq org-log-done t)
@@ -241,14 +242,44 @@
 	 "* %? \n:LOGBOOK: \n:CREATED: %T \n:END:\n")
 	("j" "Journal" entry (function org-journal-find-location)
 	 "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
-	("r" "Roam" plain (function org-roam--capture-get-point)
-	 "%?"
-	 :file-name "%<%Y%m%d%H%M%S>-${slug}"
-	 :head "#+TITLE: ${title}\n"
-	 :unnarrowed t)
 	))
 
-(setq org-roam-directory "~/Documents/org/roam")
+;; org-roam
+(use-package org-roam
+    :after org
+    :init 
+    :custom
+    (org-roam-directory "~/Documents/org/roam")
+    :config
+    (org-roam-setup)
+    :bind (("C-c n c" . org-roam-capture)
+	   ("C-c n f" . org-roam-node-find)
+           ("C-c n j" . org-roam-dailies-capture-today)
+	   ("C-c n d" . org-roam-dailies-goto-date)
+           (:map org-mode-map
+                 (("C-c n i" . org-roam-node-insert)
+                  ("C-c n o" . org-id-get-create)
+                  ("C-c n t" . org-roam-tag-add)
+                  ("C-c n a" . org-roam-alias-add)
+                  ("C-c n l" . org-roam-buffer-toggle)))))
+(use-package org-roam-dailies
+  :custom
+  (org-roam-dailies-directory "daily/")
+  (org-roam-dailies-capture-templates
+      '(("d" "default" entry
+         "* %(format-time-string org-journal-time-format) %?"
+         :target (file+head "%<%Y-%m-%d>.org"
+                            "#+title: %<%Y-%m-%d>\n")
+	 :unnarrowed t))))
+(add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*"
+               (display-buffer-in-direction)
+               (direction . right)
+               (window-width . 0.33)
+               (window-height . fit-window-to-buffer)))
+
+
+
 (setq org-capture-templates-contexts '(("p" ((in-mode . "python-mode")))))
 (use-package org-annotate-word)
 (use-package org-annotate-python)

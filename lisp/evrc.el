@@ -100,7 +100,10 @@
 	(cond ((and (not is-remote-file) is-remote-host) (setq filename (replace-regexp-in-string "/home/moutsopoulosg/workspace" "/spool/workspace" filename)))
 	      ((and (not is-remote-host) is-remote-file) (setq filename (replace-regexp-in-string "/spool/workspace" "/home/moutsopoulosg/workspace" filename)))))
     ;; end special conditions
-    (find-file (ev-tramp-this filename host))
+    (let ((target (ev-tramp-this filename host)))
+      (if (eq major-mode 'eshell-mode)
+	  (cd target)
+	(find-file target)))
     ))
 
 ;;
@@ -181,3 +184,42 @@
   (interactive)
   (visit-tags-table "/home/moutsopoulosg/dev/master/TAGS" t)
   (helm-etags-select nil))
+
+(defconst gm/helm-source-worktree-names
+  (helm-build-sync-source "worktree"
+    :candidates (lambda () (mapcan 'last (magit-list-worktrees)))))
+(defconst gm/helm-source-worktree-root-dirs
+  (helm-build-sync-source "worktree"
+    :candidates (lambda () (mapcar (lambda (el) (cons (car (last el)) (first el))) (magit-list-worktrees)))))
+(defun gm/ev-replace-worktree (arg)
+  "Find file but in another worktree."
+  (interactive "P")
+  (let ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
+	(worktree-path (helm gm/helm-source-worktree-root-dirs))
+	(from-string (projectile-project-root))
+	(func (if arg 'find-file 'find-alternate-file))
+	)
+    (funcall func (replace-regexp-in-string from-string worktree-path filename nil t))))
+
+;; (defun gm/ev-replace-dev-root (arg)
+;;   "Find file but switch master <-> py36"
+;;   (interactive "P")
+;;   (let ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
+;; 	(regex "dev/\\([^/]*\\)")
+;; 	(from) (to) (target)
+;; 	(arg t))
+;;     (when (string-match regex filename)
+;;       (setq from (match-string 1 filename))
+;;       (setq to  (if arg (helm gm/helm-source-dev-roots)
+;; 		  (cond ((string= from "master") "py36")
+;; 			(t "master"))))
+;;       (find-file (replace-match to nil nil filename 1))
+;;       )))
+
+;; (setq run-banks-kernel-on-phil-command
+;;       "PYTHONPATH=/home/moutsopoulosg/dev/master/python; PATH=/home/moutsopoulosg/miniconda/bin:\$PATH; source activate banks; ipython kernel -f kernel-emacs-remote.json")
+;; (defun start-banks-kernel-on-phil
+;;     (start-process "remote-banks-kernel" "*remote-banks-kernel*"
+;; 		   "ssh" "phil" run-banks-kernel-on-phil-command))
+;; (defun connect-banks-kernel-on-phil
+;; (run-python "ipython console --ssh phil --existing ~/.ipython/profile_default/security/kernel-emacs-remote.json"))

@@ -1,4 +1,6 @@
-(conda-env-activate "blade")
+(conda-env-activate "emacs")
+;; use (jupyter-command "kernelspec" "list" "--json" "--log-level=40")
+;; /home/moutsopoulosg/.emacs.d/elpa/jupyter-20220419.1852/jupyter-kernelspec.el:64
 (use-package jupyter
   :after (ob-jupyter ob-python)
   :config
@@ -16,10 +18,8 @@
 (require 'ob-jupyter)
 (org-babel-do-load-languages
  'org-babel-load-languages
- '( ;(ipython . t)
-   (C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
-   (jupyter . t)
-   ))
+ '((C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
+   (jupyter . t)))
 
 ;;
 ;; jupyter repl

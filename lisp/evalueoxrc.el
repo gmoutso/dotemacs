@@ -31,7 +31,7 @@
   basicstyle=\\footnotesize,        % the size of the fonts that are used for the code
   commentstyle=\\color{mygreen},    % comment style
   keywordstyle=\\color{blue},       % keyword style
-  numberstyle=\tiny\\color{mygray}, % the style that is used for the line-numbers
+  numberstyle=\\tiny\\color{mygray}, % the style that is used for the line-numbers
   stringstyle=\\color{mymauve},     % string literal style
 }
 \\lstset{style=customc}
