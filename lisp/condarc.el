@@ -15,15 +15,13 @@
   ;; (conda-env-autoactivate-mode) or (eval . (conda-env-autoactivate-mode)) or add to python hook
   )
 (add-hook 'python-mode-hook 'conda-env-autoactivate-mode)
+
 ;; https://github.com/necaris/conda.el/issues/104
 ;; (defun me/conda--get-path-prefix (env-dir)
 ;;   (expand-file-name  "bin" env-dir))
 ;; (advice-add 'conda--get-path-prefix :override #'me/conda--get-path-prefix)
 ;; (advice-remove 'conda--get-path-prefix #'me/conda--get-path-prefix)
-
-;; with-venv changes exec-path and $PATH and $VIRTUAL_ENV but not python-shell-virtualenv-root
-;; we use conda.el conda-with-env
-;; (defmacro gm/conda-with-env (name &rest forms)
+;; (defmacro conda-with-env (name &rest forms)
 ;;   "With conda env NAME active, evaluate FORMS."
 ;;   `(progn
 ;;      (let ((prev-env-name conda-env-current-name)
@@ -49,7 +47,6 @@
 	  (conda-env-activate-path prev-env-path)
 	(conda-env-deactivate))
 	)))
-
 (defun gm/with-emacs-venv-advice-add (func)
   (advice-add func
               :around
@@ -59,19 +56,34 @@
   (advice-remove func
                  'gm/with-emacs-venv-advice))
 
-; (use-package lsp-mode)
-(gm/with-emacs-venv-advice-add 'lsp)
-; (use-package blacken)
-(gm/with-emacs-venv-advice-add 'blacken-buffer)
+(use-package lsp-python-ms
+  :custom
+  (lsp-python-ms-python-executable "~/anaconda3/envs/banks/bin/python")
+  )
+(use-package lsp-pyright
+  :custom
+  (lsp-pyright-python-executable-cmd "~/anaconda3/envs/emacs/bin/python")
+  )
+;; (gm/with-emacs-venv-advice-remove 'lsp)
+
+(use-package blacken
+  :custom
+  (blacken-executable "/home/moutsopoulosg/anaconda3/envs/emacs/bin/black"))
+
+;;(gm/with-emacs-venv-advice-remove 'blacken-buffer)
 ;; (use-package code-cells)
 ;; conda install jupytext
-(gm/with-emacs-venv-advice-add 'code-cells-write-ipynb)
-(gm/with-emacs-venv-advice-add 'code-cells-convert-ipynb)
+;; (gm/with-emacs-venv-advice-remove 'code-cells-write-ipynb)
+;; (gm/with-emacs-venv-advice-remove 'code-cells-convert-ipynb)
 ;; pip install PyQtWebEngine
 ;; pip install PyQt6
 ;; conda install epc -c conda-forge
 ;; remove import line
 ;; ImportError: cannot import name 'QtWebEngineWidgets' from 'PyQt6'
 ;; (/home/moutsopoulosg/anaconda3/envs/emacs/lib/python3.10/site-packages/PyQt6/__init__.py
-(gm/with-emacs-venv-advice-add 'eaf-restart-process)
-(gm/with-emacs-venv-advice-add 'eaf-start-process)
+;; (gm/with-emacs-venv-advice-remove 'eaf-restart-process)
+;; (gm/with-emacs-venv-advice-remove 'eaf-start-process)
+
+
+;; (setq eaf-python-command "LD_LIBRARY_PATH=/home/moutsopoulosg/anaconda3/envs/emacs/lib/python3.10/site-packages/PyQt6/Qt6/lib /home/moutsopoulosg/anaconda3/envs/emacs/bin/python")
+

@@ -1,4 +1,10 @@
-(use-package code-cells)
+(use-package code-cells
+  :custom
+  (code-cells-convert-ipynb-style
+   '(("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--to" "ipynb")
+    ("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--to" "auto:percent")
+    nil code-cells-convert-ipynb-hook))
+  )
 ;; (add-hook 'python-mode-hook 'code-cells-mode-maybe)
 (with-eval-after-load 'code-cells
   (let ((map code-cells-mode-map))
