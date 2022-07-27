@@ -27,15 +27,17 @@
   :when (and (bound-and-true-p conda-env-current-name) conda-env-current-name)
   :face 'spaceline-python-venv
   )
+
 (spaceline-define-segment gm/projectile-root
   (let ((project-name (projectile-project-name)))
       (unless (or (string= project-name "-")
                   (string= project-name (buffer-name)))
         (format "proj:%s " project-name)))
   :when (fboundp 'projectile-project-name))
+
 (spaceline-toggle-gm/conda-venv-on)
 (spaceline-toggle-python-env-off)
-(spaceline-emacs-theme '(gm/conda-venv 'gm/projectile-root))
+(spaceline-emacs-theme '(gm/conda-venv))
 
 ;; diminish: hide some minor modes
 (require 'delight)
@@ -61,7 +63,6 @@
 (yas-minor-mode nil t)
 (yas-global-mode nil t)
 (eldoc-mode nil "eldoc")
-(projectile-mode nil "projectile")
 ))
 
 ;; (defadvice powerline-major-mode (around delight-powerline-major-mode activate)

@@ -23,10 +23,12 @@
 (add-to-list 'helm-boring-buffer-regexp-list "\\`\\*jupyter-traceback")
 (add-to-list 'helm-boring-buffer-regexp-list "TAGS")
 ;; (add-to-list helm-white-buffer-regexp-list "*jupyter-repl.*")
-(require 'helm-projectile)
+(use-package helm-projectile
+  :init
+  (setq helm-projectile-fuzzy-match nil))
 (helm-projectile-on)
-(setq completion-styles `(basic partial-completion emacs22 initials
-                                ,(if (version<= emacs-version "27.0") 'helm-flex 'flex)))
+;; (setq completion-styles `(basic partial-completion emacs22 initials
+;;                                 ,(if (version<= emacs-version "27.0") 'helm-flex 'flex)))
 
 ;; (defun my-recentf-show-details (file)
 ;;   (append

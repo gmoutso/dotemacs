@@ -51,6 +51,21 @@ Coppied org-mode section from ox-clip.el."
      (t
       nil))))
 
+
+
+(defun gm/copy-file-image-to-clipboard (image-file)
+  (cond
+	    ((eq system-type 'windows-nt)
+	     (message "Not supported yet."))
+	    ((eq system-type 'darwin)
+	     (do-applescript
+	      (format "set the clipboard to POSIX file \"%s\"" (expand-file-name image-file))))
+	    ((eq system-type 'gnu/linux)
+	     (call-process-shell-command
+	      (format "xclip -selection clipboard -t image/%s -i %s"
+		      (file-name-extension image-file)
+		      image-file))))
+  )
 (defun gm/copy-image-to-clipboard (&optional image-file)
   "Copy image at point as clipboard image.
 
@@ -62,21 +77,18 @@ image-mode buffers."
 			  ((derived-mode-p 'dired-mode) (dired-copy-filename-as-kill))
 			  ((derived-mode-p 'org-mode)
 			   (gm/org-get-image-or-latex-filename-at-point))
-			  ((derived-mode-p 'image-mode) (buffer-file-name))))))
-    (when image-file
-      (cond
-       ((eq system-type 'windows-nt)
-	(message "Not supported yet."))
-       ((eq system-type 'darwin)
-	(do-applescript
-	 (format "set the clipboard to POSIX file \"%s\"" (expand-file-name image-file))))
-       ((eq system-type 'gnu/linux)
-	(call-process-shell-command
-	 (format "xclip -selection clipboard -t image/%s -i %s"
-		 (file-name-extension image-file)
-		 image-file)))))
-    (message "Copied %s" image-file)))
-
+			  ((derived-mode-p 'image-mode) (buffer-file-name)))))
+	(image (ignore-errors (cdr (image--get-image)))))
+    (cond (image-file
+	   (gm/copy-file-image-to-clipboard (image-file))
+	   (message "Copied %s" image-file))
+	  (image
+	   (let ((image-file (make-temp-file "emacs_copy" nil ".png"
+					     ;; (plist-get image :type)
+					     (plist-get image :data))))
+	     (gm/copy-file-image-to-clipboard image-file)
+	     (message "Copied %s" image-file)))
+	   )))
 
 
 ;; remove cua-scrolling

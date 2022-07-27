@@ -191,7 +191,7 @@
 (defconst gm/helm-source-worktree-root-dirs
   (helm-build-sync-source "worktree"
     :candidates (lambda () (mapcar (lambda (el) (cons (car (last el)) (first el))) (magit-list-worktrees)))))
-(defun gm/ev-replace-worktree (arg)
+(defun gm/ev-change-worktree (arg)
   "Find file but in another worktree."
   (interactive "P")
   (let ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
@@ -200,6 +200,7 @@
 	(func (if arg 'find-file 'find-alternate-file))
 	)
     (funcall func (replace-regexp-in-string from-string worktree-path filename nil t))))
+(defalias 'gm/ev-change-worktree 'gm/ev-replace-worktree)
 
 ;; (defun gm/ev-replace-dev-root (arg)
 ;;   "Find file but switch master <-> py36"
