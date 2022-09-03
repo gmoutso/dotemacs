@@ -276,7 +276,7 @@
 			     source)
   source)
 ;; the following does not seem to work?
-(advice-add 'helm-etags-build-source :filter-return #'gm/etags-python-helm-advice)
+;; (advice-add 'helm-etags-build-source :filter-return #'gm/etags-python-helm-advice)
 ; the following adds to helm-etags-select source (once built initially?)
 (defun gm/etags=python-helm-add-action-post-build ()
 (helm-add-action-to-source "Insert import" 'gm/etags-python-helm-action-insert-import helm-source-etags-select)
@@ -299,7 +299,7 @@
 ;;   (occur gm/top-pydef-regex)
 ;;   )
 
-(python-x-setup)
+;; (python-x-setup)
 
 (defun python-move-down-and-newline ()
   "Move to next line, creating if needed."
@@ -322,8 +322,7 @@
 
 
 ; (setq gm/python-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
-(setq gm/python-imenu-expression '(("Sections"
-				    "^#+ *%+ *\\(.*\\)"
+(setq gm/python-imenu-expression '(("Sections" "^#+ *%+ *\\(.*\\)"
 				    1)))
 (defun gm/python-imenu-index-function ()
   "Appends the imenu index created from default function with the imenu index created from expression."
@@ -331,7 +330,7 @@
         (custom-imenu (imenu--generic-function gm/python-imenu-expression)))
     (append custom-imenu mode-imenu)))
 (defun gm/python-imenu-merge-hook ()
-  "Set up imenu for python-x."
+  "Set up imenu for python."
   (setq imenu-create-index-function 'gm/python-imenu-index-function))
 (add-hook 'python-mode-hook 'gm/python-imenu-merge-hook)
 
@@ -379,42 +378,95 @@
   (set-marker end nil)))
 
 (require 'nadvice)
-(defun run-python-locally (&rest args)
+(defun run-python-locally (&optional dedicated notshow)
   ;; https://emacs.stackexchange.com/questions/17753/make-run-python-etc-use-local-python
-  ;; interactive wrappers are not as simple as a simple call
-  (interactive (advice-eval-interactive-spec
-                       (cadr (interactive-form #'run-python))))
+  ;; (interactive (advice-eval-interactive-spec
+  ;;                      (cadr (interactive-form #'run-python))))
+  (interactive "P\ni" python-mode)
   (let ((default-directory user-emacs-directory))
     (conda-env-activate)
-    (apply #'run-python args)))
+    (run-python nil dedicated (not notshow))))
 
-(defun run-python-remotely (&rest args)
-  (interactive (advice-eval-interactive-spec
-                       (cadr (interactive-form #'run-python))))
-  (let* ((host (completing-read "host:" '("phil" "ted" "beowulf@ted")))
-	 (env (completing-read "environment:" '("banks" "dick" "egan") nil t nil nil "banks"))
-	 (python-shell-interpreter (if (string-equal env "banks") "python" "ipython"))
-	 (python-shell-interpreter-args (if (string-equal env "banks") "-i" "--simple-prompt -i"))
-	 (env-dir (format "/ssh:%s:miniconda/envs/%s" host env))
-	 (default-directory (format "/ssh:%s:" host))
-	 )
-    (pythonic-activate env-dir)
-    (apply #'run-python args)
-    (python-shell-switch-to-shell)
-  ))
+;; (defun run-python-remotely-cmd (host env)
+;;   (cond ((string-equal env "banks") "ipython -i")
+;;    ;; ((and (string-equal host "phil") (string-equal env "banks")) "python -i")
+;; 	(t "ipython --simple-prompt -i")))
+;; (defun run-python-remotely (&optional dedicated notshow)
+;;   (interactive "P\ni" python-mode)
+;;   (let* ((host (completing-read "host:" '("phil" "ted" "beowulf@ted")))
+;; 	 (env  (completing-read "environment:" '("banks" "dick" "egan") nil t nil nil "banks"))
+;; 	 (cmd (run-python-remotely-cmd host env))
+;; 	 (env-dir (format "/ssh:%s:miniconda/envs/%s" host env))
+;; 	 (default-directory (format "/ssh:%s:" host))
+;; 	 )
+;;     (pythonic-activate env-dir)
+;;     (run-python cmd dedicated (not notshow))
+;;   ))
+
+(defvar gm/run-python-config
+  '(("phil"
+     ("banks"
+      :cmd "ipython -i"
+      :host "/ssh:phil:"
+      :venv "miniconda/envs/banks"
+      :home nil
+      :pythonpaths ("/home/moutsopoulosg/dev/master/python")
+      )
+     ("egan"
+      :cmd "ipython -i"
+      :host "/ssh:phil:"
+      :venv "miniconda/envs/egan"
+      :home nil
+      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+      )
+     ("dick"
+      :cmd "ipython -i"
+      :host "/ssh:phil:"
+      :venv "miniconda/envs/dick"
+      :home nil
+      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+      ))
+    ("beowulf@ted"
+     ("banks"
+      :cmd "ipython -i"
+      :host "/ssh:beowulf@ted:"
+      :venv "miniconda/envs/banks"
+      :home nil
+      :pythonpaths ("/home/beowulf/dev/master/python")
+      )
+     ))
+  "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `run-python-remotely' but nned not be remote.")
+(defun run-python-remotely (&optional dedicated notshow)
+  (interactive "P\ni" python-mode)
+  (let* ((host (completing-read "host:" gm/run-python-config nil t))
+	 (configs (cdr (assoc host gm/run-python-config)))
+	 (config-select (if (= 1 (seq-length configs)) (car (car configs))
+			 (completing-read "host:" configs nil t)))
+	 (config (cdr (assoc config-select configs)))
+	 (host (plist-get config :host))
+	 (default-directory (or (plist-get config :home) host))
+	 (cmd (plist-get config :cmd))
+	 (venv-raw (plist-get config :venv))
+	 (venv (concat host venv-raw))
+	 (python-shell-virtualenv-root (pythonic-python-readable-file-name venv))
+	 (python-shell-extra-pythonpaths (plist-get config :pythonpaths)))
+    (run-python cmd dedicated (not notshow))
+    ))
+
+
 
 (defun gm/get-relative-pyroot-filename ()
   "Return filename."
-  (let* ((pyroot (expand-file-name (flycheck-python-find-project-root 'checker_)))
+  (let* ((pyroot (expand-file-name
+		  (or (file-name-concat (vc-root-dir) "..")
+		      (flycheck-python-find-project-root 'checker_))))
 	 (filename
 	  (cond ((derived-mode-p 'dired-mode)
 		 (dired-get-filename nil t))
-		((buffer-file-name)
-		 (buffer-file-name))
+		((buffer-file-name))
 		((null (buffer-file-name))
 		 (user-error "Current buffer is not associated with a file."))
-		(t
-		 (buffer-file-name)))))
+		)))
     (file-relative-name filename pyroot)))
 
 (defun gm/copy-file-location-pydef ()
@@ -428,9 +480,72 @@
     (kill-new module-pydef)
     (message "copied: %s" module-pydef)))
 
-(defun gm/copy-file-location-fileno ()
+(defun gm/copy-pydef-as-import ()
   (interactive)
   (let* ((filename (gm/get-relative-pyroot-filename))
-	 (filename-lineno (format "%s:%s" filename (number-to-string (line-number-at-pos)))))
+	 (dotted-filename (string-replace "/" "." filename))
+	 (module (replace-regexp-in-string "\\.py$" "" dotted-filename))
+	 (module (replace-regexp-in-string "^python.ev." "ev." module))
+	 (pydef (python-info-current-defun))
+	 (import (format "from %s import %s" module pydef))
+	 )
+    (kill-new import)
+    (message "copied: %s" module)))
+
+(defun gm/copy-file-location-fileno (no-lineno)
+  (interactive "P")
+  (let* ((filename (gm/get-relative-pyroot-filename))
+	 (fmt (if no-lineno "%s" "%s:%s"))
+	 (lineno (line-number-at-pos nil t))
+	 (filename-lineno (format fmt filename lineno)))
     (kill-new filename-lineno)
     (message "copied: %s" filename-lineno)))
+
+(defun gm/copy-file-location-absolute ()
+  (interactive)
+  (let* ((filename (buffer-file-name)))
+    (kill-new filename)
+    (message "copied: %s" filename)))
+
+(defun gm/buffer-py-to-org ()
+  (interactive nil 'python-mode)
+  (let ((header "jupyter-python")
+	(buffer (get-buffer-create (concat "*output " (file-name-sans-extension (buffer-name)) ".org*")))
+	(command "jupytext --from py:percent --to ipynb | pandoc --from ipynb --to org"))
+    (when (shell-command-on-region nil nil command buffer)
+      (with-current-buffer buffer
+	(replace-regexp-in-region "^\\(#\\+\\(?:begin_src\\|BEGIN_SRC\\) \\)python" (concat "\\1" header)
+				  (point-min))
+	(org-mode)
+	)
+      (pop-to-buffer buffer))
+  ))
+
+;; run org-babel remote sessions from local ones
+
+(defun org-babel-python-evaluate-session
+    (session body &optional result-type result-params)
+  "Pass BODY to the Python process in SESSION.
+If RESULT-TYPE equals `output' then return standard output as a
+string.  If RESULT-TYPE equals `value' then return the value of the
+last statement in BODY, as elisp."
+  (let* ((tmp-src-file (with-current-buffer session (org-babel-temp-file "python-")))
+         (results
+	  (progn
+	    (with-temp-file tmp-src-file (insert body))
+            (pcase result-type
+	      (`output
+	       (let ((body (format org-babel-python--exec-tmpfile
+				   (org-babel-process-file-name
+				    tmp-src-file 'noquote))))
+		 (org-babel-python--send-string session body)))
+              (`value
+               (let* ((tmp-results-file (with-current-buffer session (org-babel-temp-file "python-")))
+		      (body (org-babel-python-format-session-value
+			     tmp-src-file tmp-results-file result-params)))
+		 (org-babel-python--send-string session body)
+		 (sleep-for 0 10)
+		 (org-babel-eval-read-file tmp-results-file)))))))
+    (org-babel-result-cond result-params
+      results
+      (org-babel-python-table-or-string results))))

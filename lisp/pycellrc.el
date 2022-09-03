@@ -11,7 +11,8 @@
     (define-key map "n" (code-cells-speed-key 'code-cells-forward-cell))
     (define-key map "p" (code-cells-speed-key 'code-cells-backward-cell))
     (define-key map "e" (code-cells-speed-key 'code-cells-eval))
-    (define-key map (kbd "TAB") (code-cells-speed-key 'outline-cycle))))
+    (define-key map (kbd "TAB") (code-cells-speed-key 'outline-cycle))
+    (define-key map (kbd "C-c C-c") 'code-cells-eval)))
 
 (general-def code-cells-mode-map
   "<M-return>" 'code-cells-eval

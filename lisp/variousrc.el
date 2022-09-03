@@ -80,7 +80,7 @@ image-mode buffers."
 			  ((derived-mode-p 'image-mode) (buffer-file-name)))))
 	(image (ignore-errors (cdr (image--get-image)))))
     (cond (image-file
-	   (gm/copy-file-image-to-clipboard (image-file))
+	   (gm/copy-file-image-to-clipboard image-file)
 	   (message "Copied %s" image-file))
 	  (image
 	   (let ((image-file (make-temp-file "emacs_copy" nil ".png"

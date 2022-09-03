@@ -131,7 +131,7 @@
 		("C-c C-j" . helm-org-in-buffer-headings)
 	       ))))
 (use-package org-agenda
-  :bind (("C-a" . org-agenda)))
+  :bind (("C-c a" . org-agenda)))
 
 ;; when cycling TODO->DONE insert a CLOSED timestamp
 (setq org-log-done t)
@@ -239,10 +239,24 @@
 	;;  "* %?\nEntered on %U\n  %i\n  %a")
 	("n" "Note" entry (file org-default-notes-file) "* %?\n %a" :kill-buffer t)
 	("l" "work Log" entry (file "~/Documents/org/worklog.org")
-	 "* %? \n:LOGBOOK: \n:CREATED: %T \n:END:\n")
+	 "* %? \n:LOGBOOK: \n- Created on %T \n:END:\n")
 	("j" "Journal" entry (function org-journal-find-location)
 	 "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
 	))
+
+;; make logbook notes have active timestamp
+(add-to-list 'org-log-note-headings '(note . "Note taken on %T"))
+;; always add an inactive timestamp CREATED property to captured notes
+(defun org-set-created-property (&optional active)
+  (interactive)
+  (let* ((created "CREATED")
+         (fmt (if active "<%s>" "[%s]"))
+         (now  (format fmt (format-time-string "%Y-%m-%d %a %H:%M"))))
+    (unless (org-entry-get (point) created nil)
+      (org-set-property created now))))
+(add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
+
+
 
 ;; org-roam
 (use-package org-roam
@@ -588,24 +602,51 @@ g  (interactive)
   instead. Taken from https://github.com/grettke/help
  "
   (interactive)
-  (let* ((gend (org-id-new "SCR"))
+  (let* ((gend (org-id-new "SRC"))
          (newid (replace-regexp-in-string ":" "_" gend)))
     newid))
-
+;; (org-babel-where-is-src-block-head)
+;; (org-babel-get-src-block-info)
+;; (eq (org-element-type (org-element-context)) 'src-block)
+(defun gm/jupyter-source-block-at-point-p ()
+  (org-babel-when-in-src-block
+     (member (org-element-property :language (org-element-at-point)) '("jupyter-python"))))
+(defun gm/source-block-name ()
+  (let* ((element (org-element-at-point)))
+    (if (eq (org-element-type element) 'src-block)
+	(org-element-property :name element)
+      (error "Not a jupyter block"))))
 (defun gm/org-add-src-name-maybe ()
   "If it doesn't have a NAME property then add one and
    assign it a UUID."
   (interactive)
-  (let* ((name (gm/org-id-new))
-	 (element (org-element-at-point))
-	 (issrc (eq (org-element-type element) 'src-block))
-	 (isjupy (member (org-element-property :language element) '("jupyter-python")))
-	 (nameexist (org-element-property :name element)))
-      (when (and (not nameexist) issrc isjupy)
+  (when (gm/jupyter-source-block-at-point-p)
+    (if (gm/source-block-name)
+	(message "Has name")
+      (let ((name (gm/org-id-new)))
 	(save-excursion
-	  (let ((case-fold-search nil)) (search-backward-regexp "#\\+begin_src"))
+	  (goto-char (org-babel-where-is-src-block-head))
+	  ;; (let ((case-fold-search nil)) (search-backward-regexp "#\\+begin_src"))
 	  (beginning-of-line)
-	  (insert "#+name: " name "\n")))))
+	  (insert "#+name: " name "\n")
+	  (org-babel-where-is-src-block-result 'insert)
+	  )))))
+(defun gm/org-result-decorate ()
+  (interactive)
+  (when (gm/jupyter-source-block-at-point-p)
+    (if (not (gm/source-block-name)) (gm/org-add-src-name-maybe))
+    (save-excursion
+      (goto-char (org-babel-where-is-src-block-result))
+      (insert "#+ATTR_LATEX: \n#+NAME: \n#+CAPTION: \n")
+    )
+  ))
+;; automatically add a #+NAME: above a source block
+(defun gm/org-add-src-name-maybe-advice (&rest dumby) (gm/org-add-src-name-maybe))
+;; (advice-add 'jupyter-org-insert-src-block :after #'gm/org-add-src-name-maybe-advice)
+;; (advice-add 'org-insert-structure-template :after #'gm/org-add-src-name-maybe-advice)
+;; (advice-remove 'org-insert-structure-template 'gm/org-add-src-name-maybe-advice)
+;; (advice-remove 'jupyter-org-insert-src-block  'gm/org-add-src-name-maybe-advice)
+
 
 (defun gm/org-find-definition-at-point (&optional ask)
   "Find defition of symbol at point within the current org document.
@@ -618,7 +659,7 @@ If ASK then ask for the symbol to find."
 (defun gm/org-find-definition (&optional word)
   "Find defition of WORD within the current org document."
   (interactive)
-  (let* ((word (or word (read-from-minibuffer "Symbol: ")))
+  (let* ((word (or word (read-from-minibuffer "Symbol: ") (symbol-at-point)))
 	 (regex (format "^ *\\(?:def *%s(\\|class *%s\\|%s *=\\)" word word word))
 	 (ncount (count-matches regex (point-min) (point-max))))
     (push-mark)
@@ -629,7 +670,7 @@ If ASK then ask for the symbol to find."
 	  ((> ncount 1) (occur regex)))))
 
 (defun gm/org-cut-and-dump-to-section ()
-  "If return is presses then cut active region and paste to org-goto location."
+  "If return is pressed then cut active region and paste to org-goto location."
   (interactive)
   (save-excursion
     (let ((beg (region-beginning))
@@ -782,9 +823,64 @@ To make this permanent, use customize `org-image-actual-width'."
       (jupyter-org-table-string str)
       str)))
 (advice-add 'jupyter-org-export-block-or-pandoc :around #'gm/jupyter-org-table-string-maybe)
-;; automatically add a #+NAME: above a source block
-(defun gm/org-add-src-name-maybe-advice (&rest dumby) (gm/org-add-src-name-maybe))
-(advice-add 'jupyter-org-insert-src-block :after #'gm/org-add-src-name-maybe-advice)
-(advice-add 'org-insert-structure-template :after #'gm/org-add-src-name-maybe-advice)
-;; (advice-remove 'org-insert-structure-template 'gm/org-add-src-name-maybe-advice)
-;; (advice-remove 'jupyter-org-insert-src-block  'gm/org-add-src-name-maybe-advice)
+
+
+;; correct python session eval on server
+;; (defun org-babel-python-evaluate-session
+;;     (session body &optional result-type result-params)
+;;   "Pass BODY to the Python process in SESSION.
+;; If RESULT-TYPE equals `output' then return standard output as a
+;; string.  If RESULT-TYPE equals `value' then return the value of the
+;; last statement in BODY, as elisp."
+;;   (let* ((tmp-src-file (with-current-buffer session (org-babel-temp-file "python-")))
+;;          (results
+;; 	  (progn
+;; 	    (with-temp-file tmp-src-file (insert body))
+;;             (pcase result-type
+;; 	      (`output
+;; 	       (let ((body (format org-babel-python--exec-tmpfile
+;; 				   (org-babel-process-file-name
+;; 				    tmp-src-file 'noquote))))
+;; 		 (org-babel-python--send-string session body)))
+;;               (`value
+;;                (let* ((tmp-results-file (with-current-buffer session (org-babel-temp-file "python-")))
+;; 		      (body (org-babel-python-format-session-value
+;; 			     tmp-src-file tmp-results-file result-params)))
+;; 		 (org-babel-python--send-string session body)
+;; 		 (sleep-for 0 10)
+;; 		 (org-babel-eval-read-file tmp-results-file)))))))
+;;     (org-babel-result-cond result-params
+;;       results
+;;       (org-babel-python-table-or-string results))))
+
+;; (defun org-babel-python-async-evaluate-session
+;;     (session body &optional result-type result-params)
+;;   "Asynchronously evaluate BODY in SESSION.
+;; Returns a placeholder string for insertion, to later be replaced
+;; by `org-babel-comint-async-filter'."
+;;   (org-babel-comint-async-register
+;;    session (current-buffer)
+;;    "ob_comint_async_python_\\(.+\\)_\\(.+\\)"
+;;    'org-babel-chomp 'org-babel-python-async-value-callback)
+;;   (let ((python-shell-buffer-name (org-babel-python-without-earmuffs session)))
+;;     (pcase result-type
+;;       (`output
+;;        (let ((uuid (md5 (number-to-string (random 100000000)))))
+;;          (with-temp-buffer
+;;            (insert (format org-babel-python-async-indicator "start" uuid))
+;;            (insert "\n")
+;;            (insert body)
+;;            (insert "\n")
+;;            (insert (format org-babel-python-async-indicator "end" uuid))
+;;            (python-shell-send-buffer))
+;;          uuid))
+;;       (`value
+;;        (let ((tmp-results-file (with-current-buffer session (org-babel-temp-file "python-")))
+;;              (tmp-src-file (with-current-buffer session (org-babel-temp-file "python-"))))
+;;          (with-temp-file tmp-src-file (insert body))
+;;          (with-temp-buffer
+;;            (insert (org-babel-python-format-session-value tmp-src-file tmp-results-file result-params))
+;;            (insert "\n")
+;;            (insert (format org-babel-python-async-indicator "file" tmp-results-file))
+;;            (python-shell-send-buffer))
+;;          tmp-results-file)))))

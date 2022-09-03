@@ -93,10 +93,12 @@ more org rifle..\n"
    ( ;("nb" org-narrow-to-block "narrow block")
     ; ("nw" widen "widen")
     ("v" org-open-pdf "view pdf")
-    ("e" org-latex-export-to-pdf "export pdf"))
+    ("e" org-latex-export-to-pdf "export pdf")
+    ("c" gm/org-result-decorate "caption"))
    "Jupyter"
-   (("jl" jupyter-server-list-kernels "list kernels")
-    ("j." gm/org-find-definition-at-point "org def"))
+   (("k" gm/jupyter-kernels "kernels")
+    ("." gm/org-find-definition-at-point "org def")
+    )
    ))
 
 ;; (defhydra hydra-rifle (:exit t)
@@ -311,8 +313,8 @@ _m_ (_M_): set mark (jump)                 _q_: quit
 
 (major-mode-hydra-define python-mode (:exit t :quit-key ("q" "c" "<escape>"))
   ("Jupyter"
-   (("jl" jupyter-server-list-kernels "list kernels")
-    ("ja" jupyter-repl-associate-buffer "associate"))
+   (("k" gm/jupyter-kernels "kernels")
+    ("w" gm/jupyter-whos "whos"))
    "Buffer"
    (("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
     ("i" helm-imenu "imenu")
