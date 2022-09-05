@@ -436,24 +436,33 @@
       )
      ))
   "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `run-python-remotely' but nned not be remote.")
-(defun run-python-remotely (&optional dedicated notshow)
-  (interactive "P\ni" python-mode)
+(defun run-python-remotely ()
+  (interactive)
   (let* ((host (completing-read "host:" gm/run-python-config nil t))
 	 (configs (cdr (assoc host gm/run-python-config)))
 	 (config-select (if (= 1 (seq-length configs)) (car (car configs))
 			 (completing-read "host:" configs nil t)))
 	 (config (cdr (assoc config-select configs)))
-	 (host (plist-get config :host))
-	 (default-directory (or (plist-get config :home) host))
+	 (sshhost (plist-get config :host))
+	 (default-directory (or (plist-get config :home) sshhost))
 	 (cmd (plist-get config :cmd))
+	 (org-babel-python-command cmd) ;; used by org-babel-python-initiate-session-by-key
 	 (venv-raw (plist-get config :venv))
-	 (venv (concat host venv-raw))
+	 (venv (concat sshhost venv-raw))
 	 (python-shell-virtualenv-root (pythonic-python-readable-file-name venv))
-	 (python-shell-extra-pythonpaths (plist-get config :pythonpaths)))
-    (run-python cmd dedicated (not notshow))
+	 (python-shell-extra-pythonpaths (plist-get config :pythonpaths))
+	 (session (completing-read "session:" (list host
+						 (format "%s:%s" host config-select)
+						 python-shell-buffer-name)))
+	 
+	 (buffer (org-babel-python-initiate-session session)) ;; earmuffed buffer
+	 )
+    (if (derived-mode-p 'python-mode)
+	(if (y-or-n-p "associate this buffer?")
+	    ;; python-shell-get-process-name will return this
+	    (setq-local python-shell-buffer-name session)))
+    buffer
     ))
-
-
 
 (defun gm/get-relative-pyroot-filename ()
   "Return filename."
@@ -507,11 +516,16 @@
     (kill-new filename)
     (message "copied: %s" filename)))
 
-(defun gm/buffer-py-to-org ()
+(defun gm/py-to-org ()
+  "Convert python buffer to org-mode file.
+
+Pipes through jupytext and pandoc"
   (interactive nil 'python-mode)
   (let ((header "jupyter-python")
+	(jupytext-cmd (format "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb"))
+	(pandoc-cmd "~/anaconda3/envs/bastille/bin/pandoc --from ipynb --to org")
 	(buffer (get-buffer-create (concat "*output " (file-name-sans-extension (buffer-name)) ".org*")))
-	(command "jupytext --from py:percent --to ipynb | pandoc --from ipynb --to org"))
+	(command (format "%s | %s" jupytext-cmd pandoc-cmd)))
     (when (shell-command-on-region nil nil command buffer)
       (with-current-buffer buffer
 	(replace-regexp-in-region "^\\(#\\+\\(?:begin_src\\|BEGIN_SRC\\) \\)python" (concat "\\1" header)
@@ -520,6 +534,51 @@
 	)
       (pop-to-buffer buffer))
   ))
+
+(defun gm/py-to-ipynb-v3 ()
+  "Convert python buffer to good old version 3 (banks..) notebook version.
+
+Pipes through jupytext and nbconvert"
+  (interactive nil 'python-mode)
+  (let* ((jupytext-cmd "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb")
+	 (nbconvert-cmd "~/anaconda3/envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
+	 (buffer (get-buffer-create (concat (file-name-sans-extension (buffer-name)) "-v3.ipynb*")))
+	 (command (format "%s | %s" jupytext-cmd nbconvert-cmd)))
+    (shell-command-on-region nil nil command buffer)
+    (pop-to-buffer buffer))
+  )
+
+;; ;; ox-ipynb does not work on Python cells. you should change them to ipython or jupyter-python cells.
+;; ;; https://github.com/jkitchin/ox-ipynb/issues/42
+;; (with-eval-after-load 'ox-ipynb 
+;; (setq ox-ipynb-kernelspecs 
+;;       (append  ox-ipynb-kernelspecs '((python . (language_info . ((codemirror_mode . ((name . python)
+;; 						       (version . 3)))
+;; 								  (file_extension . ".py")
+;; 								  (mimetype . "text/x-python")
+;; 								  (name . "python")
+;; 								  (nbconvert_exporter . "python")
+;; 								  (pygments_lexer . "python3")
+;; 								  (version . "3.5.2"))))))))
+
+(defun gm/org-to-ipynb-v3 ()
+  "Convert org-mode buffer to good old version 3 (banks..) notebook version.
+
+Pipes through jupytext and nbconvert"
+  (interactive nil 'org-mode)
+  (let* ((old-buffer (current-buffer))
+  	 (nbconvert-cmd "~/anaconda3/envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
+	 (buffer-v3 (get-buffer-create (concat (file-name-sans-extension (buffer-name)) "-v3.ipynb")))
+	 (buffer-v4))
+    (with-temp-buffer
+      (insert-buffer-substring old-buffer)
+      (replace-regexp-in-region "^\\(#\\+\\(?:begin_src\\|BEGIN_SRC\\) \\)python" (concat "\\1 jupyter-python")
+				  (point-min))
+      (setq buffer-v4 (ox-ipynb-export-to-buffer)))
+    (with-current-buffer buffer-v4
+      (shell-command-on-region nil nil nbconvert-cmd buffer-v3))
+    (pop-to-buffer buffer-v3))
+  )
 
 ;; run org-babel remote sessions from local ones
 
