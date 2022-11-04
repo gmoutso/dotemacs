@@ -73,7 +73,6 @@ more org rifle..\n"
    (("ls" org-store-link  "store")
     ("li" org-insert-link  "insert")
     ("lf" org-footnote-new "footnote")
-    ;; ("o" org-open-at-point  "open link")
     )
    "Visibility"
    (("tl" org-toggle-link-display "toggle links")
@@ -98,6 +97,7 @@ more org rifle..\n"
    "Jupyter"
    (("k" gm/jupyter-kernels "kernels")
     ("." gm/org-find-definition-at-point "org def")
+    ("w" gm/jupyter-whos "whos")
     )
    ))
 

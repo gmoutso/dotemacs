@@ -7,20 +7,24 @@
   :config
   (bind-key "C-c C-r" 'dired-rsync dired-mode-map))
 
+(defun gm/get-filename (&optional filename)
+  (or filename (dired-get-filename) (read-file-name "file :")))
+
 ;;
 ;; using eaf in dired
 ;;
 ;; note eaf requires epc python module so conda activate base!
 (defvar gm/dired-open-xlsx-use-shr t "Either shr (t) or eaf (nil). How to open an xlsx file from dired.")
-(defun gm/dired-open-with-eaf ()
+(defun gm/dired-open-in-emacs ()
   (interactive)
   (let* ((filename (dired-get-filename))
 	 (extension (file-name-extension filename)))
     (cond ((string-equal extension "xlsx") (if gm/dired-open-xlsx-use-shr (gm/shr-open-xlsx filename)
 					     (gm/eaf-open-xlsx filename)))
+	  ((string-equal extension "ipynb") (gm/shr-open-ipynb filename))
 	  (t (eaf-open filename)))))
 (general-def dired-mode-map
-  "e" 'gm/dired-open-with-eaf)
+  "e" 'gm/dired-open-in-emacs)
 ;;
 ;; open xlsx files in emacs as html
 ;;
@@ -38,17 +42,34 @@
       (add-hook 'kill-buffer-hook 'browse-url-delete-temp-file)
       (rename-buffer filename t))))
 (defun gm/xlsx-to-html-string (filename &optional output-buffer)
-  (let ((command (concat
+  (let* ((default-directory (file-name-directory filename))
+	 (output-buffer (or output-buffer "*xlsx-to-html-output*"))
+	 (command (concat
 		  "xlsxname=" filename "\n"
 		  "htmlname=${xlsxname%.xlsx}.html\n"
 		  "libreoffice --headless --convert-to html $xlsxname 2>/dev/null >/dev/null\n"
 		  "cat $htmlname\n"
-		  "rm $htmlname")))
-    (shell-command command output-buffer)))
+		  "rm $htmlname"))
+	 )
+    (shell-command command output-buffer "*xlsx-to-html-errors*")))
 (defun gm/shr-open-xlsx (&optional filename)
+  "Open FILENAME as an html file."
   (interactive)
-  (let ((filename (or filename (dired-get-filename))))
-  (with-temp-buffer
+  (let ((filename (gm/get-filename filename))
+	 (shortname (file-name-nondirectory filename)))
+    (with-temp-buffer
       (gm/xlsx-to-html-string filename (current-buffer))
-      (shr-render-buffer (current-buffer)))))
-
+      (shr-render-buffer (current-buffer)))
+    (with-current-buffer "*html*"
+      (rename-buffer shortname 'unique)
+      (read-only-mode t))
+    shortname))
+(defun gm/org-open-xlsx (&optional filename)
+  "Open FILENAME as an org file."
+  (interactive)
+  (let* ((filename (expand-file-name (gm/get-filename filename)))
+	 (shortname (concat (file-name-base filename) ".org"))
+	 (command (format "python ~/app/scripts/xlsx2org.py %s" filename)))
+    (shell-command command shortname)
+    (with-current-buffer shortname
+      (org-mode))))

@@ -521,10 +521,10 @@
 
 Pipes through jupytext and pandoc"
   (interactive nil 'python-mode)
-  (let ((header "jupyter-python")
+  (let* ((header "jupyter-python")
 	(jupytext-cmd (format "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb"))
 	(pandoc-cmd "~/anaconda3/envs/bastille/bin/pandoc --from ipynb --to org")
-	(buffer (get-buffer-create (concat "*output " (file-name-sans-extension (buffer-name)) ".org*")))
+	(buffer (get-buffer-create (concat (file-name-sans-extension (buffer-name)) ".org")))
 	(command (format "%s | %s" jupytext-cmd pandoc-cmd)))
     (when (shell-command-on-region nil nil command buffer)
       (with-current-buffer buffer
@@ -542,7 +542,7 @@ Pipes through jupytext and nbconvert"
   (interactive nil 'python-mode)
   (let* ((jupytext-cmd "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb")
 	 (nbconvert-cmd "~/anaconda3/envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
-	 (buffer (get-buffer-create (concat (file-name-sans-extension (buffer-name)) "-v3.ipynb*")))
+	 (buffer (get-buffer-create (concat (file-name-sans-extension (buffer-name)) "-v3.ipynb")))
 	 (command (format "%s | %s" jupytext-cmd nbconvert-cmd)))
     (shell-command-on-region nil nil command buffer)
     (pop-to-buffer buffer))

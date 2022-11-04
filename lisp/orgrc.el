@@ -660,7 +660,7 @@ If ASK then ask for the symbol to find."
   "Find defition of WORD within the current org document."
   (interactive)
   (let* ((word (or word (read-from-minibuffer "Symbol: ") (symbol-at-point)))
-	 (regex (format "^ *\\(?:def *%s(\\|class *%s\\|%s *=\\)" word word word))
+	 (regex (format "^ *\\(?:def *%s(\\|class *%s(\\|%s *=\\)" word word word))
 	 (ncount (count-matches regex (point-min) (point-max))))
     (push-mark)
     (cond ((eq ncount 0) (message "No definition for %s" word))
@@ -884,3 +884,18 @@ To make this permanent, use customize `org-image-actual-width'."
 ;;            (insert (format org-babel-python-async-indicator "file" tmp-results-file))
 ;;            (python-shell-send-buffer))
 ;;          tmp-results-file)))))
+
+(use-package ox-pandoc)
+(add-to-list 'org-pandoc-extensions '(ipynb . ipynb))
+(add-to-list 'org-pandoc-menu-entry '(?i "to ipynb" org-pandoc-export-to-ipynb))
+(defun org-pandoc-export-to-ipynb (&optional a s v b e)
+  "Export to ipynb."
+  (interactive) (org-pandoc-export 'ipynb a s v b e))
+(defcustom org-pandoc-options-for-ipynb nil
+  "Pandoc options for ipynb"
+  :group 'org-pandoc
+  :type org-pandoc-option-type)
+(setq org-pandoc-command
+      "/home/moutsopoulosg/anaconda3/envs/bastille/bin/pandoc"
+      )
+ 

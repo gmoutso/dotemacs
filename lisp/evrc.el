@@ -31,13 +31,11 @@
 ;;
 ;; rsync a whole tree
 ;;
-(defun ev-rsync-tree (arg &optional init-directory)
-  "Rsync a folder in two different homes that have the same tree structure.
-   With a prefix argument it will ask from dev/master."
-  (interactive "P")
+(defun ev-rsync-tree (&optional init-directory)
+  "Rsync a folder in two different homes that have the same tree structure."
+  (interactive)
   (let* ((home-folder (expand-file-name "~/"))
-      	 (init-directory (if arg (expand-file-name "~/dev/master/")
-			 (file-local-name (or init-directory default-directory dired-directory))))
+      	 (init-directory (file-local-name (or init-directory default-directory dired-directory)))
 	 (dirname (read-directory-name "Directory: " init-directory))
 	 (from (helm :sources helm-source-rsync-tree-hosts
 		     :prompt "From: "
@@ -53,11 +51,6 @@
 		     :buffer "*helm rsync args*"))
 	(command (concat (concat "rsync "  from " " to " ") (s-join " " args)))
 	(command (read-string "rsync: " command 'rsync-tree-history)))
-    ;; (generate-new-buffer "*rsync*")
-    ;; (with-current-buffer "*rsync*"
-    ;;   (goto-char (point-max))
-    ;;   (insert (concat "$ " command "\n"))
-    ;;   )
     (message command)
     (let ((default-directory home-folder))
     (async-shell-command command "*rsync*"))

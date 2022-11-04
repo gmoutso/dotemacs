@@ -69,7 +69,7 @@
 		  (state execution_state)
 		  (info (propertize (format "(%s, %s, %s connections)" state activity conns)
 				    'face 'shadow)))
-	     (cons (format "%-20s id:%s %s" name (propertize id 'face 'fixed-pitch) info) id)))))))
+	     (cons (format "%-30s id:%s %s" name (propertize id 'face 'fixed-pitch) info) id)))))))
 (defun gm/helm-action-kernels-create-repl-name (id &optional ask)
   "Name the repl when creating a new repl for existing kernel"
     (let* ((server (jupyter-current-server))
@@ -80,11 +80,12 @@
     (if ask (read-string "REPL Name: " nil nil default) default)))
 (defun gm/helm-action-kernels-create-repl (id)
   (let ((server (jupyter-current-server))
-	(replname (gm/helm-action-kernels-create-repl-name id)))
-    (jupyter-connect-server-repl server id replname t nil t)))
+	(replname (gm/helm-action-kernels-create-repl-name id))
+	(associate (y-or-n-p "associate?")))
+    (jupyter-connect-server-repl server id replname associate nil t)))
 (setq gm/helm-source-jupyter-server-kernel-list
       (helm-build-sync-source
-	  "Kernels"
+	  "Live Kernels"
 	:candidates 'gm/helm-candidates-kernels
 	:action 'gm/helm-action-kernels-create-repl))
 ;;
@@ -109,8 +110,9 @@
   (let* ((server (jupyter-current-server))
 	 (kernel-name spec)
 	 (kernelname (gm/helm-action-specs-create-new-kernel-name spec t))
-	 (replname kernelname))
-    (jupyter-run-server-repl server spec replname t nil t)
+	 (replname kernelname)
+	 (associate (y-or-n-p "associate?")))
+    (jupyter-run-server-repl server spec replname associate nil t)
     (jupyter-server-name-client-kernel jupyter-current-client kernelname)))
 (setq gm/helm-source-jupyter-server-spec-list
       (helm-build-sync-source
@@ -136,7 +138,7 @@
   ))
 (defun gm/helm-action-repls-pop-associate (buffer)
   (let ((client (buffer-local-value 'jupyter-current-client buffer)))
-    (if (eq (jupyter-kernel-language-mode client) major-mode)
+    (if (and (eq (jupyter-kernel-language-mode client) major-mode) (y-or-n-p "associate?"))
 	(jupyter-repl-associate-buffer client))
     (pop-to-buffer buffer)
   ))
@@ -156,7 +158,6 @@
   (helm :sources '(gm/helm-source-jupyter-server-repl-list
 		   gm/helm-source-jupyter-server-spec-list
 		   gm/helm-source-jupyter-server-kernel-list)))
-
 ;;
 ;; helm python whos
 ;;
@@ -174,13 +175,43 @@
     (goto-line 1)
     (kill-whole-line 2)
     (buffer-string))))
+(defun gm/jupyter-page-object (strobject)
+  (jupyter-eval-string (format "%%page %s" strobject)))
 (defun gm/jupyter-whos ()
   (interactive)
   (let ((data (gm/jupyter-repl-python-whos-trimmed)))
   (helm :sources (helm-build-in-buffer-source "whos"
 		   :data data
 		   :display-to-real (lambda (line) (nth 0 (split-string line)))
-		   :action '(("buffer definition" . gm/org-find-definition)
-			     ("insert" . insert)
-			     ("eval" . jupyter-eval-string))
+		   :action '(("insert" . insert)
+			     ("definition" . gm/org-find-definition)
+			     ("show" . gm/jupyter-page-object))
 		   ))))
+
+(defun gm/shr-open-ipynb (&optional filename)
+  "Open ipynb file as html.
+
+Opens either file name at point (if in dired), current file (if .ipynb) or via find-file."
+  (interactive)
+  (let* ((filename (cond
+		   (filename filename)
+		   ((derived-mode-p 'dired-mode) (dired-file-name-at-point))
+		   ((and (buffer-file-name)
+			 (string-equal (file-name-extension buffer-file-name) "ipynb"))
+		    buffer-file-name)
+		   (t (read-file-name "ipynb file: "))))
+	 (shortname (file-name-nondirectory filename))
+	 (command (format "jupyter nbconvert --to html --log-level WARN --stdout %s" filename))
+	 (html-buffer (concat (file-name-sans-extension shortname) ".html"))
+	 (error-buffer (format "*stdout %s*" html-buffer)))
+    (with-temp-buffer
+      (insert-file-contents filename)
+      (shell-command-on-region (point-min) (point-max)
+			       "jupyter nbconvert --to html --log-level WARN --stdout --stdin"
+			       nil 'no-mark error-buffer)
+      (shr-render-buffer (current-buffer))
+      )
+    (with-current-buffer "*html*"
+      (rename-buffer shortname 'unique)
+      (read-only-mode t))
+    ))
