@@ -77,7 +77,7 @@ more org rifle..\n"
    "Visibility"
    (("tl" org-toggle-link-display "toggle links")
     ("ti" org-toggle-inline-images "toggle images")
-    ("ts" org-hide-block-all "hide blocks")
+    ("ts" org-fold-hide-block-all "hide blocks")
     ("ri" gm/org-resize-images "resize images")
      
     )
@@ -318,6 +318,7 @@ _m_ (_M_): set mark (jump)                 _q_: quit
    "Buffer"
    (("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
     ("i" helm-imenu "imenu")
+    ("I" gm/message-pydef "info defun")
     )
    "Code"
    (("f" flycheck-list-errors "flycheck")

@@ -631,6 +631,7 @@ g  (interactive)
 	  (insert "#+name: " name "\n")
 	  (org-babel-where-is-src-block-result 'insert)
 	  )))))
+
 (defun gm/org-result-decorate ()
   (interactive)
   (when (gm/jupyter-source-block-at-point-p)

@@ -66,6 +66,7 @@
 ;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
 ;; (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
 
+
 (windmove-default-keybindings 'shift)
 ;; https://orgmode.org/manual/Conflicts.html
 (with-eval-after-load 'org
@@ -73,6 +74,10 @@
   (add-hook 'org-shiftleft-final-hook 'windmove-left)
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
   (add-hook 'org-shiftright-final-hook 'windmove-right))
+(define-key org-read-date-minibuffer-local-map (kbd "<left>") (lambda () (interactive) (org-eval-in-calendar '(calendar-backward-day 1))))
+(define-key org-read-date-minibuffer-local-map (kbd "<right>") (lambda () (interactive) (org-eval-in-calendar '(calendar-forward-day 1))))
+(define-key org-read-date-minibuffer-local-map (kbd "<up>") (lambda () (interactive) (org-eval-in-calendar '(calendar-backward-week 1))))
+(define-key org-read-date-minibuffer-local-map (kbd "<down>") (lambda () (interactive) (org-eval-in-calendar '(calendar-forward-week 1))))
 ; (windmove-default-keybindings '(shift ctrl))
 ;; (windmove-default-keybindings 'ctrl)
 ;; (global-set-key (kbd "C-x <up>")  'windmove-up )

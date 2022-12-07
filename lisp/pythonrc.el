@@ -242,7 +242,7 @@
          (fname (car split)) ; 1st
 	 (linum (string-to-number (cadr split))) ; 2nd
 	 (elm   (s-trim (cl-caddr split))) ; 3d
-	 (tagpattern "\\(?:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)(")
+	 (tagpattern "\\(?:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)[(:]")
 	 (elmpattern (string-match tagpattern  elm))
 	 (object (match-string 1 elm))  ; class/function name
 	 (modulepattern "\\(?:\\(?:src\\|python\\|cython\\)/\\)?\\(?1:.*\\)\\.py")
@@ -478,28 +478,36 @@
 		)))
     (file-relative-name filename pyroot)))
 
-(defun gm/copy-file-location-pydef ()
-  (interactive)
+(defun gm/get-pydef ()
   (let* ((filename (gm/get-relative-pyroot-filename))
 	 (dotted-filename (string-replace "/" "." filename))
 	 (module (replace-regexp-in-string "\\.py$" "" dotted-filename))
 	 (pydef (python-info-current-defun))
-	 (module-pydef (concatenate 'string module "." pydef))
-	 (module-pydef (replace-regexp-in-string "^python.ev." "ev." module-pydef)))
+	 (module-pydef (concatenate 'string module "::" pydef))
+	 (module-pydef (replace-regexp-in-string "^.*python\\.ev\\." "ev." module-pydef)))
+    module-pydef
+    ))
+
+(defun gm/message-pydef ()
+  (interactive)
+  (message (gm/get-pydef)))
+
+(defun gm/copy-file-location-pydef ()
+  (interactive)
+  (let ((module-pydef (gm/get-pydef)))
     (kill-new module-pydef)
     (message "copied: %s" module-pydef)))
 
 (defun gm/copy-pydef-as-import ()
   (interactive)
-  (let* ((filename (gm/get-relative-pyroot-filename))
-	 (dotted-filename (string-replace "/" "." filename))
-	 (module (replace-regexp-in-string "\\.py$" "" dotted-filename))
-	 (module (replace-regexp-in-string "^python.ev." "ev." module))
-	 (pydef (python-info-current-defun))
-	 (import (format "from %s import %s" module pydef))
+  (let* ((module-pydef (split-string (gm/get-pydef) "::"))
+	 (module (first module-pydef))
+	 (pydef (second module-pydef))
+	 (firstfun (first (split-string pydef "\\.")))
+	 (import (format "from %s import %s" module firstfun))
 	 )
     (kill-new import)
-    (message "copied: %s" module)))
+    (message "copied: %s" import)))
 
 (defun gm/copy-file-location-fileno (no-lineno)
   (interactive "P")
