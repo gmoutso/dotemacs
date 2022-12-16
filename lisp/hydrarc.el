@@ -60,7 +60,8 @@ more org rifle..\n"
 ;;     ("K" org-shiftup    "up")
 ;;     ("L" org-shiftright "right")))
 ;; )
-
+(defun gm/org-display-inline-images () (interactive)
+       (org-display-inline-images nil t))
 (major-mode-hydra-define org-mode
   (:exit t :quit-key ("q" "<escape>"))
   (
@@ -77,6 +78,7 @@ more org rifle..\n"
    "Visibility"
    (("tl" org-toggle-link-display "toggle links")
     ("ti" org-toggle-inline-images "toggle images")
+    ("ir" gm/org-display-inline-images "refresh images")
     ("ts" org-fold-hide-block-all "hide blocks")
     ("ri" gm/org-resize-images "resize images")
      

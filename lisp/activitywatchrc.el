@@ -5,7 +5,7 @@
     (let* ((project-name (activity-watch-project-name-projectile))
 	   (project-root (projectile-project-root))
 	   (relative-dir (file-relative-name default-directory project-root))
-	   (subdir (first (split-string relative-dir "/"))))
+	   (subdir (nth 0 (split-string relative-dir "/"))))
       (unless (string-equal subdir ".") subdir)
       )))
 (add-to-list 'activity-watch-project-name-resolvers 'workspace-subdir)

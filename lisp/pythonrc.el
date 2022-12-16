@@ -464,6 +464,7 @@
     buffer
     ))
 
+
 (defun gm/get-relative-pyroot-filename ()
   "Return filename."
   (let* ((pyroot (expand-file-name
@@ -483,7 +484,7 @@
 	 (dotted-filename (string-replace "/" "." filename))
 	 (module (replace-regexp-in-string "\\.py$" "" dotted-filename))
 	 (pydef (python-info-current-defun))
-	 (module-pydef (concatenate 'string module "::" pydef))
+	 (module-pydef (concat module "::" pydef))
 	 (module-pydef (replace-regexp-in-string "^.*python\\.ev\\." "ev." module-pydef)))
     module-pydef
     ))
@@ -501,9 +502,9 @@
 (defun gm/copy-pydef-as-import ()
   (interactive)
   (let* ((module-pydef (split-string (gm/get-pydef) "::"))
-	 (module (first module-pydef))
-	 (pydef (second module-pydef))
-	 (firstfun (first (split-string pydef "\\.")))
+	 (module (nth 0 module-pydef))
+	 (pydef (nth 1 module-pydef))
+	 (firstfun (nth 0 (split-string pydef "\\.")))
 	 (import (format "from %s import %s" module firstfun))
 	 )
     (kill-new import)
@@ -520,7 +521,14 @@
 
 (defun gm/copy-file-location-absolute ()
   (interactive)
-  (let* ((filename (buffer-file-name)))
+  (let* ((filename
+	  (cond ((derived-mode-p 'dired-mode)
+		 (dired-get-filename nil t))
+		((buffer-file-name))
+		((null (buffer-file-name))
+		 (user-error "Current buffer is not associated with a file."))
+		))
+	 )
     (kill-new filename)
     (message "copied: %s" filename)))
 

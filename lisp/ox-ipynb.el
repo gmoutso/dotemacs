@@ -47,9 +47,25 @@
 ;; to enable collapsible headings to work nicely.
 ;;
 ;; You can export an org-file to a buffer, file or file and open.
+;;
+;; `ox-ipynb' supports the following features for making notebooks that don't
+;; include all the org-source. You can label regions of a code cell with ###
+;; BEGIN SOLUTION...### END SOLUTION, and if you export with
+;; `ox-ipynb-export-to-participant-notebook' those regions will be stripped out
+;; in the notebook. You can also label a region as hidden with ### BEGIN
+;; HIDDEN...### END HIDDEN.
+;;
+;; Finally any cell with
+;; #+attr_ipynb: :remove t
+;; on it will be removed in the export with `ox-ipynb-export-to-participant-notebook'.
+;;
+;; You can export a notebook with all the results stripped out with
+;; `ox-ipynb-export-to-ipynb-no-results-file-and-open'.
+
+
 
 ;;; Code:
-(require 'cl)
+(require 'cl-lib)
 (require 'ox-md)
 (require 'ox-org)
 (require 's)
@@ -73,6 +89,9 @@
                                (julia . (kernelspec . ((display_name . "Julia 0.6.0")
                                                        (language . "julia")
                                                        (name . "julia-0.6"))))
+			       (jupyter-julia . (kernelspec . ((display_name . "Julia 0.6.0")
+							       (language . "julia")
+							       (name . "julia-0.6"))))
                                (jupyter-python . (kernelspec . ((display_name . "Python 3")
                                                                 (language . "python")
                                                                 (name . "python3")))))
@@ -88,18 +107,7 @@
                                  (nbconvert_exporter . "python")
                                  (pygments_lexer . "ipython3")
                                  (version . "3.5.2"))))
-    (R . (language_info . ((codemirror_mode . "r")
-                           (file_extension . ".r")
-                           (mimetype . "text/x-r-source")
-                           (name . "R")
-                           (pygments_lexer . "r")
-                           (version . "3.3.2"))))
-    (julia . (language_info . ((codemirror_mode . "julia")
-                               (file_extension . ".jl")
-                               (mimetype . "text/x-julia")
-                               (name . "julia")
-                               (pygments_lexer . "julia")
-                               (version . "0.6.0"))))
+
     (jupyter-python . (language_info . ((codemirror_mode . ((name . ipython)
                                                             (version . 3)))
                                         (file_extension . ".py")
@@ -107,7 +115,27 @@
                                         (name . "python")
                                         (nbconvert_exporter . "python")
                                         (pygments_lexer . "ipython3")
-                                        (version . "3.5.2")))))
+                                        (version . "3.5.2"))))
+
+    (jupyter-julia . (language_info . ((codemirror_mode . "julia")
+				       (file_extension . ".jl")
+				       (mimetype . "text/x-julia")
+				       (name . "julia")
+				       (pygments_lexer . "julia")
+				       (version . "0.6.0"))))
+    (julia . (language_info . ((codemirror_mode . "julia")
+                               (file_extension . ".jl")
+                               (mimetype . "text/x-julia")
+                               (name . "julia")
+                               (pygments_lexer . "julia")
+                               (version . "0.6.0"))))
+
+    (R . (language_info . ((codemirror_mode . "r")
+                           (file_extension . ".r")
+                           (mimetype . "text/x-r-source")
+                           (name . "R")
+                           (pygments_lexer . "r")
+                           (version . "3.3.2")))))
   "These get injected into notebook metadata.
 They are reverse-engineered from existing notebooks.")
 
@@ -144,9 +172,11 @@ The cdr of SRC-RESULT is the end position of the results."
       (setq img-path (match-string 1 results)
             img-data (base64-encode-string
                       (encode-coding-string
-                       (with-temp-buffer
-                         (insert-file-contents img-path)
-                         (buffer-string))
+		       (if (file-exists-p img-path)
+			   (with-temp-buffer
+                             (insert-file-contents  img-path)
+                             (buffer-string))
+			 "")
                        'binary)
                       t))
 
@@ -276,7 +306,8 @@ version was incorrectly modifying them."
 				       ;; That seems to also be a problem in the
 				       ;; notebook though.
 				       (push (cons fname img-data) ox-ipynb-images)
-				       (format "![%s](attachment:%s)" (or desc fname) fname)))))
+				       ;; (format "![%s](attachment:%s)" (or desc fname) fname)
+				       (format "![%s](data:image/png;base64,%s)" (or desc fname) img-data)))))
 
 			 ;; This puts overlays on top of the links. You can remove the overlays with C-c C-x C-v
 			 :activate-func (lambda (start end path bracketp)
@@ -289,9 +320,10 @@ version was incorrectly modifying them."
 					      (overlay-put ov 'modification-hooks (list 'org-display-inline-remove-overlay))
 					      (push ov org-inline-image-overlays)))))
 
+(defun gm/font-lock-fontify-buffer-ox-ipynb (&rest args)
+  (font-lock-fontify-buffer))
 ;; This re-fontifies any image links when you toggle the inline images.
-(advice-add 'org-display-inline-images :after 'font-lock-fontify-buffer)
-
+(advice-add 'org-display-inline-images :after 'gm/font-lock-fontify-buffer-ox-ipynb)
 
 
 (defun ox-ipynb-export-markdown-cell (s)
@@ -683,7 +715,6 @@ nil:END:"  nil t)
                    (when-let ((md (ox-ipynb-export-markdown-cell (s-trim s))))
                      (push md cells))))))
 
-
     (setq data (append
                 `((cells . ,(reverse cells)))
                 (list metadata)
@@ -733,6 +764,17 @@ nil:END:"  nil t)
 (add-hook 'ox-ipynb-preprocess-hook 'ox-ipynb-preprocess-ignore)
 
 
+(defun ox-ipynb-preprocess-babel-calls ()
+  "Process babel calls to remove them.
+They don't work well in the export."
+  (goto-char (point-min))
+  (cl-loop for bc in (reverse (org-element-map (org-element-parse-buffer) 'babel-call 'identity))
+	   do
+	   (delete-region (org-element-property :begin bc)
+			  (org-element-property :end bc))))
+
+(add-hook 'ox-ipynb-preprocess-hook 'ox-ipynb-preprocess-babel-calls)
+
 (defun ox-ipynb-export-to-buffer ()
   "Export the current buffer to ipynb format in a buffer.
 Only ipython source blocks are exported as code cells. Everything
@@ -747,7 +789,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 	       (org-element-map (org-element-parse-buffer) 'headline
 		 (lambda (hl)
 		   (when (-intersection (org-get-tags
-					 (org-element-property :begin hl))
+					 (org-element-property :begin hl) t)
 					exclude-tags)
 		     hl))))
 	      do
@@ -768,7 +810,7 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
 					 select-tags)
 		      (setq found t))
 		    (unless (-intersection (org-get-tags
-					    (org-element-property :begin hl))
+					    (org-element-property :begin hl) t)
 					   select-tags)
 		      hl))))))
      (when found
@@ -815,6 +857,35 @@ else is exported as a markdown cell. The output is in *ox-ipynb*."
   "Open FNAME in jupyter notebook."
   (interactive  (list (read-file-name "Notebook: ")))
   (shell-command (format "nbopen \"%s\" &" fname)))
+
+
+(defun ox-ipynb-remove-solution ()
+  "Delete all SOLUTION regions.
+This is usually run as a function in `ox-ipynb-preprocess-hook'."
+  (goto-char (point-max))
+  (while (re-search-backward "^### BEGIN SOLUTION\\(.\\|\n\\)*?### END SOLUTION" nil t)
+    (setf (buffer-substring (match-beginning 0) (match-end 0)) "")))
+
+
+(defun ox-ipynb-remove-hidden ()
+  "Delete all HIDDEN regions.
+This is usually run as a function in `ox-ipynb-preprocess-hook'."
+  (goto-char (point-max))
+  (while (re-search-backward "^### BEGIN HIDDEN\\(.\\|\n\\)*?### END HIDDEN" nil t)
+    (setf (buffer-substring (match-beginning 0) (match-end 0)) "")))
+
+(defun ox-ipynb-remove-remove ()
+  "Delete all cells with remove in the metadata.
+This is not specific
+This is usually run as a function in `ox-ipynb-preprocess-hook'."
+  (org-babel-map-src-blocks nil
+    (let* ((src (org-element-context))
+	   (ipynb-attr (org-element-property :attr_ipynb src))
+	   remove)
+      (when (and ipynb-attr)
+	(setq remove (cdr (assoc 'remove (cadr (read (concat "(" (car ipynb-attr) ")"))))))
+	(when remove
+	  (setf (buffer-substring (org-element-property :begin src) (org-element-property :end src)) ""))))))
 
 
 ;; * export menu
@@ -951,14 +1022,28 @@ Based on the `org-babel-tangle-file' function that is to be
 found in the ob-tangle.el file."
   (interactive "fOrg file to export as ipynb: ")
   (let ((visited-p (find-buffer-visiting (expand-file-name file)))
-	       to-be-removed)
+	to-be-removed)
     (prog1
-	    (save-window-excursion
-	      (find-file file)
-	      (setq to-be-removed (current-buffer))
-        (ox-ipynb-export-to-ipynb-file) )
+	(save-window-excursion
+	  (find-file file)
+	  (setq to-be-removed (current-buffer))
+          (ox-ipynb-export-to-ipynb-file) )
       (unless visited-p
-	      (kill-buffer to-be-removed)))))
+	(kill-buffer to-be-removed)))))
+
+
+(defun ox-ipynb-export-to-participant-notebook (&optional async subtreep visible-only body-only info)
+  "Export current buffer to a participant file and open it.
+Removes SOLUTION and HIDDEN regions.
+Optional argument ASYNC to asynchronously export.
+Optional argument SUBTREEP to export current subtree.
+Optional argument VISIBLE-ONLY to only export visible content.
+Optional argument BODY-ONLY export only the body.
+Optional argument INFO is a plist of options."
+  (let ((ox-ipynb-preprocess-hook (append ox-ipynb-preprocess-hook '(ox-ipynb-remove-hidden
+								     ox-ipynb-remove-solution
+								     ox-ipynb-remove-remove))))
+    (ox-ipynb-export-to-ipynb-file-and-open)))
 
 
 (org-export-define-derived-backend 'jupyter-notebook 'org
@@ -967,7 +1052,8 @@ found in the ob-tangle.el file."
        ((?b "to buffer" ox-ipynb-export-to-ipynb-buffer)
         (?n "to notebook" ox-ipynb-export-to-ipynb-file)
 	(?o "to notebook and open" ox-ipynb-export-to-ipynb-file-and-open)
-        (?r "to notebook with no results and open" ox-ipynb-export-to-ipynb-no-results-file-and-open)
+	(?p "to participant nb & open" ox-ipynb-export-to-participant-notebook)
+        (?r "to nb (no results) and open" ox-ipynb-export-to-ipynb-no-results-file-and-open)
 	(?s "to slides and open" ox-ipynb-export-to-ipynb-slides-and-open))))
 
 

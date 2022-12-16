@@ -138,8 +138,8 @@
   (let* ((default-directory "~/")
 	 (selection (helm :sources helm-source-ssh-port
 			  :buffer "*helm ssh-port*"))
-	 (host (first selection))
-	 (port (second selection))
+	 (host (nth 0 selection))
+	 (port (nth 1 selection))
 	 ;; (args (concat "-NfL " port ":localhost:" port " " host))
 	 )
     ;; (async-shell-command (concat "ssh -NfL " port ":localhost:" port " " host))
@@ -183,7 +183,7 @@
     :candidates (lambda () (mapcan 'last (magit-list-worktrees)))))
 (defconst gm/helm-source-worktree-root-dirs
   (helm-build-sync-source "worktree"
-    :candidates (lambda () (mapcar (lambda (el) (cons (car (last el)) (first el))) (magit-list-worktrees)))))
+    :candidates (lambda () (mapcar (lambda (el) (cons (car (last el)) (nth 0 el))) (magit-list-worktrees)))))
 (defun gm/ev-change-worktree (arg)
   "Find file but in another worktree."
   (interactive "P")

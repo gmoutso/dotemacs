@@ -215,3 +215,14 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
       (rename-buffer shortname 'unique)
       (read-only-mode t))
     ))
+
+;; allow editing jupyter-src src blocks without errors
+(defun gm/advice-org-babel-edit-prep:jupyter (func info)
+  (let* ((params (nth 2 info))
+         (session (alist-get :session params))
+	 (kernel (alist-get :session params)))
+    (if (string-equal session "none")
+	nil
+      (funcall func info)
+      )))
+(advice-add 'org-babel-edit-prep:jupyter :around 'gm/advice-org-babel-edit-prep:jupyter)

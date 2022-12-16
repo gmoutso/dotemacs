@@ -177,7 +177,7 @@
     (list (or file "empty") ignore pre-recipe-list post-recipe-list src-string)))
 
 (defun org-recipes--filter-src-parameters (src-params key-list)
-  (delete-if (lambda (s)
+  (cl-delete-if (lambda (s)
                (not (member (car s) key-list))) src-params))
 
 (defun org-recipes--get-candidates (&optional recipe)
