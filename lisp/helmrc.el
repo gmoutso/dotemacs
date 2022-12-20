@@ -1,20 +1,28 @@
-(require 'helm-config)
+;; (require 'helm-config)
 (require 'general)
+(use-package helm
+  :custom
+  (helm-move-to-line-cycle-in-source t)
+  (helm-ff-search-library-in-sexp)
+  (helm-scroll-amount 8)
+  :config
+  (helm-autoresize-mode t)
+  (helm-mode nil)
+  :bind
+  (("M-x" . helm-M-x)
+   ("C-x C-r" . helm-recentf)
+   ("C-x C-b" . helm-mini)
+   ("C-x C-l" . helm-locate)
+   ("C-x /" . helm-find)
+   ("C-h a" . helm-apropos)
+   ("C-x C-f" . helm-find-files)
+   ("C-x r b" . helm-filtered-bookmarks))
+  )
 
-(setq ; helm-quick-update t ; obsolete? do not display invisible candidates
-      ; helm-split-window-inside-p t ; split inside window
-      ; helm-always-two-windows t ;display two windows in one frame
-      ; helm-autoresize-mode t;  uses two windows in this frame.
-      ; helm-split-window-default-side 'below ; 'same below above left right
-      ; helm-buffers-fuzzy-matching t
-      helm-move-to-line-cycle-in-source t
-      helm-ff-search-library-in-sexp t ; search for library in `require' and `declare-function' sexp.
-      helm-scroll-amount 8
-      ;helm-ff-file-name-history-use-recentf t ; history action in helm-find-files 
-      )
-(helm-mode)
-(helm-descbinds-mode)
-(helm-autoresize-mode)
+(use-package helm-descbinds
+  :config
+  (helm-descbinds-mode 1))
+
 (add-to-list 'helm-boring-buffer-regexp-list "\\`\\*epc")
 (add-to-list 'helm-boring-buffer-regexp-list "\\`\\*anaconda-mode")
 (add-to-list 'helm-boring-buffer-regexp-list "\\`\\*pyright")
@@ -23,6 +31,7 @@
 (add-to-list 'helm-boring-buffer-regexp-list "\\`\\*jupyter-traceback")
 (add-to-list 'helm-boring-buffer-regexp-list "TAGS")
 ;; (add-to-list helm-white-buffer-regexp-list "*jupyter-repl.*")
+
 (use-package helm-projectile
   :init
   (setq helm-projectile-fuzzy-match nil))

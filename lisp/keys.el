@@ -1,20 +1,13 @@
-;; helm
-(require 'helm-config)
-(global-set-key (kbd "M-x") 'helm-M-x)
-(global-set-key (kbd "C-x C-r") 'helm-recentf)
-(global-set-key (kbd "C-x C-b") 'helm-mini)
-(global-set-key (kbd "C-x C-l") 'helm-locate)
-(global-set-key (kbd "C-x /") 'helm-find)
-(global-set-key (kbd "C-h a") 'helm-apropos)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
-(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-
 ;; ace
-(require 'ace-window)
-(global-set-key (kbd "C-x o") 'ace-window)
+
+(use-package ace-window
+  :bind
+  ("C-x o" . ace-window))
 
 ;; treemacs
-(global-set-key (kbd "C-x C-t") 'treemacs)
+(use-package treemacs
+  :bind
+  ("C-x C-t" . treemacs))
 
 ;; PERSISTENT viewing keys in minor mode
 (defvar my-keys-mode-map (make-keymap) "my-keys-mode keymap.")
@@ -64,10 +57,13 @@
 
 ;; Which key intergration
 ;; https://github.com/justbur/emacs-which-key/issues/306
-(use-package which-key)
+(use-package which-key
+  :config
+  (which-key-mode))
+
 (if (daemonp)
     (add-hook 'server-after-make-frame-hook 'which-key-mode)
   (which-key-mode))
-(which-key-mode)
+
 (with-eval-after-load 'lsp-mode
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))

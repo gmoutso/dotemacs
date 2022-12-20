@@ -10,7 +10,7 @@
 (setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
 (setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
 
-(scroll-bar-mode nil)
+(scroll-bar-mode 0)
 
 ;;
 ;; winner undo
@@ -73,11 +73,11 @@
   (add-hook 'org-shiftup-final-hook 'windmove-up)
   (add-hook 'org-shiftleft-final-hook 'windmove-left)
   (add-hook 'org-shiftdown-final-hook 'windmove-down)
-  (add-hook 'org-shiftright-final-hook 'windmove-right))
-(define-key org-read-date-minibuffer-local-map (kbd "<left>") (lambda () (interactive) (org-eval-in-calendar '(calendar-backward-day 1))))
-(define-key org-read-date-minibuffer-local-map (kbd "<right>") (lambda () (interactive) (org-eval-in-calendar '(calendar-forward-day 1))))
-(define-key org-read-date-minibuffer-local-map (kbd "<up>") (lambda () (interactive) (org-eval-in-calendar '(calendar-backward-week 1))))
-(define-key org-read-date-minibuffer-local-map (kbd "<down>") (lambda () (interactive) (org-eval-in-calendar '(calendar-forward-week 1))))
+  (add-hook 'org-shiftright-final-hook 'windmove-right)
+  (define-key org-read-date-minibuffer-local-map (kbd "<left>") (lambda () (interactive) (org-eval-in-calendar '(calendar-backward-day 1))))
+  (define-key org-read-date-minibuffer-local-map (kbd "<right>") (lambda () (interactive) (org-eval-in-calendar '(calendar-forward-day 1))))
+  (define-key org-read-date-minibuffer-local-map (kbd "<up>") (lambda () (interactive) (org-eval-in-calendar '(calendar-backward-week 1))))
+  (define-key org-read-date-minibuffer-local-map (kbd "<down>") (lambda () (interactive) (org-eval-in-calendar '(calendar-forward-week 1)))))
 ; (windmove-default-keybindings '(shift ctrl))
 ;; (windmove-default-keybindings 'ctrl)
 ;; (global-set-key (kbd "C-x <up>")  'windmove-up )
@@ -92,8 +92,11 @@
 ;; popwin (close popup windows easily)
 ;;
 ;; Special buffers specified in popwin:special-display-config
-(require 'popwin)
-(popwin-mode 1)
+(use-package popwin
+  :config
+  (popwin-mode 1)
+  )
+
 (push '(" *undo-tree*" :width 0.3 :position right) popwin:special-display-config)
 ;(push '("^\\*anything.*\\*$" :regexp t) popwin:special-display-config)
 ;; (push '(anaconda-mode-view-mode :dedicated t) popwin:special-display-config)
@@ -126,6 +129,12 @@ point reaches the beginning or end of the buffer, stop there."
 
 ;; remap C-a to `smarter-move-beginning-of-line'
 (global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
+(general-define-key
+ :keymaps
+ 'python-mode
+ "C-a" 'smarter-move-beginning-of-line  ; so that visual-line remap works on other buffers
+ "C-e" 'smarter-move-end-of-line)
+
 
 (require 'newcomment)
 (defun move-end-of-code ()
@@ -201,11 +210,4 @@ buffer in current window."
        "%s: Can't touch this!"
      "%s is up for grabs.")
    (current-buffer)))
-
-(require 'general)
-(general-define-key
- :keymaps
- 'python-mode
- "C-a" 'smarter-move-beginning-of-line  ; so that visual-line remap works on other buffers
- "C-e" 'smarter-move-end-of-line)
 
