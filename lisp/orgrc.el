@@ -1,6 +1,11 @@
 (use-package org-variable-pitch)
 (add-hook 'org-mode-hook #'org-variable-pitch-minor-mode)
 (add-hook 'after-init-hook #'org-variable-pitch-setup)
+;; (use-package mixed-pitch
+;;   :hook
+;;   ;; If you want it in all text modes:
+;;   (text-mode . mixed-pitch-mode))
+
 
 ;; needs to be set before org is loaded
 (setq org-list-allow-alphabetical t)
