@@ -1,11 +1,30 @@
-(use-package org-variable-pitch)
-(add-hook 'org-mode-hook #'org-variable-pitch-minor-mode)
+(use-package org-variable-pitch
+  :hook (org-variable-pitch-minor . org-mode))
 (add-hook 'after-init-hook #'org-variable-pitch-setup)
 ;; (use-package mixed-pitch
 ;;   :hook
 ;;   ;; If you want it in all text modes:
 ;;   (text-mode . mixed-pitch-mode))
 
+;; toggle emphases, links, etc when cursor is on them
+(use-package org-appear
+  :hook org-mode
+  :custom
+  (org-appear-autolinks t)
+  ;; org-appear-inside-latex is about pretty UTF elements, not image fragments like fragtog
+  (org-appear-inside-latex t) ;; relevant if org-pretty-entities
+  (org-pretty-entities t)
+  (org-appear-autoentities t) ;; relavent if org-appear-inside-latex
+  (org-appear-autosubmarkers t) ;; relavent if org-appear-inside-latex
+  ) 
+;; toggle latex framgents when cursor is on them
+(use-package org-fragtog
+  :hook org-mode
+  :custom
+  (org-fragtog-preview-delay 0.4))
+;; modern look
+(use-package org-modern
+  :hook org-mode)
 
 ;; needs to be set before org is loaded
 (setq org-list-allow-alphabetical t)
@@ -819,18 +838,6 @@ To make this permanent, use customize `org-image-actual-width'."
   (org-redisplay-inline-images))
 
 ;; Helm will show you the car of each cell, but return the cdr of the selected entry. 
-
-
-;; Decorating Jupyter blocks
-;; make dataframe output not have a RESULTS drawer by adding org-table property to results
-;; you need to manually add :table t in block
-(defun gm/jupyter-org-table-string-maybe (func type value params)
-  "Add org-table property to pandoc output if table in PARAMS"
-  (let ((str (funcall func type value params)))
-    (if (alist-get :table params)
-      (jupyter-org-table-string str)
-      str)))
-(advice-add 'jupyter-org-export-block-or-pandoc :around #'gm/jupyter-org-table-string-maybe)
 
 
 ;; correct python session eval on server

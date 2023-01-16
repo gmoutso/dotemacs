@@ -218,6 +218,7 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
 
 ;; allow editing jupyter-src src blocks without errors
 (defun gm/advice-org-babel-edit-prep:jupyter (func info)
+  "Allow editing jupyter blocks when session is set to 'none'."
   (let* ((params (nth 2 info))
          (session (alist-get :session params))
 	 (kernel (alist-get :session params)))
@@ -226,3 +227,27 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
       (funcall func info)
       )))
 (advice-add 'org-babel-edit-prep:jupyter :around 'gm/advice-org-babel-edit-prep:jupyter)
+
+;; Decorating Jupyter blocks
+;; make dataframe output not have a RESULTS drawer by adding org-table property to results
+;; you need to manually add :table t in block
+(defun gm/jupyter-org-table-string-maybe (func type value params)
+  "Add org-table property to pandoc output if table in PARAMS"
+  ;; type: 'html
+  ;; value: long html sting
+  ;; params: includes ((:pandoc t) (:tangle . yes))
+  ;; 
+  (let ((result (funcall func type value params)))
+    (if (and (eq (org-element-type result) 'pandoc)
+	     (alist-get :table params))
+	(let ((vls (car (cdr result))))
+	  (let ((newresult
+		(list 'pandoc (list :text (jupyter-org-table-string (plist-get vls :text))
+			    :type (plist-get vls :type)
+			    :value (plist-get vls :value)
+			    ))))
+	    newresult)
+	  )
+      result)))
+(advice-add 'jupyter-org-export-block-or-pandoc :around #'gm/jupyter-org-table-string-maybe)
+;; (advice-remove 'jupyter-org-export-block-or-pandoc 'gm/jupyter-org-table-string-maybe)
