@@ -1,9 +1,22 @@
 (require 'ox)
-(require 'ox-latex)
-(setq org-latex-listings t)
+(use-package ox-latex
+  :custom
+  ;; minted needs -shell-escape
+  (org-latex-pdf-process '("%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+			   "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+			   "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+  (org-latex-default-class "evalue")
+  (org-latex-compiler "xelatex")
+  )
+;; use minted for org source blocks
+(setq org-latex-listings 'minted)
+(add-to-list 'org-latex-packages-alist '("" "minted"))
 (add-to-list 'org-latex-packages-alist '("" "listings"))
 (add-to-list 'org-latex-packages-alist '("" "color"))
 (add-to-list 'org-latex-listings-langs '(jupyter-python "Python"))
+;; minted needs -shell-escape. Below is for tex-mode
+(setq TeX-command-extra-options "-shell-escape")
+
 
 (add-to-list 'org-latex-classes
              '("evalue"
@@ -68,8 +81,6 @@
   ("\\subsection{%s}" . "\\subsection*{%s}")
   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
 
-(setq org-latex-default-class "evalue")
-(setq org-latex-compiler "xelatex")
 
 ;; export to html - also applies to org-mime-org-mode-htmlize
 (setq org-html-with-latex t)

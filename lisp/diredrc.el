@@ -8,7 +8,8 @@
   (bind-key "C-c C-r" 'dired-rsync dired-mode-map))
 
 (defun gm/get-filename (&optional filename)
-  (or filename (dired-get-filename) (read-file-name "file :")))
+  "Get filename. If in dired, return current line, else ask."
+  (or filename (dired-get-filename nil t) (read-file-name "file :")))
 
 ;;
 ;; using eaf in dired
@@ -73,3 +74,9 @@
     (shell-command command shortname)
     (with-current-buffer shortname
       (org-mode))))
+
+(use-package dired-x
+  :custom
+  (dired-omit-files "\\`[.]?[#~]")
+  )
+

@@ -21,7 +21,9 @@
 (use-package org-fragtog
   :hook org-mode
   :custom
-  (org-fragtog-preview-delay 0.4))
+  (org-fragtog-preview-delay 0.4)
+  (org-fragtog-ignore-predicates '(org-at-table-p))
+  )
 ;; modern look
 (use-package org-modern
   :hook org-mode)

@@ -466,7 +466,7 @@
 
 
 (defun gm/get-relative-pyroot-filename ()
-  "Return filename."
+  "Get filename relative to root. If in dired, return current line, else return buffer file."
   (let* ((pyroot (expand-file-name
 		  (or (file-name-concat (vc-root-dir) "..")
 		      (flycheck-python-find-project-root 'checker_))))

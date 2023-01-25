@@ -1,10 +1,13 @@
 (use-package code-cells
   :custom
   (code-cells-convert-ipynb-style
-   '(("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--to" "ipynb")
+   '(("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--update" "--to" "ipynb")
     ("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--to" "py:percent")
     nil code-cells-convert-ipynb-hook))
+  :hook
+  ((python-mode . code-cells-mode-maybe))
   )
+;; (add-hook 'python-mode-hook 'code-cells-mode-maybe)
 
 (with-eval-after-load 'code-cells
   (let ((map code-cells-mode-map))
@@ -25,7 +28,7 @@
     (define-key map [remap jupyter-eval-line-or-region] 'code-cells-eval)))
 
 
-(defcustom gm/code-cells-convert-ipynb-maybe t "Whether to auto-convert ipynb files to py:percent.")
+(defcustom gm/code-cells-convert-ipynb-maybe t "Whether to auto-convert ipynb files.")
 (defun gm/code-cells-convert-ipynb-maybe ()
   "Converts to ipynb if variable is set to true."
   (if gm/code-cells-convert-ipynb-maybe (code-cells-convert-ipynb) (json-mode))
@@ -36,4 +39,13 @@
   (setq gm/code-cells-convert-ipynb-maybe (not gm/code-cells-convert-ipynb-maybe)))
 (setq auto-mode-alist (remove (rassoc 'code-cells-convert-ipynb auto-mode-alist) auto-mode-alist))
 (add-to-list 'auto-mode-alist '("\\.ipynb\\'" . gm/code-cells-convert-ipynb-maybe))
-(add-hook 'python-mode-hook 'code-cells-mode-maybe)
+
+(defun gm/code-cells-test-roundtrip (&optional filename)
+  (interactive)
+  (let ((filename (gm/get-filename filename)))
+    (if (not (string-equal (file-name-extension filename) "ipynb"))
+	(error "Only on ipynb files."))
+    (async-shell-command (format "/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext --update --to py:percent --test %s" filename)
+			 "*code-cells-roundtrip*")
+    )
+  )
