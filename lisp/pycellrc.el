@@ -36,9 +36,14 @@
 (defun gm/code-cells-convert-ipynb-maybe-toggle ()
   "Toggle whether to auto-convert ipynb files with code-cells."
   (interactive)
-  (setq gm/code-cells-convert-ipynb-maybe (not gm/code-cells-convert-ipynb-maybe)))
-(setq auto-mode-alist (remove (rassoc 'code-cells-convert-ipynb auto-mode-alist) auto-mode-alist))
-(add-to-list 'auto-mode-alist '("\\.ipynb\\'" . gm/code-cells-convert-ipynb-maybe))
+  (let ((new-val (not gm/code-cells-convert-ipynb-maybe)))
+    (setq gm/code-cells-convert-ipynb-maybe new-val)
+    (message (format "automatic conversion %s" (if new-val "on" "off")))))
+
+(with-eval-after-load 'code-cells
+  (setq auto-mode-alist (remove (rassoc 'code-cells-convert-ipynb auto-mode-alist) auto-mode-alist))
+  (add-to-list 'auto-mode-alist '("\\.ipynb\\'" . gm/code-cells-convert-ipynb-maybe))
+  )
 
 (defun gm/code-cells-test-roundtrip (&optional filename)
   (interactive)

@@ -100,6 +100,7 @@ more org rifle..\n"
    (("k" gm/jupyter-kernels "kernels")
     ("." gm/org-find-definition-at-point "org def")
     ("w" gm/jupyter-whos "whos")
+    ("r" org-recipes "recipes")
     )
    ))
 

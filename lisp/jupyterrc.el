@@ -251,3 +251,30 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
       result)))
 (advice-add 'jupyter-org-export-block-or-pandoc :around #'gm/jupyter-org-table-string-maybe)
 ;; (advice-remove 'jupyter-org-export-block-or-pandoc 'gm/jupyter-org-table-string-maybe)
+
+(defun gm/jupyter-server-cull-kernel-names (&optional server)
+  "Ensure all names in `jupyter-server-kernel-names' map to existing kernels.
+If SERVER is non-nil only check the kernels on SERVER, otherwise
+check all kernels on all existing servers.
+
+Override. If I have not forwarded the port, I don't want my names culled."
+  (let ((servers (if server (list server)
+                   (jupyter-gc-servers)
+                   (jupyter-servers))))
+    (message "server: %s servers: %s" server servers)
+    (unless server
+      ;; Only remove non-existing servers when culling all kernels on all
+      ;; servers.
+      (let ((urls (mapcar (lambda (x) (oref x url)) servers)))
+        (cl-callf2 cl-remove-if-not (lambda (x) (member (car x) urls))
+                   jupyter-server-kernel-names)))
+    (dolist (server servers)
+      (when-let* ((names (assoc (oref server url) jupyter-server-kernel-names)))
+        (setf (alist-get (oref server url)
+                         jupyter-server-kernel-names nil nil #'equal)
+              (cl-loop
+               for kernel across (jupyter-api-get-kernel server)
+               for name = (assoc (plist-get kernel :id) names)
+               when name collect name))))))
+(advice-add 'jupyter-server-cull-kernel-names :override #'gm/jupyter-server-cull-kernel-names)
+

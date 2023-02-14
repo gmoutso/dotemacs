@@ -41,7 +41,9 @@
       fullname)))
 
 (defun gm/kde-open (&optional filename)
-  "Works remotely and local files."
+  "Works remotely and local files.
+
+Does not work with snap firefox because it cannot access hidden files in .cache"
   (interactive)
   (let ((filename (or filename (dired-get-filename nil t) default-directory)))
     ;; (cmd (shell-quote-argument (concat "kde-open5 " (gm/tramp-to-kio filename)))))

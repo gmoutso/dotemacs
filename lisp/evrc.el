@@ -3,16 +3,15 @@
 ;;
 ;; helm rsync tree to/from ted
 ;;
-(defconst helm-source-rsync-tree-hosts
+(defconst helm-source-ev-hosts
   (helm-build-sync-source "Host"
     :candidates (list "~/" "ted:" "beowulf@ted:" "phil:" "beowulf@phil:")))
-;; (defvar (defvar helm-rsync-tree-directory-history nil
-	  ;; "History of helm-rsync-tree directories."))
-(defconst helm-source-rsync-tree-common-dirs (helm-build-sync-source "Directory"
-					       :candidates (list "~/dev/master/python/ev/reporting/latex/reports/"
-					"~/dev/master/python/ev/reporting/latex/templates/"			 )
-					;; :history helm-rsync-tree-directory-history
-					))
+(defun helm-ev-host (&optional prompt)
+  "Choose ev host name."
+  (let ((prompt (or prompt "Host: ")))
+    (helm :sources helm-source-ev-hosts
+	  :prompt prompt
+	  :buffer "*helm-ev-host*")))
 (defconst helm-source-rsync-tree-args (helm-build-sync-source "arguments"
 					:candidates (list
 						     "-avz" "-rvz" "-n" "-u" "--delete" "--delete-excluded"
@@ -21,12 +20,6 @@
 						     "-m --include=\"*/\" --include=\"*output/***\" --exclude=\"*\"")
 					:action (lambda (candidate) (helm-marked-candidates))))
 (defvar rsync-tree-history nil)
-(defun this-directory-or-master (init-directory)
-  "If init-directory not provided, return this directory if in dev/master else dev/master"
-  (or init-directory  ;; if provided use this
-			     (if (string-prefix-p (expand-file-name "~/dev/master/")  default-directory)  ;; if current directory in dev/master
-				 default-directory "~/dev/master/")))
-
 
 ;;
 ;; rsync a whole tree
@@ -34,65 +27,83 @@
 (defun ev-rsync-tree (&optional init-directory)
   "Rsync a folder in two different homes that have the same tree structure."
   (interactive)
-  (let* ((home-folder (expand-file-name "~/"))
-      	 (init-directory (file-local-name (or init-directory default-directory dired-directory)))
+  (let* ((init-directory (file-local-name (or init-directory default-directory dired-directory)))
 	 (dirname (read-directory-name "Directory: " init-directory))
-	 (from (helm :sources helm-source-rsync-tree-hosts
-		     :prompt "From: "
-		     :buffer "*helm host from*"))
-	 (from (ev-tramp-this dirname from))
+	 (from (helm-ev-host "From: "))
+	 (to (helm-ev-host "To: "))
+	 (args (helm :sources helm-source-rsync-tree-args
+		     :buffer "*helm rsync args*")))
+    (ev-do-rsync dirname from to args nil t)
+  ))
+
+(defun ev-do-rsync (dirname from to args &optional output-buffer confirm)
+  "Rsync convenience that translates dirname to evalue hostnames.
+
+FROM and TO are hosts, eg `beowulf@ted' or `~/', and DIRNAME can be any local or remote directory that `ev-tramp-this' recognizes, eg in dev/master or workspace.
+"
+  (let* ((from (ev-tramp-this dirname from))
 	 (from (replace-regexp-in-string "^/ssh:" "" from t nil))
-	 (to (helm :sources helm-source-rsync-tree-hosts
-		   :prompt "To: "
-		   :buffer "*helm host to*"))
 	 (to (ev-tramp-this dirname to))
 	 (to (replace-regexp-in-string "^/ssh:" "" to t nil))
-	 (args (helm :sources helm-source-rsync-tree-args
-		     :buffer "*helm rsync args*"))
-	(command (concat (concat "rsync "  from " " to " ") (s-join " " args)))
-	(command (read-string "rsync: " command 'rsync-tree-history)))
+	 (command (concat (concat "rsync "  from " " to " ") (s-join " " args)))
+	 (output-buffer (or output-buffer "*rsync*")))
+    (if confirm (setq command (read-string "rsync: " command 'rsync-tree-history)))
     (message command)
-    (let ((default-directory home-folder))
-    (async-shell-command command "*rsync*"))
-  ))
+    (let ((default-directory (expand-file-name "~/")))
+      (async-shell-command command output-buffer))
+    ))
 
 ;;
 ;; open with tramp this
 ;;
+(defun gm/remote-host (host)
+  "Return hostname or nil. 
+
+Remoteness is detected from a semi-column `:' in HOST.
+If remote, returns hostname removing any ssh protocol."
+  (if (string-match-p ".*:" host) (replace-regexp-in-string "\\(/ssh:\\)?\\([^:]*\\):.*" "\\2:" host)))
+
 (defun ev-tramp-this (filename host)
   "Convert filename to tramp version on evalue space.
 
-   host is either ~/ or of the form [user@]host: eg beowulf@ted:
-   the filename might start with /home/someones/ or some other absolute path from /"
-  (let* ((is-remote-host (string-match-p ".*:" host))
-	 (is-remote-file (file-remote-p filename))
-	 (filelocal (expand-file-name (file-local-name filename))))
-    (concat (if is-remote-host "/ssh:") host (replace-regexp-in-string "^/home/[^/]*/" "" filelocal))))
-
-
-(defun gm/match-replace-gather-select (origin mrlist)
-  "MRLIST is a list of triplets of the form (MATCH REGEX REPLACE)."
-  (helm :sources (helm-build-sync-source "hosts"
-		   :candidates (cl-loop for (match regex replace) in mrlist
-							  if (string-match-p match origin) collect
-							  (replace-regexp-in-string regex replace origin))
-		   :fuzzy-match t)
-	:buffer "*helm evalue*"))
+   HOST is either a local or remote path, eg `~/somewhere' or `beowulf@ted:'.
+   HOST can accept tramp names like `/ssh:beowulf@ted:somewhere'.
+   Remoteness is detected from a semi-column `:' in HOST.
+   the FILENAME might be /home/someones/ with or without host info."
+  (let* ((is-remote-host (gm/remote-host host))
+	 (is-remote-file (file-remote-p filename)) ; /ssh:host:
+	 (absolute-path (expand-file-name filename))
+	 (filelocal (file-local-name absolute-path))
+	 (converted (cond ((and
+				 (string-match-p "workspace" filelocal)
+				 is-remote-host)
+				(replace-regexp-in-string
+				 "/home/moutsopoulosg/workspace"
+				 "/spool/workspace"
+				 filelocal))
+			       ((and
+				 (string-match-p "workspace" filelocal)
+				 (not is-remote-host))
+				(replace-regexp-in-string
+				 "/spool/workspace"
+				 "/home/moutsopoulosg/workspace"
+				 filelocal))
+			       (filelocal)))
+	 (homeless (replace-regexp-in-string "^/home/[^/]*/" "" converted))
+	 (path-prefix (if is-remote-host
+			  (format "/ssh:%s" is-remote-host)
+			"~/"))
+	 (target (concat path-prefix homeless))
+	 )
+    target))
 
 (defun ev-tramp-here ()
   "Open the current file/dir in an evalue host."
   (interactive)
   (let* ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
-	 (host (helm :sources helm-source-rsync-tree-hosts
-		     :prompt "Host: "
-		     :buffer "*helm host from*"))
-	 (is-remote-host (string-match-p ".*:" host))
+	 (host (helm-ev-host "Host: "))
+	 (is-remote-host (gm/remote-host host))
 	 (is-remote-file (file-remote-p filename)))
-    ;; special conditions
-    (if (string-match-p "workspace" filename)
-	(cond ((and (not is-remote-file) is-remote-host) (setq filename (replace-regexp-in-string "/home/moutsopoulosg/workspace" "/spool/workspace" filename)))
-	      ((and (not is-remote-host) is-remote-file) (setq filename (replace-regexp-in-string "/spool/workspace" "/home/moutsopoulosg/workspace" filename)))))
-    ;; end special conditions
     (let ((target (ev-tramp-this filename host)))
       (if (eq major-mode 'eshell-mode)
 	  (cd target)
@@ -134,6 +145,7 @@
 				 ))
 
 (defun ev-ssh-port ()
+  "Forward ssh port from emacs."
   (interactive)
   (let* ((default-directory "~/")
 	 (selection (helm :sources helm-source-ssh-port

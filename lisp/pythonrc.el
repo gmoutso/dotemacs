@@ -387,83 +387,113 @@
     (conda-env-activate)
     (run-python nil dedicated (not notshow))))
 
-;; (defun run-python-remotely-cmd (host env)
-;;   (cond ((string-equal env "banks") "ipython -i")
-;;    ;; ((and (string-equal host "phil") (string-equal env "banks")) "python -i")
-;; 	(t "ipython --simple-prompt -i")))
-;; (defun run-python-remotely (&optional dedicated notshow)
-;;   (interactive "P\ni" python-mode)
-;;   (let* ((host (completing-read "host:" '("phil" "ted" "beowulf@ted")))
-;; 	 (env  (completing-read "environment:" '("banks" "dick" "egan") nil t nil nil "banks"))
-;; 	 (cmd (run-python-remotely-cmd host env))
-;; 	 (env-dir (format "/ssh:%s:miniconda/envs/%s" host env))
-;; 	 (default-directory (format "/ssh:%s:" host))
-;; 	 )
-;;     (pythonic-activate env-dir)
-;;     (run-python cmd dedicated (not notshow))
-;;   ))
-
-(defvar gm/run-python-config
-  '(("phil"
-     ("banks"
+(defvar gm/run-python-configs
+  '(("Python[local:egan]"
+     :cmd "ipython --simple-prompt -i"
+      :host "~"
+      :venv "anaconda3/envs/egan"
+      :home nil
+      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+      )
+    ("Python[local:banks]"
+     :cmd "ipython -i"
+      :host "~"
+      :venv "anaconda3/envs/banks"
+      :home nil
+      :pythonpaths ("/home/moutsopoulosg/dev/master/python")
+     )
+    ("Python[phil:banks]"
       :cmd "ipython -i"
       :host "/ssh:phil:"
       :venv "miniconda/envs/banks"
       :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/master/python")
       )
-     ("egan"
-      :cmd "ipython -i"
+     ("Python[phil:egan]"
+      :cmd "ipython -i --simple-prompt"
       :host "/ssh:phil:"
       :venv "miniconda/envs/egan"
       :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
       )
-     ("dick"
+     ("Python[phil:dick]"
       :cmd "ipython -i"
       :host "/ssh:phil:"
       :venv "miniconda/envs/dick"
       :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
-      ))
-    ("beowulf@ted"
-     ("banks"
+      )
+    ("Python[beowulf@ted:banks]"
       :cmd "ipython -i"
       :host "/ssh:beowulf@ted:"
       :venv "miniconda/envs/banks"
       :home nil
       :pythonpaths ("/home/beowulf/dev/master/python")
       )
-     ))
-  "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `run-python-remotely' but nned not be remote.")
-(defun run-python-remotely ()
-  (interactive)
-  (let* ((host (completing-read "host:" gm/run-python-config nil t))
-	 (configs (cdr (assoc host gm/run-python-config)))
-	 (config-select (if (= 1 (seq-length configs)) (car (car configs))
-			 (completing-read "host:" configs nil t)))
-	 (config (cdr (assoc config-select configs)))
+     )
+  "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `gm/run-python' but nned not be remote.")
+
+;; (defun gm/get-run-python-config-alt ()
+;;   (let* ((host (completing-read "host:" gm/run-python-configs-alt nil t))
+;; 	 (configs (cdr (assoc host gm/run-python-configs-alt)))
+;; 	 (config-select (if (= 1 (seq-length configs)) (car (car configs))
+;; 			 (completing-read "host:" configs nil t)))
+;; 	 (config (cdr (assoc config-select configs)))
+;; 	 (sshhost (plist-get config :host))
+;; 	 (default-directory (or (plist-get config :home) sshhost))
+;; 	 (cmd (plist-get config :cmd))
+;; 	 (venv-raw (plist-get config :venv))
+;; 	 (venv (pythonic-python-readable-file-name (concat sshhost venv-raw)))
+;; 	 (pythonpaths (plist-get config :pythonpaths))
+;; 	 (candidate-session-names (list host
+;; 					(format "%s:%s" host config-select)
+;; 					python-shell-buffer-name)))
+;;     (list :cmd cmd :host host :venv venv :pythonpaths pythonpaths
+;; 	  :home default-directory)
+;;     ))
+(defun gm/get-run-python-config ()
+  (let* ((config-name (completing-read "config: " gm/run-python-configs nil t))
+	 (config (cdr (assoc config-name gm/run-python-configs)))
 	 (sshhost (plist-get config :host))
 	 (default-directory (or (plist-get config :home) sshhost))
 	 (cmd (plist-get config :cmd))
-	 (org-babel-python-command cmd) ;; used by org-babel-python-initiate-session-by-key
 	 (venv-raw (plist-get config :venv))
-	 (venv (concat sshhost venv-raw))
-	 (python-shell-virtualenv-root (pythonic-python-readable-file-name venv))
-	 (python-shell-extra-pythonpaths (plist-get config :pythonpaths))
-	 (session (completing-read "session:" (list host
-						 (format "%s:%s" host config-select)
-						 python-shell-buffer-name)))
-	 
-	 (buffer (org-babel-python-initiate-session session)) ;; earmuffed buffer
-	 )
-    (if (derived-mode-p 'python-mode)
-	(if (y-or-n-p "associate this buffer?")
-	    ;; python-shell-get-process-name will return this
-	    (setq-local python-shell-buffer-name session)))
-    buffer
-    ))
+	 (venv (pythonic-python-readable-file-name (concat sshhost venv-raw)))
+	 (pythonpaths (plist-get config :pythonpaths)))
+    (list :cmd cmd :host sshhost :venv venv :pythonpaths pythonpaths
+	  :home default-directory :name config-name)))
 
+(defun gm/run-python ()
+  "Run python using configs specified in `gm/run-python-configs'.
+
+Under the hood, it uses `org-babel-python-initiate-session' instead of `run-python'
+so that the session gets registered for an org-mode session if needed.
+"
+  (interactive)
+  (let* ((config (gm/get-run-python-config))
+	 (sshhost (plist-get config :host))
+	 (default-directory (or (plist-get config :home) sshhost))
+	 (cmd (plist-get config :cmd))
+	 (venv (plist-get config :venv))
+	 (pythonpaths (plist-get config :pythonpaths))
+	 (name (generate-new-buffer-name (plist-get config :name)))
+	 ;; setup and run
+	 ;; used by org-babel-python-initiate-session-by-key
+	 (org-babel-python-command cmd) 
+	 (python-shell-virtualenv-root venv)
+	 (python-shell-extra-pythonpaths pythonpaths)
+	 (session (read-string (format "session (default %s): " name) nil nil name)))
+    (let ((buffer (org-babel-python-initiate-session session)))
+      (cond
+       ((and (derived-mode-p 'python-mode) (y-or-n-p "associate this python buffer?"))
+	;; python-shell-get-process-name will return this
+	(setq-local python-shell-buffer-name session))
+       ((and (derived-mode-p 'org-mode))
+	;; python-shell-get-process-name will return this
+	(message (format "Use `:session %s' in header args manually." session))))
+      (switch-to-buffer-other-window buffer)
+      ;; buffer
+      )))
 
 (defun gm/get-relative-pyroot-filename ()
   "Get filename relative to root. If in dired, return current line, else return buffer file."
@@ -598,7 +628,7 @@ Pipes through jupytext and nbconvert"
 
 ;; run org-babel remote sessions from local ones
 
-(defun org-babel-python-evaluate-session
+(defun gm/org-babel-python-evaluate-session
     (session body &optional result-type result-params)
   "Pass BODY to the Python process in SESSION.
 If RESULT-TYPE equals `output' then return standard output as a
@@ -624,3 +654,5 @@ last statement in BODY, as elisp."
     (org-babel-result-cond result-params
       results
       (org-babel-python-table-or-string results))))
+(advice-add 'org-babel-python-evaluate-session :override #'gm/org-babel-python-evaluate-session)
+
