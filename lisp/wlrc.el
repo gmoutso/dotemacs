@@ -1,3 +1,4 @@
+(require 'wl)
 ;;
 ;; directories
 ;;
@@ -275,13 +276,13 @@
 ;;
 (setq
  ;; use gmail search on All Mail
- wl-quicksearch-folder "%[Gmail]/All Mail:\"george.moutsopoulos@ev.uk\"/clear@imap.gmail.com:993!")
+ wl-quicksearch-folder "%[Gmail]/All Mail:\"george.moutsopoulos@ev.uk\"/xoauth2@imap.gmail.com:993!")
 
 
 ;; default IMAP
 ;; (setq elmo-imap4-default-server "imap.gmail.com"
 ;;       elmo-imap4-default-user "gmoutso@gmail.com"
-;;       elmo-imap4-default-authenticate-type 'clear
+;;       elmo-imap4-default-authenticate-type 'xoauth2
 ;;       elmo-imap4-default-port '993
 ;;       elmo-imap4-default-stream-type 'ssl
 ;;       ;; For non ascii-characters in folder-names
@@ -304,8 +305,8 @@
  ;; All system folders (draft, trash, spam, etc) are placed in the
  ;; [Google Mail]-folder, except inbox. "%" means it's an IMAP-folder
  ;; wl-default-folder "%inbox"
- wl-trash-folder "%[Gmail]/Bin:\"george.moutsopoulos@ev.uk\"/clear@imap.gmail.com:993!"
- wl-draft-folder "%[Gmail]/Drafts:\"george.moutsopoulos@ev.uk\"/clear@imap.gmail.com:993!"
+ wl-trash-folder "%[Gmail]/Bin:\"george.moutsopoulos@ev.uk\"/xoauth2@imap.gmail.com:993!"
+ wl-draft-folder "%[Gmail]/Drafts:\"george.moutsopoulos@ev.uk\"/xoauth2@imap.gmail.com:993!"
  ;; ;; The below is not necessary when you send mail through Gmail's SMTP server,
  ;; wl-fcc
  ;; Mark sent messages as read
@@ -320,7 +321,7 @@
 ;;
 ;; Multiple SMTP
 ;;
-;; wl-draft-parent-folder => %INBOX:myname/clear@imap.gmail.com:993
+;; wl-draft-parent-folder => %INBOX:myname/xoauth2@imap.gmail.com:993
 (setq
  ;; my identities
  wl-from "George Moutsopoulos <george.moutsopoulos@ev.uk>"
@@ -388,8 +389,8 @@
 ;; string = move to string.
 (setq wl-dispose-folder-alist
       '(
-	("^%.*yahoo.*" . "%Trash:\"gmoutso@yahoo.com\"/clear@imap.mail.yahoo.com:993!")
-        ("^%.*gmail.*" . "%[Gmail]/Bin:george.moutsopoulos@ev.uk/clear@imap.gmail.com:993!")
+	("^%.*yahoo.*" . "%Trash:\"gmoutso@yahoo.com\"/xoauth2@imap.mail.yahoo.com:993!")
+        ("^%.*gmail.*" . "%[Gmail]/Bin:george.moutsopoulos@ev.uk/xoauth2@imap.gmail.com:993!")
         ))
 
 
@@ -546,3 +547,13 @@
           (test . "test -n \"$DISPLAY\"")
           ("charset" . "UTF-8"))
          . 1)))
+
+
+;; sasl-xoauth2
+(require 'sasl-xoauth2)
+(require 'oauth2)
+;; 1. install oauth2
+;; 2. set up google api credentials
+;; 3. Set up sasl-xoauth2-host-url-table and sasl-xoauth2-host-user-id-table variables. (done in customize)
+;; 4. When passphrase is asked, input client secret.
+;; 5. set xoauth2 authentication type in wl-folders config file

@@ -137,7 +137,7 @@
 
 ;; plantuml with babel executable
 (setq org-plantuml-jar-path
-      (expand-file-name "~/app/plantuml.1.2020.12.jar"))
+      (expand-file-name "~/app/plantuml-1.2023.1.jar"))
 (setq plantuml-jar-path org-plantuml-jar-path)
 
 ;;; display/update images in the buffer after I evaluate

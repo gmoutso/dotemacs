@@ -390,14 +390,14 @@
 (defvar gm/run-python-configs
   '(("Python[local:egan]"
      :cmd "ipython --simple-prompt -i"
-      :host "~"
+      :host "~/"
       :venv "anaconda3/envs/egan"
       :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
       )
     ("Python[local:banks]"
      :cmd "ipython -i"
-      :host "~"
+      :host "~/"
       :venv "anaconda3/envs/banks"
       :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/master/python")
@@ -494,6 +494,28 @@ so that the session gets registered for an org-mode session if needed.
       (switch-to-buffer-other-window buffer)
       ;; buffer
       )))
+
+(defun gm/read-buffer-with-mode (mode)
+  "Choose a buffer with given major MODE."
+  (interactive)
+  (read-buffer (format "%s buffer: " mode) nil t
+	       (lambda (b) (provided-mode-derived-p
+			    (buffer-local-value 'major-mode (get-buffer b))
+			    mode))))
+
+(defun gm/register-python-buffer-wth-org (&optional buffer)
+  "Use if a python repl was started outside org.
+
+BUFFER is an inferior-python buffer name.
+
+After doing this, one can simply put :session buffer in org source blocks.
+This is not needed if a python repl was started with `gm/run-python'.
+This is necessary if a python repl was started with built-in `run-python'.
+"
+  (interactive)
+  (let (buffer (or buffer (gm/read-buffer-with-mode 'inferior-python-mode)))
+    (with-current-buffer buffer
+      (setq-local org-babel-python--initialized t))))
 
 (defun gm/get-relative-pyroot-filename ()
   "Get filename relative to root. If in dired, return current line, else return buffer file."

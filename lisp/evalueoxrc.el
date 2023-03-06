@@ -1,4 +1,6 @@
 (require 'ox)
+
+(add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
 (use-package ox-latex
   :custom
   ;; minted needs -shell-escape
@@ -10,6 +12,8 @@
   )
 ;; use minted for org source blocks
 (setq org-latex-listings 'minted)
+(setq org-latex-listings 'listings)
+
 (add-to-list 'org-latex-packages-alist '("" "minted"))
 (add-to-list 'org-latex-packages-alist '("" "listings"))
 (add-to-list 'org-latex-packages-alist '("" "color"))

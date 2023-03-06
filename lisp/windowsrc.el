@@ -65,6 +65,7 @@
 ;; (add-hook 'org-mode-hook 'variable-pitch-mode)
 ;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
 ;; (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
+(setq tab-bar-new-tab-choice "*scratch*")
 
 
 (windmove-default-keybindings 'shift)

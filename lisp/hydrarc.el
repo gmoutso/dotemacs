@@ -78,9 +78,9 @@ more org rifle..\n"
    "Visibility"
    (("tl" org-toggle-link-display "toggle links")
     ("ti" org-toggle-inline-images "toggle images")
-    ("ir" gm/org-display-inline-images "refresh images")
+    ("ir" gm/org-display-inline-images "images refresh")
     ("ts" org-fold-hide-block-all "hide blocks")
-    ("ri" gm/org-resize-images "resize images")
+    ("is" gm/org-resize-images "images size")
      
     )
    "Jump"
