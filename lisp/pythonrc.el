@@ -387,6 +387,9 @@
     (conda-env-activate)
     (run-python nil dedicated (not notshow))))
 
+;; (add-to-list 'tramp-remote-process-environment (format "DISPLAY=%s" (getenv "DISPLAY")))
+;; (setq tramp-remote-process-environment '("ENV=''" "TMOUT=0" "LC_CTYPE=''" "CDPATH=" "HISTORY=" "MAIL=" "MAILCHECK=" "MAILPATH=" "PAGER=cat" "autocorrect=" "correct="))
+
 (defvar gm/run-python-configs
   '(("Python[local:egan]"
      :cmd "ipython --simple-prompt -i"

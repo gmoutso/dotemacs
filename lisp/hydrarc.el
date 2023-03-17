@@ -21,7 +21,7 @@
     )
    "Places"
    (("p" helm-projectile "projects") 
-    ("B" helm-filtered-bookmarks "bookmarks")
+    ("b" helm-filtered-bookmarks "bookmarks")
     ("t" treemacs "treemacs"))
    "Org"
    (
@@ -327,6 +327,7 @@ _m_ (_M_): set mark (jump)                 _q_: quit
    (("f" flycheck-list-errors "flycheck")
     ("g" gtags-find-tag "gtags")
     ("e" conda-env-activate "activate env")
+    ("r" org-recipes "recipes")
     )
    "LSP"
    (("ll" lsp "LSP")

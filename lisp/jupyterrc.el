@@ -188,6 +188,16 @@
 			     ("show" . gm/jupyter-page-object))
 		   ))))
 
+
+(defun gm/ipynb-to-html-with-nbconvert (filename)
+  (with-temp-buffer
+    (insert-file-contents filename)
+    (shell-command-on-region (point-min) (point-max)
+       "/home/moutsopoulosg/anaconda3/envs/egan/bin/jupyter-nbconvert --to html --log-level WARN --stdout --stdin"
+       nil 'no-mark)
+    (buffer-string)
+    ))
+
 (defun gm/shr-open-ipynb (&optional filename)
   "Open ipynb file as html.
 
