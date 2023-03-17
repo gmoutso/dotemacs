@@ -80,12 +80,13 @@
   (dired-omit-files "\\`[.]?[#~]")
   )
 
-(defun gm/dired-insert-subdir-glob (&optional glob)
-  (interactive)
+(defun gm/dired-insert-subdirs-using-glob (&optional glob)
+  "In a dired buffer insert subdirs using a GLOB eg `*/output'.
+"
+  (interactive nil 'dired-mode)
   (let* ((glob (or glob (read-string "glob: ")))
 	 (paths (f-glob glob))
 	 (subdirs (seq-filter 'file-directory-p paths)))
     (dolist (subdir subdirs)
-      (dired-maybe-insert-subdir subdir)
-	    )
+      (dired-maybe-insert-subdir subdir))
     ))
