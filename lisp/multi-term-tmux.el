@@ -154,11 +154,11 @@ If option SPECIAL-SHELL is `non-nil', will use shell from user input."
   (interactive)
   (let* ((user+host (or user+host (read-string "[user@]host: ")))
 	(session-name (or session-name
-			  (multi-term-tmux-remote-choose-session user+host)))
+			  (gm/multi-term-tmux-remote-choose-session user+host)))
 	(term-name (or buffer-name (format "*tmux-%s:%s" user+host session-name))))
   (multi-term-tmux-remote-get term-name session-name user+host)))
-
-(defun multi-term-tmux-remote-choose-session (user+host)
+(defalias 'gm/term-tmux-remote 'multi-term-tmux-remote-open)
+(defun gm/multi-term-tmux-remote-choose-session (user+host)
   (let ((tmuxls (multi-term-tmux-sessions user+host)))
   (completing-read "session (default emacs-session): " tmuxls nil nil nil nil "emacs-session")
   ))
