@@ -116,6 +116,7 @@
 If option SPECIAL-SHELL is `non-nil', will use shell from user input."
   (with-temp-buffer
     (setq tmuxls (multi-term-tmux-sessions))
+
     (if (member session-name tmuxls)
 	(make-term term-name "tmux" nil "attach" "-t" session-name)
     (make-term term-name "tmux" nil "new" "-s" session-name))
@@ -130,11 +131,14 @@ If option SPECIAL-SHELL is `non-nil', will use shell from user input."
   "Get term buffer.
 If option SPECIAL-SHELL is `non-nil', will use shell from user input."
   (with-temp-buffer
-    (if (member session-name (multi-term-tmux-sessions user+host))
+    (setq tmuxls (multi-term-tmux-sessions user+host))
+
+    (if (member session-name tmuxls)
 	(make-term term-name "ssh"  nil user+host "-t" "tmux" "attach" "-t"
 		   session-name)
     (make-term term-name "ssh" nil user+host "-t" "tmux" "new" "-s" session-name))
     (setq term-name (concat "*" term-name "*"))
+
     (with-current-buffer term-name
         (multi-term-internal))
     (switch-to-buffer term-name)
@@ -147,21 +151,19 @@ If option SPECIAL-SHELL is `non-nil', will use shell from user input."
   ;; get a special buffer
   (setq term-name (or buffer-name (format "localhost-tmux-%s" multi-term-tmux-name)))
   (setq session-name (or session-name multi-term-tmux-name))
+
   (multi-term-tmux-get term-name session-name))
 
-(defun multi-term-tmux-remote-open (&optional user+host session-name buffer-name)
+
+(defun multi-term-tmux-remote-open (user+host &optional session-name buffer-name)
   "Input: provide USER+HOST, SESSION-NAME."
   (interactive)
-  (let* ((user+host (or user+host (read-string "[user@]host: ")))
-	(session-name (or session-name
-			  (gm/multi-term-tmux-remote-choose-session user+host)))
-	(term-name (or buffer-name (format "*tmux-%s:%s" user+host session-name))))
-  (multi-term-tmux-remote-get term-name session-name user+host)))
-(defalias 'gm/term-tmux-remote 'multi-term-tmux-remote-open)
-(defun gm/multi-term-tmux-remote-choose-session (user+host)
-  (let ((tmuxls (multi-term-tmux-sessions user+host)))
-  (completing-read "session (default emacs-session): " tmuxls nil nil nil nil "emacs-session")
-  ))
+
+  (setq term-name (or buffer-name (format "%s-tmux-%s" user+host multi-term-tmux-name)))
+  (setq session-name (or session-name multi-term-tmux-name))
+
+  (multi-term-tmux-remote-get term-name session-name user+host))
+
 
 ;; End:
 (provide 'multi-term-tmux)
