@@ -13,7 +13,6 @@
             (or project-name "-"))))
 (setq projectile-mode-line-function 'gm/projectile-default-mode-line)
 
-
 ;; mode-icons
 ;(setq mode-icons-change-mode-name nil)
 ;(require 'mode-icons)

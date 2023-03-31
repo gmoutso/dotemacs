@@ -193,7 +193,7 @@
   (with-temp-buffer
     (insert-file-contents filename)
     (shell-command-on-region (point-min) (point-max)
-       "/home/moutsopoulosg/anaconda3/envs/egan/bin/jupyter-nbconvert --to html --log-level WARN --stdout --stdin"
+       "/home/moutsopoulosg/anaconda3/envs/egan/bin/jupyter-nbconvert --to html --log-level ERROR --stdout --stdin"
        nil 'no-mark)
     (buffer-string)
     ))
@@ -201,7 +201,7 @@
 (defun gm/shr-open-ipynb (&optional filename)
   "Open ipynb file as html.
 
-Opens either file name at point (if in dired), current file (if .ipynb) or via find-file."
+Opens either file name at point (if in dired), current file (if .ipynb) or via find-file. Creates two buffers, html and shr."
   (interactive)
   (let* ((filename (cond
 		   (filename filename)
@@ -211,16 +211,12 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
 		    buffer-file-name)
 		   (t (read-file-name "ipynb file: "))))
 	 (shortname (file-name-nondirectory filename))
-	 (command (format "jupyter nbconvert --to html --log-level WARN --stdout %s" filename))
-	 (html-buffer (concat (file-name-sans-extension shortname) ".html"))
-	 (error-buffer (format "*stdout %s*" html-buffer)))
-    (with-temp-buffer
-      (insert-file-contents filename)
-      (shell-command-on-region (point-min) (point-max)
-			       "jupyter nbconvert --to html --log-level WARN --stdout --stdin"
-			       nil 'no-mark error-buffer)
-      (shr-render-buffer (current-buffer))
-      )
+	 (html-buffer (generate-new-buffer
+		       (concat (file-name-sans-extension shortname) ".html"))))
+    (with-current-buffer html-buffer
+      (insert (gm/ipynb-to-html-with-nbconvert filename))
+      (html-mode))
+    (shr-render-buffer html-buffer)
     (with-current-buffer "*html*"
       (rename-buffer shortname 'unique)
       (read-only-mode t))

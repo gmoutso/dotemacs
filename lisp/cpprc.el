@@ -12,18 +12,6 @@
 (require 'helm-projectile)
 (helm-projectile-on)
 (setq projectile-switch-project-action 'helm-projectile-find-file)
-(add-to-list 'projectile-globally-ignored-directories "html")
-(add-to-list 'projectile-globally-ignored-directories "tmp")
-;; do not show projectile always on modeline if not in a project
-(setq projectile-mode-line
-      '(:eval (if (projectile-project-p)
-                  (format " Proj[%s]"
-                          (projectile-project-name))
-                "")))
-;; default switch project is to select file in project
-;(setq projectile-switch-project-action 'projectile-dired)
-;; need this to accept wild cards in ignore files
-;; however it is said to be slow!
 (setq projectile-indexing-method 'native)
 
 ;; CEDET

@@ -3,12 +3,14 @@
 ;;
 ;; see also keys.el!!!
 ;; (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
-(pixel-scroll-mode)
-;; (good-scroll-mode)
-(setq pixel-dead-time 0) ; Never go back to the old scrolling behaviour.
-(setq pixel-resolution-fine-flag t) ; Scroll by number of pixels instead of lines (t = frame-char-height pixels).
-(setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
-(setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
+(use-package pixel-scroll
+  :custom
+  (pixel-dead-time 0) ; Never go back to the old scrolling behaviour.
+  (pixel-resolution-fine-flag t) ; Scroll by number of pixels instead of lines
+  )
+;; (pixel-scroll-mode)  ;; does not work with fixed position scrolling?
+;; (setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
+;; (setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
 
 (scroll-bar-mode 0)
 
@@ -213,17 +215,45 @@ buffer in current window."
    (current-buffer)))
 
 ;; tabspaces
-(use-package tabspaces
-  ;; use this next line only if you also use straight, otherwise ignore it. 
-  ;; :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
-  :commands (tabspaces-switch-or-create-workspace
-             tabspaces-open-or-create-project-and-workspace)
-  :custom
-  ;; (tabspaces-use-filtered-buffers-as-default t)
-  (tabspaces-default-tab "Default")
-  (tabspaces-remove-to-default t)
-  (tabspaces-include-buffers '("*scratch*"))
-  ;; sessions
-  ;; (tabspaces-session t)
-  ;; (tabspaces-session-auto-restore t)
-  )
+;; tabspaces is too focused on project.el
+;; (use-package tabspaces
+;;   :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+;;   :commands (tabspaces-switch-or-create-workspace
+;;              tabspaces-open-or-create-project-and-workspace)
+;;   :custom
+;;   ;; (tabspaces-use-filtered-buffers-as-default t)
+;;   (tabspaces-default-tab "Default")
+;;   (tabspaces-remove-to-default t)
+;;   (tabspaces-include-buffers '("*scratch*"))
+;;   ;; sessions
+;;   ;; (tabspaces-session t)
+;;   ;; (tabspaces-session-auto-restore t)
+;;   )
+(use-package bufferlo
+  :config
+  (bufferlo-mode t))
+;; (defvar bufferlo-keymap-prefix "C-c TAB")
+;; (defvar bufferlo-command-map
+;;   (let ((map (make-sparse-keymap)))
+;;     ;; (define-key map (kbd "C") 'tabspaces-clear-buffers)
+;;     ;; (define-key map (kbd "b") 'tabspaces-switch-to-buffer)
+;;     ;; (define-key map (kbd "d") 'tabspaces-close-workspace)
+;;     ;; (define-key map (kbd "k") 'tabspaces-kill-buffers-close-workspace)
+;;     ;; (define-key map (kbd "o") 'tabspaces-open-or-create-project-and-workspace)
+;;     ;; (define-key map (kbd "r") 'tabspaces-remove-current-buffer)
+;;     ;; (define-key map (kbd "R") 'tabspaces-remove-selected-buffer)
+;;     ;; (define-key map (kbd "s") 'tabspaces-switch-or-create-workspace)
+;;     ;; (define-key map (kbd "t") 'tabspaces-switch-buffer-and-tab)
+;;     map)
+;;   "Keymap for bufferlo commands after `bufferlo-keymap-prefix'.")
+;; (fset 'bufferlo-command-map bufferlo-command-map)
+;; (defvar bufferlo-mode-map
+;;   (let ((map (make-sparse-keymap)))
+;;     (when bufferlo-keymap-prefix
+;;       (define-key map (kbd bufferlo-keymap-prefix) 'bufferlo-command-map))
+;;     map)
+;;   "Keymap for Tabspaces mode.")
+(general-define-key
+ :prefix "C-x t"
+ "b" 'bufferlo-switch-to-buffer)
+(use-package tab-bookmark)

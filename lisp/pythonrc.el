@@ -506,6 +506,13 @@ so that the session gets registered for an org-mode session if needed.
 			    (buffer-local-value 'major-mode (get-buffer b))
 			    mode))))
 
+(defun gm/associate-repl-with-python-buffer (&optional repl-buffer)
+  (interactive nil 'python-mode)
+  (let* ((repl-buffer (or repl-buffer (gm/read-buffer-with-mode 'inferior-python-mode)))
+	(session (org-babel-python-without-earmuffs repl-buffer)))
+  (setq-local python-shell-buffer-name session)
+  ))
+
 (defun gm/register-python-buffer-wth-org (&optional buffer)
   "Use if a python repl was started outside org.
 
@@ -516,7 +523,7 @@ This is not needed if a python repl was started with `gm/run-python'.
 This is necessary if a python repl was started with built-in `run-python'.
 "
   (interactive)
-  (let (buffer (or buffer (gm/read-buffer-with-mode 'inferior-python-mode)))
+  (let ((buffer (or buffer (gm/read-buffer-with-mode 'inferior-python-mode))))
     (with-current-buffer buffer
       (setq-local org-babel-python--initialized t))))
 
