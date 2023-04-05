@@ -128,3 +128,13 @@ image-mode buffers."
 	 (next-line)
 	 (yank)
 	 ))
+
+(defun gm/edit-path ()
+  (interactive)
+  (let* ((is-file (buffer-file-name))
+	 (old-path (or (buffer-file-name) default-directory))
+	 (new-path (read-string "new path: " old-path)))
+    (cond ((eq major-mode 'eshell-mode) (eshell/cd new-path))
+	  ((eq major-mode 'shell-mode) (insert (format "cd %s" new-path)))
+	  ((find-file new-path))))
+ )
