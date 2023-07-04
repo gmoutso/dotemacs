@@ -130,6 +130,9 @@ image-mode buffers."
 	 ))
 
 (defun gm/edit-path ()
+  "Allows a minibuffer edit of path to open new file.
+
+Keeps old as is."
   (interactive)
   (let* ((is-file (buffer-file-name))
 	 (old-path (or (buffer-file-name) default-directory))

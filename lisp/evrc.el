@@ -205,7 +205,6 @@ If remote, returns hostname removing any ssh protocol."
 	(func (if arg 'find-file 'find-alternate-file))
 	)
     (funcall func (replace-regexp-in-string from-string worktree-path filename nil t))))
-(defalias  'gm/ev-replace-worktree 'gm/ev-change-worktree)
 (defalias  'gm/ev-switch-worktree 'gm/ev-change-worktree)
 
 ;; (defun gm/ev-replace-dev-root (arg)

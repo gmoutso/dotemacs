@@ -16,6 +16,7 @@
   (org-pretty-entities t)
   (org-appear-autoentities t) ;; relavent if org-appear-inside-latex
   (org-appear-autosubmarkers t) ;; relavent if org-appear-inside-latex
+  (org-appear-delay 2)
   ) 
 ;; toggle latex framgents when cursor is on them
 (use-package org-fragtog

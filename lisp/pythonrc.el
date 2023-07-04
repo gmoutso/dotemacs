@@ -395,76 +395,75 @@
      :cmd "ipython --simple-prompt -i"
       :host "~/"
       :venv "anaconda3/envs/egan"
-      :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
       )
     ("Python[local:banks]"
      :cmd "ipython -i"
       :host "~/"
       :venv "anaconda3/envs/banks"
-      :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/master/python")
-     )
+      )
+    ("Python[local:dick]"
+     :cmd "ipython"
+      :host "~/"
+      :venv "anaconda3/envs/dick"
+      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+      )
     ("Python[phil:banks]"
-      :cmd "ipython -i"
+      :cmd "ipython"
       :host "/ssh:phil:"
       :venv "miniconda/envs/banks"
-      :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/master/python")
       )
      ("Python[phil:egan]"
       :cmd "ipython -i --simple-prompt"
       :host "/ssh:phil:"
       :venv "miniconda/envs/egan"
-      :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
       )
      ("Python[phil:dick]"
       :cmd "ipython -i"
       :host "/ssh:phil:"
       :venv "miniconda/envs/dick"
-      :home nil
       :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
       )
     ("Python[beowulf@ted:banks]"
       :cmd "ipython -i"
       :host "/ssh:beowulf@ted:"
       :venv "miniconda/envs/banks"
-      :home nil
       :pythonpaths ("/home/beowulf/dev/master/python")
       )
+    ("Python[beowulf@ted:egan]"
+      :cmd "ipython -i --simple-prompt"
+      :host "/ssh:beowulf@ted:"
+      :venv "miniconda3/envs/egan"
+      :pythonpaths ("/home/beowulf/dev/py36/python")
+      )
+    ("Python[test-docdb:banks]"
+     :cmd "ipython"
+     :host "/ssh:test-docdb:"
+     :venv "miniconda/envs/banks"
+     :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
+     )
+    ("Python[gm_aws_migration:banks]"
+     :cmd "ipython"
+     :host "/ssh:gm_aws_migration:"
+     :venv "miniconda/envs/banks"
+     :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
+     )
      )
   "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `gm/run-python' but nned not be remote.")
 
-;; (defun gm/get-run-python-config-alt ()
-;;   (let* ((host (completing-read "host:" gm/run-python-configs-alt nil t))
-;; 	 (configs (cdr (assoc host gm/run-python-configs-alt)))
-;; 	 (config-select (if (= 1 (seq-length configs)) (car (car configs))
-;; 			 (completing-read "host:" configs nil t)))
-;; 	 (config (cdr (assoc config-select configs)))
-;; 	 (sshhost (plist-get config :host))
-;; 	 (default-directory (or (plist-get config :home) sshhost))
-;; 	 (cmd (plist-get config :cmd))
-;; 	 (venv-raw (plist-get config :venv))
-;; 	 (venv (pythonic-python-readable-file-name (concat sshhost venv-raw)))
-;; 	 (pythonpaths (plist-get config :pythonpaths))
-;; 	 (candidate-session-names (list host
-;; 					(format "%s:%s" host config-select)
-;; 					python-shell-buffer-name)))
-;;     (list :cmd cmd :host host :venv venv :pythonpaths pythonpaths
-;; 	  :home default-directory)
-;;     ))
 (defun gm/get-run-python-config ()
-  (let* ((config-name (completing-read "config: " gm/run-python-configs nil t))
-	 (config (cdr (assoc config-name gm/run-python-configs)))
-	 (sshhost (plist-get config :host))
-	 (default-directory (or (plist-get config :home) sshhost))
+  (let* ((name (completing-read "config: " gm/run-python-configs nil t))
+	 (config (cdr (assoc name gm/run-python-configs)))
+	 (host (plist-get config :host))
 	 (cmd (plist-get config :cmd))
 	 (venv-raw (plist-get config :venv))
-	 (venv (pythonic-python-readable-file-name (concat sshhost venv-raw)))
+	 (venv (pythonic-python-readable-file-name (concat host venv-raw)))
 	 (pythonpaths (plist-get config :pythonpaths)))
-    (list :cmd cmd :host sshhost :venv venv :pythonpaths pythonpaths
-	  :home default-directory :name config-name)))
+    (list :cmd cmd :host host :venv venv :pythonpaths pythonpaths
+	  :name name)))
 
 (defun gm/run-python ()
   "Run python using configs specified in `gm/run-python-configs'.
@@ -474,20 +473,24 @@ so that the session gets registered for an org-mode session if needed.
 "
   (interactive)
   (let* ((config (gm/get-run-python-config))
-	 (sshhost (plist-get config :host))
-	 (default-directory (or (plist-get config :home) sshhost))
+	 (host (plist-get config :host))
+	 (default-directory host)
 	 (cmd (plist-get config :cmd))
 	 (venv (plist-get config :venv))
 	 (pythonpaths (plist-get config :pythonpaths))
-	 (name (generate-new-buffer-name (plist-get config :name)))
-	 ;; setup and run
-	 ;; used by org-babel-python-initiate-session-by-key
-	 (org-babel-python-command cmd) 
-	 (python-shell-virtualenv-root venv)
-	 (python-shell-extra-pythonpaths pythonpaths)
-	 (session (read-string (format "session (default %s): " name) nil nil name)))
-    (let ((buffer (org-babel-python-initiate-session session)))
-      (cond
+	 (name (plist-get config :name)))
+    (gm/run-python-with-args host cmd venv pythonpaths name)))
+
+(defun gm/run-python-with-args
+    (host &optional cmd venv pythonpaths name)
+  (let* ((name (generate-new-buffer-name (or name "Python")))
+	 (org-babel-python-command (or cmd "ipython")) 
+	 (python-shell-virtualenv-root (or venv "."))
+	 (python-shell-extra-pythonpaths (or pythonpaths (list)))
+	 (session (read-string (format "session (default %s): " name) nil nil name))
+	 (default-directory host)
+	 (buffer (org-babel-python-initiate-session session)))
+    (cond
        ((and (derived-mode-p 'python-mode) (y-or-n-p "associate this python buffer?"))
 	;; python-shell-get-process-name will return this
 	(setq-local python-shell-buffer-name session))
@@ -496,7 +499,7 @@ so that the session gets registered for an org-mode session if needed.
 	(message (format "Use `:session %s' in header args manually." session))))
       (switch-to-buffer-other-window buffer)
       ;; buffer
-      )))
+      ))
 
 (defun gm/read-buffer-with-mode (mode)
   "Choose a buffer with given major MODE."
@@ -545,7 +548,8 @@ This is necessary if a python repl was started with built-in `run-python'.
   (let* ((filename (gm/get-relative-pyroot-filename))
 	 (dotted-filename (string-replace "/" "." filename))
 	 (module (replace-regexp-in-string "\\.py$" "" dotted-filename))
-	 (pydef (python-info-current-defun))
+	 (pydef (or (python-info-current-defun)
+		    (python-info-current-symbol)))
 	 (module-pydef (concat module "::" pydef))
 	 (module-pydef (replace-regexp-in-string "^.*python\\.ev\\." "ev." module-pydef)))
     module-pydef

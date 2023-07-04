@@ -14,6 +14,12 @@
 
 (scroll-bar-mode 0)
 
+;;scroll window up/down by one line
+;; (setq scroll-preserve-screen-position 1) ; set in custom.el
+(global-set-key (kbd "M-n") (kbd "C-u 1 C-v"))
+(global-set-key (kbd "M-p") (kbd "C-u 1 M-v"))
+
+
 ;;
 ;; winner undo
 ;;
@@ -56,8 +62,10 @@
 ;;
 ;; tab-bar-mode
 ;;
-(defun tab-bar-rename-after-create (&rest _) (call-interactively #'tab-bar-rename-tab))
-(add-hook 'tab-bar-tab-post-open-functions 'tab-bar-rename-after-create)
+;; rename tab bar after creation
+;; (defun tab-bar-rename-after-create (&rest _) (call-interactively #'tab-bar-rename-tab))
+;; (add-hook 'tab-bar-tab-post-open-functions 'tab-bar-rename-after-create)
+
 ;; (variable-pitch-mode 0)
 ;; (use-package mixed-pitch
 ;;   :hook
@@ -216,44 +224,25 @@ buffer in current window."
 
 ;; tabspaces
 ;; tabspaces is too focused on project.el
-;; (use-package tabspaces
-;;   :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
-;;   :commands (tabspaces-switch-or-create-workspace
-;;              tabspaces-open-or-create-project-and-workspace)
-;;   :custom
-;;   ;; (tabspaces-use-filtered-buffers-as-default t)
-;;   (tabspaces-default-tab "Default")
-;;   (tabspaces-remove-to-default t)
-;;   (tabspaces-include-buffers '("*scratch*"))
-;;   ;; sessions
-;;   ;; (tabspaces-session t)
-;;   ;; (tabspaces-session-auto-restore t)
-;;   )
-(use-package bufferlo
-  :config
-  (bufferlo-mode t))
-;; (defvar bufferlo-keymap-prefix "C-c TAB")
-;; (defvar bufferlo-command-map
-;;   (let ((map (make-sparse-keymap)))
-;;     ;; (define-key map (kbd "C") 'tabspaces-clear-buffers)
-;;     ;; (define-key map (kbd "b") 'tabspaces-switch-to-buffer)
-;;     ;; (define-key map (kbd "d") 'tabspaces-close-workspace)
-;;     ;; (define-key map (kbd "k") 'tabspaces-kill-buffers-close-workspace)
-;;     ;; (define-key map (kbd "o") 'tabspaces-open-or-create-project-and-workspace)
-;;     ;; (define-key map (kbd "r") 'tabspaces-remove-current-buffer)
-;;     ;; (define-key map (kbd "R") 'tabspaces-remove-selected-buffer)
-;;     ;; (define-key map (kbd "s") 'tabspaces-switch-or-create-workspace)
-;;     ;; (define-key map (kbd "t") 'tabspaces-switch-buffer-and-tab)
-;;     map)
-;;   "Keymap for bufferlo commands after `bufferlo-keymap-prefix'.")
-;; (fset 'bufferlo-command-map bufferlo-command-map)
-;; (defvar bufferlo-mode-map
-;;   (let ((map (make-sparse-keymap)))
-;;     (when bufferlo-keymap-prefix
-;;       (define-key map (kbd bufferlo-keymap-prefix) 'bufferlo-command-map))
-;;     map)
-;;   "Keymap for Tabspaces mode.")
-(general-define-key
- :prefix "C-x t"
- "b" 'bufferlo-switch-to-buffer)
+(use-package tabspaces
+  :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+  :commands (tabspaces-switch-or-create-workspace
+             tabspaces-open-or-create-project-and-workspace)
+  :custom
+  ;; (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-default-tab "Default")
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*"))
+  ;; sessions
+  ;; (tabspaces-session t)
+  ;; (tabspaces-session-auto-restore t)
+  )
+
+;; (use-package bufferlo
+;;   :config
+;;   (bufferlo-mode t))
+;; (general-define-key
+;;  :prefix "C-x t"
+;;  "b" 'bufferlo-switch-to-buffer)
+
 (use-package tab-bookmark)
