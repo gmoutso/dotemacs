@@ -13,8 +13,9 @@
   (conda-env-initialize-eshell)
   ;; if you want auto-activation (add conda-project-env-name in .dir-locals), include:
   ;; (conda-env-autoactivate-mode) or (eval . (conda-env-autoactivate-mode)) or add to python hook
+  (conda-env-autoactivate-mode t)
   )
-(add-hook 'python-mode-hook 'conda-env-autoactivate-mode)
+;; (add-hook 'python-mode-hook 'conda-env-activate-for-buffer)
 
 ;; https://github.com/necaris/conda.el/issues/104
 ;; (defun me/conda--get-path-prefix (env-dir)
@@ -64,8 +65,6 @@
   :custom
   (lsp-pyright-python-executable-cmd "~/anaconda3/envs/emacs/bin/python")
   )
-;; (gm/with-emacs-venv-advice-remove 'lsp)
-
 (use-package blacken
   :custom
   (blacken-executable "/home/moutsopoulosg/anaconda3/envs/emacs/bin/black"))
