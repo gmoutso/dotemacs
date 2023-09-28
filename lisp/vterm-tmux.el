@@ -4,7 +4,7 @@
 
 ;; Author: Oliver J. Mead <olivermead@olivermead.xyz>
 ;; Keywords: terminals, convenience
-;; Version: 0.3.2
+;; Version: 0.4.0
 ;; Package-Requires (vterm multi-vterm)
 ;; URL: https://github.com/OliverMead/vterm-tmux
 
@@ -113,7 +113,7 @@ SESSION: the name of the buffer's TMux session."
 (defun tmux-session-split (session-list)
   "Parse SESSION-LIST (tmux list-sessions output) for session names."
   (cl-loop for line in (split-string session-list "\n" t)
-             collect (car (split-string line ":" t))))
+           collect (car (split-string line ":" t))))
 
 (defun vterm-tmux-list-sessions ()
   "List (tmux) sessions running, respecting `default-directory'."
@@ -126,20 +126,23 @@ SESSION: the name of the buffer's TMux session."
   "Attach to a (possibly remote) tmux session.
 TERM indicates the name for the new terminal
 SESSION indicates the tmux session to attach to"
-  (let ((vterm-buffer-name-string (concat "*" term "*")))
+  (let ((vterm-buffer-name-string (concat "*" term "*"))
+        (tmux-command (concat "( exec </dev/tty; exec <&1;"
+                              (vterm-tmux-env) " tmux "
+                              vterm-tmux-connection-method " "
+                              session " )")))
     (if (get-buffer vterm-buffer-name-string)
         (switch-to-buffer vterm-buffer-name-string)
       (with-temp-buffer
-          ;; (setq tmux-sessions (multi-tmux-list-sessions host))
-          (let ((vterm-shell (concat vterm-shell " -c \'"
-                                     (vterm-tmux-env) " tmux "
-                                     vterm-tmux-connection-method " "
-                                     session "\'"))
-                (vterm-buffer-name-string (concat "*" term "*")))
-            (vterm vterm-buffer-name-string)
-            (with-current-buffer vterm-buffer-name-string
-              (multi-vterm-internal))
-            vterm-buffer-name-string)))))
+        (let* ((vterm-shell (concat vterm-shell " -c \'" tmux-command "\'"))
+               )
+          (message vterm-shell)
+          (vterm vterm-buffer-name-string)
+          (with-current-buffer vterm-buffer-name-string
+            (if (ignore-errors (file-remote-p default-directory)) ;; temporary fix
+                (vterm-send-string (concat tmux-command "\n")))
+            (multi-vterm-internal))
+          vterm-buffer-name-string)))))
 
 (defun vterm-tmux (&optional dir session-opt bufname)
   "(Interactively) attach to tmux session SESSION-OPT in directory DIR.
@@ -154,7 +157,7 @@ conforming to TRAMP file-name syntax (including multi-hop)"
          (let*
              ((default-directory (or host-inp default-directory))
               (coll (vterm-tmux-list-sessions)))
-            (setq session-inp
+           (setq session-inp
                  (completing-read
                   "Session: " coll nil nil nil nil
                   vterm-tmux-default-session)))
@@ -162,7 +165,7 @@ conforming to TRAMP file-name syntax (including multi-hop)"
 
   (let* ((default-directory (file-name-directory (or dir default-directory)))
          (filename-tramp (when (tramp-tramp-file-p default-directory)
-                             (tramp-dissect-file-name default-directory)))
+                           (tramp-dissect-file-name default-directory)))
          (hostname (if filename-tramp
                        (tramp-file-name-host filename-tramp)
                      vterm-tmux-default-hostname))

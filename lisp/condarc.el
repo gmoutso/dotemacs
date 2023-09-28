@@ -15,6 +15,9 @@
   ;; (conda-env-autoactivate-mode) or (eval . (conda-env-autoactivate-mode)) or add to python hook
   (conda-env-autoactivate-mode t)
   )
+;; conda-env-autoactivate-mode is good but changes exec-path whenever buffer is switched
+;; when file is originally opened, the conda environment is not set
+(add-hook 'find-file-hook 'conda-env-activate-for-buffer)
 ;; (add-hook 'python-mode-hook 'conda-env-activate-for-buffer)
 
 ;; https://github.com/necaris/conda.el/issues/104

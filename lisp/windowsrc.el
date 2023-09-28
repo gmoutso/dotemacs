@@ -57,7 +57,8 @@
 			      "Bury buffers" 'gm/tab-line-bury-marked-buffers-action))))
       (helm-add-action-to-source "Bury buffers" 'gm/tab-line-bury-marked-buffers-action source)
       (helm :sources source)))
-(global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
+;; (global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
+
 
 ;;
 ;; tab-bar-mode
@@ -224,8 +225,22 @@ buffer in current window."
 
 ;; tabspaces
 ;; tabspaces is too focused on project.el
+(defun gm/tabspaces-make-default-tab ()
+  (when tabspaces-default-tab
+    (if (member tabspaces-default-tab (tabspaces--list-tabspaces))
+	(tab-switch tabspaces-default-tab)
+      (tab-bar-rename-tab tabspaces-default-tab))))
+(defun gm/tabspaces-new-tab-and-rename ()
+  (interactive)
+  (tab-new)
+  (tab-rename (read-from-minibuffer "New tab name: "))
+  )
+(general-def
+  [remap tab-new] (cons "new tab" 'gm/tabspaces-new-tab-and-rename))
 (use-package tabspaces
-  :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+  :hook
+  (after-init . tabspaces-mode)
+  (server-after-make-frame . gm/tabspaces-make-default-tab)
   :commands (tabspaces-switch-or-create-workspace
              tabspaces-open-or-create-project-and-workspace)
   :custom
@@ -236,13 +251,21 @@ buffer in current window."
   ;; sessions
   ;; (tabspaces-session t)
   ;; (tabspaces-session-auto-restore t)
+  :general
+  (:keymaps 'tabspaces-mode-map
+   :prefix "C-c TAB"
+   ;; "2" (cons "new tab" 'gm/tabspaces-new-tab-and-rename)
+   ;; "b" (cons "tabspace buffer" 'gm/helm-switch-to-workspace-buffers) ;; in helmrc.el
+   )
   )
+(which-key-add-key-based-replacements "C-c TAB s" "tab switch/create")
+(which-key-setup-side-window-right-bottom)
+
 
 ;; (use-package bufferlo
 ;;   :config
-;;   (bufferlo-mode t))
-;; (general-define-key
-;;  :prefix "C-x t"
-;;  "b" 'bufferlo-switch-to-buffer)
+;;   (bufferlo-mode t)
+;; :general :prefix "C-x t" "b" 'bufferlo-switch-to-buffer
+;; )
 
 (use-package tab-bookmark)

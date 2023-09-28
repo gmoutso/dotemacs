@@ -56,9 +56,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Use Okular as the pdf viewer
-(setq TeX-view-program-selection
- '((output-pdf "PDF Viewer")))
-(setq TeX-view-program-list '(("PDF Viewer" "okular --unique %o#src:%n%b")))
+;; (setq TeX-view-program-selection
+;;  '((output-pdf "PDF Viewer")))
+;; (setq TeX-view-program-list '(("PDF Viewer" "okular --unique %o#src:%n%b")))
 ;(defun pdfokular ()
 ;   (add-to-list 'TeX-output-view-style
 ;                 '("^pdf$" "." "okular %o %(outpage)")))

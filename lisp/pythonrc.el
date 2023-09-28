@@ -389,14 +389,15 @@
 
 ;; (add-to-list 'tramp-remote-process-environment (format "DISPLAY=%s" (getenv "DISPLAY")))
 ;; (setq tramp-remote-process-environment '("ENV=''" "TMOUT=0" "LC_CTYPE=''" "CDPATH=" "HISTORY=" "MAIL=" "MAILCHECK=" "MAILPATH=" "PAGER=cat" "autocorrect=" "correct="))
+;; (alist :key-type string :value-type (plist ???))
 
 (defvar gm/run-python-configs
   '(("Python[local:egan]"
      :cmd "ipython --simple-prompt -i"
-      :host "~/"
-      :venv "anaconda3/envs/egan"
-      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
-      )
+     :host "~/"
+     :venv "anaconda3/envs/egan"
+     :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+     )
     ("Python[local:banks]"
      :cmd "ipython -i"
       :host "~/"
@@ -439,20 +440,43 @@
       :venv "miniconda3/envs/egan"
       :pythonpaths ("/home/beowulf/dev/py36/python")
       )
-    ("Python[test-docdb:banks]"
+    ;; ("Python[migration-gm]"
+    ;;  :cmd "ipython"
+    ;;  :host "/ssh:test-migration-gm:"
+    ;;  :venv "miniconda3/envs/bankscloud"
+    ;;  :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
+    ;;  )
+    ("Python[aws-tests:bankscloud]"
      :cmd "ipython"
-     :host "/ssh:test-docdb:"
-     :venv "miniconda/envs/banks"
+     :host "/ssh:cloud-tests-gm:"
+     :venv "miniconda3/envs/bankscloud"
      :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
      )
-    ("Python[gm_aws_migration:banks]"
-     :cmd "ipython"
-     :host "/ssh:gm_aws_migration:"
-     :venv "miniconda/envs/banks"
-     :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
+    ;; ("Python[aws-tests:db3]"
+    ;;  :cmd "ipython --simple-prompt  -i"
+    ;;  :host "/ssh:gm_aws_migration:"
+    ;;  :venv "miniconda3/envs/db3env"
+    ;;  :pythonpaths ("/home/ubuntu/dev/cloud_migration_py3/python"
+    ;; 		   "/home/ubuntu/dev/db3/python"
+    ;; 		   )
+    ;;  )
+    ("Python[aws-tests:py310]"
+     :cmd "ipython --simple-prompt  -i"
+     :host "/ssh:cloud-tests-gm:"
+     :venv "miniconda3/envs/egan_simulator"
+     :pythonpaths ("/home/ubuntu/dev/py310/python")
      )
+    ;; ("Python[gm_aws:db3.v1.debug]"
+    ;;  :cmd "ipython --simple-prompt  -i"
+    ;;  :host "/ssh:gm_aws_migration:"
+    ;;  :venv "miniconda3/envs/db3env"
+    ;;  :pythonpaths ("/home/ubuntu/dev/cloud_migration_py3/python"
+    ;; 		   "/home/ubuntu/dev/db3.v1.debug/python"
+    ;; 		   )
+    ;;  )
      )
-  "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `gm/run-python' but nned not be remote.")
+  "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `gm/run-python' but nned not be remote."
+  )
 
 (defun gm/get-run-python-config ()
   (let* ((name (completing-read "config: " gm/run-python-configs nil t))
@@ -544,16 +568,24 @@ This is necessary if a python repl was started with built-in `run-python'.
 		)))
     (file-relative-name filename pyroot)))
 
-(defun gm/get-pydef ()
+(defun gm/get-pydef (&optional with-variable no-module)
   (let* ((filename (gm/get-relative-pyroot-filename))
 	 (dotted-filename (string-replace "/" "." filename))
 	 (module (replace-regexp-in-string "\\.py$" "" dotted-filename))
-	 (pydef (or (python-info-current-defun)
-		    (python-info-current-symbol)))
-	 (module-pydef (concat module "::" pydef))
-	 (module-pydef (replace-regexp-in-string "^.*python\\.ev\\." "ev." module-pydef)))
-    module-pydef
-    ))
+	 (module (replace-regexp-in-string "^.*python\\.ev\\." "ev." module))
+	 (funname (python-info-current-defun))
+	 (varname (save-excursion (python-nav-beginning-of-statement)
+				  (python-info-current-symbol)))
+	 (pydef-no-module (if with-variable
+			      (cond ((not funname) varname)
+				    ((not varname) funname)
+				    ((concat funname "." varname)))
+			    (or funname varname)
+			    ))
+	 (pydef-with-module (concat module "::" pydef-no-module))
+	 (pydef (if no-module pydef-no-module pydef-with-module)))
+    pydef
+	 ))
 
 (defun gm/message-pydef ()
   (interactive)
@@ -575,6 +607,12 @@ This is necessary if a python repl was started with built-in `run-python'.
 	 )
     (kill-new import)
     (message "copied: %s" import)))
+
+(defun gm/find-tag-copy-as-import ()
+  (interactive)
+  (with-current-buffer (find-tag-noselect (or (python-info-current-defun)
+					      (python-info-current-symbol)))
+    (gm/copy-pydef-as-import)))
 
 (defun gm/copy-file-location-fileno (no-lineno)
   (interactive "P")

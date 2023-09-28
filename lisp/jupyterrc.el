@@ -1,4 +1,4 @@
-(conda-env-activate "emacs")
+;; (conda-env-activate "emacs")
 ;; use (jupyter-command "kernelspec" "list" "--json" "--log-level=40")
 ;; /home/moutsopoulosg/.emacs.d/elpa/jupyter-20220419.1852/jupyter-kernelspec.el:64
 (use-package jupyter
@@ -20,6 +20,8 @@
  'org-babel-load-languages
  '((C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
    (jupyter . t)))
+(conda-with-env "emacs"
+  (org-babel-jupyter-make-local-aliases))
 
 ;;
 ;; jupyter repl
@@ -27,6 +29,11 @@
 (general-def jupyter-repl-interaction-mode-map
   "C-c C-p" 'jupyter-repl-pop-to-buffer)
 (general-unbind jupyter-repl-interaction-mode-map "C-c C-r")
+
+(general-def jupyter-server-kernel-list-mode-map
+  "C-c C-c" 'jupyter-server-kernel-list-launch-kernel
+  )
+
 
 ;; https://github.com/nnicandro/emacs-jupyter/issues/366
 ;; garbled errors
@@ -90,21 +97,34 @@
 	:action 'gm/helm-action-kernels-create-repl))
 ;;
 ;; (1)
+
+;; (defun gm/helm-candidates-specs ()
+;;   "Get alist of spec display names to specs"
+;;     (with-helm-current-buffer
+;; (let* ((server (jupyter-current-server))
+;;        (specs (jupyter-server-kernelspecs server)))
+;;   (cl-loop with names = nil
+;; 	for spec in specs
+;; 	collect
+;; 	(cons (plist-get (cddr spec) :display_name) (car spec))))))
+
 (defun gm/helm-candidates-specs ()
   "Get alist of spec display names to specs"
     (with-helm-current-buffer
 (let* ((server (jupyter-current-server))
-       (specs (jupyter-server-kernelspecs server)))
+       (specs (jupyter-kernelspecs server)))
   (cl-loop with names = nil
 	for spec in specs
 	collect
-	(cons (plist-get (cddr spec) :display_name) (car spec))))))
+	(cons (plist-get (jupyter-kernelspec-plist spec) :display_name) spec)))))
+
 (defun gm/helm-action-specs-create-new-kernel-name (spec &optional ask)
   "Name the repl when creating a new repl for existing kernel"
   (let (default (file-name-sans-extension (buffer-name)))
     (if ask
 	(read-string "REPL Name: " nil nil default)
       default)))
+
 (defun gm/helm-action-specs-create-kernel-and-repl (spec)
   "Create kernel based on spec, create repl, name both and associate."
   (let* ((server (jupyter-current-server))
@@ -264,16 +284,19 @@ If SERVER is non-nil only check the kernels on SERVER, otherwise
 check all kernels on all existing servers.
 
 Override. If I have not forwarded the port, I don't want my names culled."
+  (message "arg0: %s" jupyter-server-kernel-names)
   (let ((servers (if server (list server)
                    (jupyter-gc-servers)
                    (jupyter-servers))))
-    (message "server: %s servers: %s" server servers)
+    (message "arg1: %s" jupyter-server-kernel-names)
     (unless server
       ;; Only remove non-existing servers when culling all kernels on all
       ;; servers.
       (let ((urls (mapcar (lambda (x) (oref x url)) servers)))
         (cl-callf2 cl-remove-if-not (lambda (x) (member (car x) urls))
-                   jupyter-server-kernel-names)))
+                   jupyter-server-kernel-names))
+      (message "arg2: %s" jupyter-server-kernel-names)
+      )
     (dolist (server servers)
       (when-let* ((names (assoc (oref server url) jupyter-server-kernel-names)))
         (setf (alist-get (oref server url)
@@ -281,6 +304,9 @@ Override. If I have not forwarded the port, I don't want my names culled."
               (cl-loop
                for kernel across (jupyter-api-get-kernel server)
                for name = (assoc (plist-get kernel :id) names)
-               when name collect name))))))
+               when name collect name)))))
+  (message "arg3: %s" jupyter-server-kernel-names))
+
 (advice-add 'jupyter-server-cull-kernel-names :override #'gm/jupyter-server-cull-kernel-names)
+;; (advice-remove 'jupyter-server-cull-kernel-names 'gm/jupyter-server-cull-kernel-names)
 

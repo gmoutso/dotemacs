@@ -56,3 +56,16 @@
 ;;         :buffer "*helm recentf*")
 
 (general-def helm-buffer-map "M-d" 'helm-buffer-run-kill-persistent)
+
+(setq gm/helm-source-tabspaces-buffers
+      (helm-make-source "Workspace Buffers" 'helm-source-buffers
+      :buffer-list (lambda () (mapcar 'buffer-name (tabspaces--buffer-list)))))
+(defun gm/helm-switch-to-workspace-buffers ()
+  (interactive)
+  (let ((buffer-list (mapcar 'buffer-name (tabspaces--buffer-list))))
+    (helm :sources gm/helm-source-tabspaces-buffers)))
+(general-def
+  :keymaps 'tabspaces-mode-map
+  ;; :prefix "C-c TAB" if without remap
+  [remap tabspaces-switch-to-buffer] (cons "tabspace buffer" 'gm/helm-switch-to-workspace-buffers))
+(global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)

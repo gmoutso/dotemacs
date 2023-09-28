@@ -13,8 +13,8 @@
   (completing-read "session (default emacs-session): " tmuxls nil nil nil nil "emacs-session")))
 (defun gm/multi-term-tmux-remote-choose-userhost ()
   (completing-read "[user@]host: " '("beowulf@ted" "phil" "ted" "beowulf@phil"
-				     "test-docdb" "gm_aws_migration") nil t))
-(defalias 'gm/tmux-open 'gm/multi-term-tmux-remote-open)
+				     "test-docdb" "test-migration-gm") nil t))
+(defalias 'gm/term-tmux-open 'gm/multi-term-tmux-remote-open)
 
 ;; https://github.com/cuspymd/tramp-term.el
 (defun gm/term-tmux-set-dir ()

@@ -80,8 +80,8 @@ more org rifle..\n"
     ("ti" org-toggle-inline-images "toggle images")
     ("ir" gm/org-display-inline-images "images refresh")
     ("ts" org-fold-hide-block-all "hide blocks")
-    ("is" gm/org-resize-images "images size")
-     
+    ("is" gm/org-resize-images "images temp resize")
+    ("iS" gm/org-set-size-images "set images size")
     )
    "Jump"
    (("jh" helm-org-in-buffer-headings "headings")

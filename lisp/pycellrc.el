@@ -15,7 +15,12 @@
     (define-key map "p" (code-cells-speed-key 'code-cells-backward-cell))
     (define-key map "e" (code-cells-speed-key 'code-cells-eval))
     (define-key map (kbd "TAB") (code-cells-speed-key 'outline-cycle))
-    (define-key map (kbd "C-c C-c") 'code-cells-eval)))
+    (define-key map (kbd "C-c C-c") 'code-cells-eval))
+  (add-to-list 'code-cells-eval-region-commands '(jupyter-repl-interaction-mode . gm/jupyter-eval-region)))
+
+(defun gm/jupyter-eval-region (beg end)
+  (jupyter-eval-region nil beg end))
+
 
 (general-def code-cells-mode-map
   "<M-return>" 'code-cells-eval

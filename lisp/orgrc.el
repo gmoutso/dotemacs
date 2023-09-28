@@ -7,27 +7,30 @@
 ;;   (text-mode . mixed-pitch-mode))
 
 ;; toggle emphases, links, etc when cursor is on them
+;; will also render tex with unicode
 (use-package org-appear
-  :hook org-mode
+  :hook
+  (org-mode . org-appear-mode)
   :custom
-  (org-appear-autolinks t)
+  (org-appear-autolinks nil) ;; https://github.com/awth13/org-appear/issues/34
   ;; org-appear-inside-latex is about pretty UTF elements, not image fragments like fragtog
-  (org-appear-inside-latex t) ;; relevant if org-pretty-entities
-  (org-pretty-entities t)
-  (org-appear-autoentities t) ;; relavent if org-appear-inside-latex
+  (org-appear-inside-latex nil) ;; relevant if org-pretty-entities
+  (org-pretty-entities nil) ;; non-nil means use UTF8 for \something
+  (org-appear-autoentities nil) ;; relavent if org-appear-inside-latex
   (org-appear-autosubmarkers t) ;; relavent if org-appear-inside-latex
   (org-appear-delay 2)
   ) 
 ;; toggle latex framgents when cursor is on them
 (use-package org-fragtog
-  :hook org-mode
+  :hook
+  (org-mode . org-fragtog-mode)
   :custom
   (org-fragtog-preview-delay 0.4)
   (org-fragtog-ignore-predicates '(org-at-table-p))
   )
 ;; modern look
-(use-package org-modern
-  :hook org-mode)
+(use-package org-modern)
+(global-org-modern-mode)
 
 ;; needs to be set before org is loaded
 (setq org-list-allow-alphabetical t)
@@ -36,7 +39,21 @@
 ;;(setq org-drill-hide-item-headings-p )
 ;; search through many org files
 (require 'helm-org-rifle)
-(require 'ox)
+(use-package ox
+  :custom
+  (org-export-with-smart-quotes nil)
+  (org-export-with-emphasize t)
+  (org-export-with-special-strings t)
+  (org-export-with-fixed-width t)
+  (org-export-with-timestamps t)
+  (org-export-preserve-breaks nil)
+  (org-export-with-archived-trees nil)
+  (org-export-headline-levels 3)
+  (org-export-time-stamp-file t)
+  (org-export-with-toc t)
+  (org-export-with-todo-keywords t)
+  (org-export-with-sub-superscripts nil)
+  )
 ;;(require 'org-tempo)
 (setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
@@ -156,7 +173,9 @@
 		("C-c l i" . org-insert-link)
 		("C-c C-." . org-time-stamp)
 		("C-c C-j" . helm-org-in-buffer-headings)
-	       ))))
+		)))
+  :custom
+  (org-use-sub-superscripts nil))
 (use-package org-agenda
   :bind (("C-c a" . org-agenda)))
 
@@ -482,6 +501,13 @@ ARG is passed through to `org-copy-schedule-today'."
 ;; do not overclock
 (setq org-clock-idle-time 90)
 
+(defun copy-table-as-tsv ()
+  (interactive)
+  (unless (org-at-table-p)
+    (user-error "No table at point"))
+  (let ((table (org-table-to-lisp
+		(buffer-substring-no-properties (org-table-begin)  (org-table-end)))))
+    (kill-new (orgtbl-to-tsv table '()))))
 
 (defun org-paste-df ()
   (interactive)
@@ -696,6 +722,8 @@ If ASK then ask for the symbol to find."
 				(search-forward-regexp regex nil t)
 				(message "Found unique definition for %s" word)))
 	  ((> ncount 1) (occur regex)))))
+
+(defalias 'gm/org-find-definition 'gm/org-jump-definition)
 
 (defun gm/org-cut-and-dump-to-section ()
   "If return is pressed then cut active region and paste to org-goto location."
