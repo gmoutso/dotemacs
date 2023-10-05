@@ -5,7 +5,9 @@
 	      ("C-q" . vterm-send-next-key)
 	      ("C-SPC" . vterm--self-insert)
 	      )
-  :config (setq vterm-max-scrollback 100000)
+  :config
+  (setq vterm-max-scrollback 100000)
+  (add-to-list 'vterm-tramp-shells '("ssh" "/bin/bash"))
   :custom
   (vterm-enable-manipulate-selection-data-by-osc52 t) ;; tmux set -g set-clipboard on
   )
@@ -17,19 +19,51 @@
 
 ;; I need to set TMPDIR in .bashrc before non-interactive exit!?
 ;; see also https://codeberg.org/olivermead/vterm-tmux
-(use-package vterm-tmux)
+;; (use-package vterm-tmux)
 
-(defconst gm/tmux-user-hosts '("beowulf@ted" "phil" "ted" "beowulf@phil"
-			       "test-docdb" "test-migration-gm"))
+(defconst gm/tmux-user-hosts '("beowulf@ted" "phil" "cloud-tests-gm"))
 
 (defun gm/tmux-select-user-host ()
   (completing-read "[user@]host: " gm/tmux-user-hosts nil t))
 
-(defun gm/tmux-make-command (cmd &optional user+host)
-  (let ((tmux (if user+host (format "ssh %s -q -t tmux" user+host)
-		;; is extra -t needed for list-sessions?
-		"tmux")))
-    (format "%s %s" tmux cmd)))
+(defun gm/vterm-make-command (cmd &optional user+host)
+  "Make a command CMD with an ssh if USER+HOST is non nil"
+  (if user+host (format "ssh %s -q -t \"%s\"" user+host cmd)
+      (format "sh -c \"%s\"" cmd)))
+
+(defun gm/tmux-make-command (tmux-subcmd &optional user+host)
+  (gm/vterm-make-command (format "tmux %s" tmux-subcmd)
+			 user+host))
+
+(defun gm/vterm-exec (cmd &optional user@host directory buffer-name)
+  (let* ((default-directory "~")
+	 (full-cmd (concat (if directory (format "cd %s;" directory)) cmd))
+	 (vterm-shell (gm/vterm-make-command full-cmd user@host))
+	 (buffer-name (or buffer-name (concat "*" (generate-new-buffer-name cmd) "*")))
+	 buffer)
+    (setq buffer (vterm buffer-name))
+    (with-current-buffer buffer
+      (multi-vterm-internal))
+    (message "started vterm buffer #<%s>" (buffer-name buffer))
+  ))
+
+(defun gm/make-user@host (&optional directory)
+  (let* ((directory (or directory default-directory))
+	 (host (file-remote-p directory 'host))
+	 (user (file-remote-p directory 'user))
+	 (user@host (if host (if user (format  "%s@%s" user host) host)))
+	 )
+    user@host
+    ))
+
+(defun eshell/vterm-exec (&rest cmd-args)
+  (if cmd-args
+      (let ((user@host (gm/make-user@host))
+	    (directory (file-local-name default-directory)))
+	(gm/vterm-exec (string-join cmd-args " ") user@host directory)
+	)
+    (message "missing args")
+    ))
 
 (defun gm/tmux-command-to-string (cmd &optional user+host)
   (let ((default-directory "~"))

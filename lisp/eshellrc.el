@@ -68,3 +68,19 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
       (call-process "konsole" nil 0 nil "--new-tab" "-e" method (concat user (if user "@") host localname))
     )))
 
+(defun eshell/remote-cd (&optional directory)
+  "cd into remote DIRECTORY in eshell as if in remote shell"
+  (if (file-remote-p default-directory)
+      (with-parsed-tramp-file-name default-directory nil
+        (eshell/cd (tramp-make-tramp-file-name
+                    (tramp-file-name-method v)
+                    (tramp-file-name-user v)
+		    'nil
+                    (tramp-file-name-host v)
+		    'nil
+                    (or directory "")
+		    (tramp-file-name-hop v)
+		    )))
+    (eshell/cd directory)))
+(defalias 'eshell/rcd 'eshell/remote-cd)
+(defalias 'eshell/lcd 'eshell/remote-cd)
