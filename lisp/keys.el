@@ -65,5 +65,3 @@
     (add-hook 'server-after-make-frame-hook 'which-key-mode)
   (which-key-mode))
 
-(with-eval-after-load 'lsp-mode
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))

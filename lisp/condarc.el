@@ -60,14 +60,6 @@
   (advice-remove func
                  'gm/with-emacs-venv-advice))
 
-(use-package lsp-python-ms
-  :custom
-  (lsp-python-ms-python-executable "~/anaconda3/envs/banks/bin/python")
-  )
-(use-package lsp-pyright
-  :custom
-  (lsp-pyright-python-executable-cmd "~/anaconda3/envs/emacs/bin/python")
-  )
 (use-package blacken
   :custom
   (blacken-executable "/home/moutsopoulosg/anaconda3/envs/emacs/bin/black"))

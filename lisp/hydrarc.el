@@ -323,30 +323,7 @@ _m_ (_M_): set mark (jump)                 _q_: quit
   ("." org-agenda-goto-today "goto today")
   ("gr" org-agenda-redo "redo"))))
 
-(major-mode-hydra-define python-mode (:exit t :quit-key ("q" "c" "<escape>"))
-  ("Jupyter"
-   (("k" gm/jupyter-kernels "kernels")
-    ("w" gm/jupyter-whos "whos")
-    ("P" gm/run-python "python"))
-   "Buffer"
-   (("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
-    ("i" helm-imenu "imenu")
-    ("I" gm/message-pydef "info defun")
-    )
-   "Code"
-   (("f" flycheck-list-errors "flycheck")
-    ("g" gtags-find-tag "gtags")
-    ("e" conda-env-activate "activate env")
-    ("r" org-recipes "recipes")
-    )
-   "LSP"
-   (("ll" lsp "LSP")
-    ("ld" lsp-ui-doc-glance "document")
-    ("ls" lsp-signature-activate "signature")
-    ("s" lsp-treemacs-symbols "symbols"))
-   ))
-
-(major-mode-hydra-define python-ts-mode (:exit t :quit-key ("q" "c" "<escape>"))
+(major-mode-hydra-define (python-mode python-ts-mode) (:exit t :quit-key ("q" "c" "<escape>"))
   ("Jupyter"
    (("k" gm/jupyter-kernels "kernels")
     ("w" gm/jupyter-whos "whos")

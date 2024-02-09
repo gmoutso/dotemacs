@@ -17,9 +17,3 @@
 (helm-gtags-find-tag 'tag)
 (list (helm-gtags--read-tagname 'tag)))
 (helm-gtags--common '(gm-helm-source-gtags-tags) "get_mdb")
-
-(use-package lsp-mode
-:config
-(add-hook 'c++-mode-hook #'lsp)
-(add-hook 'python-mode-hook #'lsp)
-(add-hook 'rust-mode-hook #'lsp))

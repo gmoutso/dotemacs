@@ -9,10 +9,7 @@
 ;;
 ;; identifying buffers
 ;;
-(defun is-notebook-p ()
-  (and (boundp 'ein:notebook-mode) ein:notebook-mode))
-(defun is-python-p ()
-  (derived-mode-p 'python-mode 'python-ts-mode))
+(defun is-python-p () (derived-mode-p 'python-mode 'python-ts-mode))
 
 ;;
 ;; yas
@@ -22,19 +19,6 @@
   :config
   (yas-reload-all)
   (setq yas-triggers-in-field t))
-
-
-;;
-;; intellisense hook
-;;
-;; (defun gm/load-intellisense ()
-;;   "Select lsp or anaconda according to py or ipynb"
-;;   (cond ((file-remote-p default-directory) nil)
-;; 	((is-notebook-p) (anaconda-mode))
-;; 	(t (lsp-deferred))))
-;; (add-hook 'python-mode-hook 'my-load-intellisense)
-;; (remove-hook 'python-mode-hook 'my-load-intellisense)
-;; (add-hook 'ein:notebook-mode-hook 'my-load-intellisense)
 
 ;;
 ;; anaconda
@@ -98,13 +82,13 @@
 ;; 	       (is-notebook-p) 'ein:shared-output-pop-to-buffer)
 ;; )
 
-(defun my-python-line-mode-hook ()
-  (cond ((is-notebook-p) (display-line-numbers-mode 0))
-	((is-python-p) (display-line-numbers-mode t)
-	 (display-line-numbers-mode t)
-	 (column-number-mode t))))
-(add-hook 'python-mode-hook 'my-python-line-mode-hook)
-(add-hook 'python-ts-mode-hook 'my-python-line-mode-hook)
+(defun gm/python-mode-hook ()
+  (display-line-numbers-mode t)
+  (display-line-numbers-mode t)
+  (column-number-mode t)
+  )
+(add-hook 'python-mode-hook 'gm/python-mode-hook)
+(add-hook 'python-ts-mode-hook 'gm/python-mode-hook)
 
 
 ;; (defun my-run-python (&optional new)
