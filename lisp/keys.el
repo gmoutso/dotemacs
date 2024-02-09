@@ -13,7 +13,9 @@
 (defvar my-keys-mode-map (make-keymap) "my-keys-mode keymap.")
 (define-minor-mode my-keys-mode
   "A minor mode with my keys."
-  t " myKeys" 'my-keys-mode-map)
+  :init-value t
+  :lighter " myKeys"
+  :keymap my-keys-mode-map)
 (my-keys-mode 1)
 (defadvice load (after give-my-keybindings-priority)
   "Try to ensure that my keybindings always have priority."
@@ -47,7 +49,9 @@
 (defvar my-gdb-navigation-mode-map (make-keymap) "my-gdb-navigation-mode keymap.")
 (define-minor-mode my-gdb-navigation-mode
   "A minor mode so that I navigate gdb steps."
-  nil " gdbNav" 'my-gdb-navigation-mode-map)
+  :init-value t
+  :lighter " gdbNav"
+  :keymap my-gdb-navigation-mode-map)
 (define-key my-gdb-navigation-mode-map (kbd "s") 'gud-step)
 (define-key my-gdb-navigation-mode-map (kbd "n") 'gud-next)
 (define-key my-gdb-navigation-mode-map (kbd "c") 'gud-cont)
