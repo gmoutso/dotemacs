@@ -4,12 +4,6 @@
 ;; None
 ;; Code
 
-
-;; sudo apt install python-is-python3 needed for lsp-python-ms on banks?
-;; TODO
-;; 1. Formalise gtags or simplify to etags
-;; 2. Document flycheck or simplify to flymake
-;; 3. project-wise loading of components
 (use-package general)
 
 ;;
@@ -18,67 +12,29 @@
 (defun is-notebook-p ()
   (and (boundp 'ein:notebook-mode) ein:notebook-mode))
 (defun is-python-p ()
-  (derived-mode-p 'python-mode))
+  (derived-mode-p 'python-mode 'python-ts-mode))
 
 ;;
 ;; yas
 ;;
 (use-package yas-minor-mode
-  :hook python-mode
+  :hook python-mode python-ts-mode
   :config
   (yas-reload-all)
   (setq yas-triggers-in-field t))
 
-;;
-;; lsp
-;;
-(use-package lsp-mode
-  :hook (python-mode . lsp-deferred)
-  :commands (lsp lsp-deferred)
-  :custom
-  (lsp-headerline-breadcrumb-enable nil))
-
-(use-package lsp-python-ms
-  ;; :hook lsp-mode ; what to put here?
-  :custom
-  (lsp-python-ms-extra-paths 
-   '("/home/moutsopoulosg/dev/master/python"
-     "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7"
-     "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/site-packages"
-     )))
-
-(use-package lsp-pyright
-  ;; :custom
-  ;; (lsp-pyright-multi-root nil)
-  )
-
-;; (add-to-list 'lsp-disabled-clients 'pyright)
-
-(use-package lsp-ui
-  ;; :hook (lsp-mode . lsp-ui-mode)
-  :commands lsp-ui-mode
-  :custom
-  (lsp-ui-doc-enable t)
-  (focus-follows-mouse nil)
-  )
-
-
-(use-package helm-lsp :commands helm-lsp-workspace-symbol)
-
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 
 ;;
 ;; intellisense hook
 ;;
-(defvar my-python-intellisense `my-python-load-intellisense-select "Which function to use for intellisense.")
-(defun my-python-load-intellisense-select ()
-  "Select lsp or anaconda according to py or ipynb"
-  (cond ((file-remote-p default-directory) nil)
-	((is-notebook-p) (anaconda-mode))
-	(t (lsp-deferred))))
-(defun my-load-intellisense ()  "Load python intellisense" (funcall my-python-intellisense))
-(add-hook 'python-mode-hook 'my-load-intellisense)
-(add-hook 'ein:notebook-mode-hook 'my-load-intellisense)
+;; (defun gm/load-intellisense ()
+;;   "Select lsp or anaconda according to py or ipynb"
+;;   (cond ((file-remote-p default-directory) nil)
+;; 	((is-notebook-p) (anaconda-mode))
+;; 	(t (lsp-deferred))))
+;; (add-hook 'python-mode-hook 'my-load-intellisense)
+;; (remove-hook 'python-mode-hook 'my-load-intellisense)
+;; (add-hook 'ein:notebook-mode-hook 'my-load-intellisense)
 
 ;;
 ;; anaconda
@@ -108,13 +64,13 @@
   ;; (python-shell-interpreter "python")  ; ipython does not not exist eg for pydoc
   ;; (python-shell-extra-pythonpaths
   ;; '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
-)
+  )
 
 ;;
 ;; python keys
 ;;
 (defun backward-symbol () (interactive) (forward-symbol -1))
-(general-def python-mode-map
+(general-def python-mode-map python-ts-mode-map 
   ;; navigation
   "C-<right>" 'forward-symbol
   "C-<left>" 'backward-symbol
@@ -148,6 +104,7 @@
 	 (display-line-numbers-mode t)
 	 (column-number-mode t))))
 (add-hook 'python-mode-hook 'my-python-line-mode-hook)
+(add-hook 'python-ts-mode-hook 'my-python-line-mode-hook)
 
 
 ;; (defun my-run-python (&optional new)
@@ -382,7 +339,7 @@
   ;; https://emacs.stackexchange.com/questions/17753/make-run-python-etc-use-local-python
   ;; (interactive (advice-eval-interactive-spec
   ;;                      (cadr (interactive-form #'run-python))))
-  (interactive "P\ni" python-mode)
+  (interactive "P\ni" python-mode python-ts-mode)
   (let ((default-directory user-emacs-directory))
     (conda-env-activate)
     (run-python nil dedicated (not notshow))))
@@ -392,11 +349,24 @@
 ;; (alist :key-type string :value-type (plist ???))
 
 (defvar gm/run-python-configs
-  '(("Python[local:egan]"
-     :cmd "ipython --simple-prompt -i"
+  '(
+    ;; ("Python[local:egan]"
+    ;;  :cmd "ipython --simple-prompt -i"
+    ;;  :host "~/"
+    ;;  :venv "anaconda3/envs/egan"
+    ;;  :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+    ;;  )
+    ("Python[local:egan_reporter]"
+     :cmd "ipython"
      :host "~/"
-     :venv "anaconda3/envs/egan"
-     :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+     :venv "anaconda3/envs/egan_reporter"
+     :pythonpaths ("/home/moutsopoulosg/dev/py310/python")
+     )
+    ("Python[local:db3]"
+     :cmd "ipython"
+     :host "~/"
+     :venv "anaconda3/envs/db3env"
+     :pythonpaths ("/home/moutsopoulosg/dev/db3/python")
      )
     ("Python[local:banks]"
      :cmd "ipython -i"
@@ -404,12 +374,12 @@
       :venv "anaconda3/envs/banks"
       :pythonpaths ("/home/moutsopoulosg/dev/master/python")
       )
-    ("Python[local:dick]"
-     :cmd "ipython"
-      :host "~/"
-      :venv "anaconda3/envs/dick"
-      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
-      )
+    ;; ("Python[local:dick]"
+    ;;  :cmd "ipython"
+    ;;   :host "~/"
+    ;;   :venv "anaconda3/envs/dick"
+    ;;   :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+    ;;   )
     ("Python[phil:banks]"
       :cmd "ipython"
       :host "/ssh:phil:"
@@ -440,6 +410,12 @@
       :venv "miniconda3/envs/egan"
       :pythonpaths ("/home/beowulf/dev/py36/python")
       )
+    ("Python[beowulf@ted:dick]"
+      :cmd "ipython -i --simple-prompt"
+      :host "/ssh:beowulf@ted:"
+      :venv "miniconda3/envs/dick"
+      :pythonpaths ("/home/beowulf/dev/py36/python")
+      )
     ;; ("Python[migration-gm]"
     ;;  :cmd "ipython"
     ;;  :host "/ssh:test-migration-gm:"
@@ -460,7 +436,7 @@
     ;; 		   "/home/ubuntu/dev/db3/python"
     ;; 		   )
     ;;  )
-    ("Python[aws-tests:py310]"
+    ("Python[cloud-tests:py310]"
      :cmd "ipython --simple-prompt  -i"
      :host "/ssh:cloud-tests-gm:"
      :venv "miniconda3/envs/egan_simulator"
@@ -483,8 +459,7 @@
 	 (config (cdr (assoc name gm/run-python-configs)))
 	 (host (plist-get config :host))
 	 (cmd (plist-get config :cmd))
-	 (venv-raw (plist-get config :venv))
-	 (venv (pythonic-python-readable-file-name (concat host venv-raw)))
+	 (venv (plist-get config :venv))
 	 (pythonpaths (plist-get config :pythonpaths)))
     (list :cmd cmd :host host :venv venv :pythonpaths pythonpaths
 	  :name name)))
@@ -498,7 +473,6 @@ so that the session gets registered for an org-mode session if needed.
   (interactive)
   (let* ((config (gm/get-run-python-config))
 	 (host (plist-get config :host))
-	 (default-directory host)
 	 (cmd (plist-get config :cmd))
 	 (venv (plist-get config :venv))
 	 (pythonpaths (plist-get config :pythonpaths))
@@ -507,15 +481,16 @@ so that the session gets registered for an org-mode session if needed.
 
 (defun gm/run-python-with-args
     (host &optional cmd venv pythonpaths name)
-  (let* ((name (generate-new-buffer-name (or name "Python")))
-	 (org-babel-python-command (or cmd "ipython")) 
-	 (python-shell-virtualenv-root (or venv "."))
-	 (python-shell-extra-pythonpaths (or pythonpaths (list)))
-	 (session (read-string (format "session (default %s): " name) nil nil name))
-	 (default-directory host)
-	 (buffer (org-babel-python-initiate-session session)))
+  (let ((default-directory host)
+	(venv (pythonic-python-readable-file-name (concat host venv))))
+    (let* ((name (generate-new-buffer-name (or name "Python")))
+	   (org-babel-python-command (or cmd "ipython")) 
+	   (python-shell-virtualenv-root (or venv "."))
+	   (python-shell-extra-pythonpaths (or pythonpaths (list)))
+	   (session (read-string (format "session (default %s): " name) nil nil name))
+	   (buffer (org-babel-python-initiate-session session)))
     (cond
-       ((and (derived-mode-p 'python-mode) (y-or-n-p "associate this python buffer?"))
+       ((and (is-python-p) (y-or-n-p "associate this python buffer?"))
 	;; python-shell-get-process-name will return this
 	(setq-local python-shell-buffer-name session))
        ((and (derived-mode-p 'org-mode))
@@ -523,7 +498,7 @@ so that the session gets registered for an org-mode session if needed.
 	(message (format "Use `:session %s' in header args manually." session))))
       (switch-to-buffer-other-window buffer)
       ;; buffer
-      ))
+      )))
 
 (defun gm/read-buffer-with-mode (mode)
   "Choose a buffer with given major MODE."
@@ -534,7 +509,7 @@ so that the session gets registered for an org-mode session if needed.
 			    mode))))
 
 (defun gm/associate-repl-with-python-buffer (&optional repl-buffer)
-  (interactive nil 'python-mode)
+  (interactive nil 'python-mode 'python-ts-mode)
   (let* ((repl-buffer (or repl-buffer (gm/read-buffer-with-mode 'inferior-python-mode)))
 	(session (org-babel-python-without-earmuffs repl-buffer)))
   (setq-local python-shell-buffer-name session)
@@ -640,7 +615,7 @@ This is necessary if a python repl was started with built-in `run-python'.
   "Convert python buffer to org-mode file.
 
 Pipes through jupytext and pandoc"
-  (interactive nil 'python-mode)
+  (interactive nil 'python-mode 'python-ts-mode)
   (let* ((header "jupyter-python")
 	(jupytext-cmd (format "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb"))
 	(pandoc-cmd "~/anaconda3/envs/bastille/bin/pandoc --from ipynb --to org")
@@ -659,7 +634,7 @@ Pipes through jupytext and pandoc"
   "Convert python buffer to good old version 3 (banks..) notebook version.
 
 Pipes through jupytext and nbconvert"
-  (interactive nil 'python-mode)
+  (interactive nil 'python-mode 'python-ts-mode)
   (let* ((jupytext-cmd "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb")
 	 (nbconvert-cmd "~/anaconda3/envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
 	 (buffer (get-buffer-create (concat (file-name-sans-extension (buffer-name)) "-v3.ipynb")))
@@ -730,3 +705,4 @@ last statement in BODY, as elisp."
       (org-babel-python-table-or-string results))))
 (advice-add 'org-babel-python-evaluate-session :override #'gm/org-babel-python-evaluate-session)
 
+(add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))

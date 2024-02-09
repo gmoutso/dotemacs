@@ -33,7 +33,8 @@
    ;; ("oa" helm-org-rifle-agenda-files "agenda")
    )
    "Shells"
-   (("e" eshell "eshell"))))
+   (("e" eshell "eshell")
+    ("v" gm/jump-to-vterm "vterm"))))
 
 (defhydra hydra-files-org-more (:exit t)
   "
@@ -62,6 +63,14 @@ more org rifle..\n"
 ;; )
 (defun gm/org-display-inline-images () (interactive)
        (org-display-inline-images nil t))
+
+(major-mode-hydra-define jupyter-repl-mode
+  (:exit t :quit-key ("q" "<escape>"))
+  ("Kernel"
+  (("g" jupyter-repl-restart-kernel "restart")
+   ("r" org-recipes "recipes"))
+  ))
+
 (major-mode-hydra-define org-mode
   (:exit t :quit-key ("q" "<escape>"))
   (
@@ -317,7 +326,31 @@ _m_ (_M_): set mark (jump)                 _q_: quit
 (major-mode-hydra-define python-mode (:exit t :quit-key ("q" "c" "<escape>"))
   ("Jupyter"
    (("k" gm/jupyter-kernels "kernels")
-    ("w" gm/jupyter-whos "whos"))
+    ("w" gm/jupyter-whos "whos")
+    ("P" gm/run-python "python"))
+   "Buffer"
+   (("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
+    ("i" helm-imenu "imenu")
+    ("I" gm/message-pydef "info defun")
+    )
+   "Code"
+   (("f" flycheck-list-errors "flycheck")
+    ("g" gtags-find-tag "gtags")
+    ("e" conda-env-activate "activate env")
+    ("r" org-recipes "recipes")
+    )
+   "LSP"
+   (("ll" lsp "LSP")
+    ("ld" lsp-ui-doc-glance "document")
+    ("ls" lsp-signature-activate "signature")
+    ("s" lsp-treemacs-symbols "symbols"))
+   ))
+
+(major-mode-hydra-define python-ts-mode (:exit t :quit-key ("q" "c" "<escape>"))
+  ("Jupyter"
+   (("k" gm/jupyter-kernels "kernels")
+    ("w" gm/jupyter-whos "whos")
+    ("P" gm/run-python "python"))
    "Buffer"
    (("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
     ("i" helm-imenu "imenu")

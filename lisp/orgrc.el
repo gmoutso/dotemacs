@@ -193,7 +193,7 @@
  ;; do not start the week from today (opposite: start on Monday)
  org-agenda-start-on-weekday 1
  ;; in global todo do not ignore some scheduled
- org-agenda-todo-ignore-scheduled 10; nil;'all
+ org-agenda-todo-ignore-scheduled nil; 10; nil;'all
  ;;
  ;; org-agenda-todo-ignore-with-date t
  ;;
@@ -206,7 +206,7 @@
  ;; hide entries with deadline/scheduled today or in the future that are done
  ;; note entries deadline/scheduled in the past that are done are hidden always
  ;; the purpose of letting this nil is for a happy feeling
- org-agenda-skip-deadline-if-done t
+ org-agenda-skip-deadline-if-done nil
  ;;
  ;; skip scheduled delay when entry also has a deadline
  ;; org-agenda-skip-scheduled-delay-if-deadline t
@@ -340,7 +340,8 @@
 
 
 
-(setq org-capture-templates-contexts '(("p" ((in-mode . "python-mode")))))
+;; (setq org-capture-templates-contexts '(("p" ((in-mode . "python-mode")))))
+(setq org-capture-templates-contexts '(("p" ((in-mode . "python-ts-mode")))))
 (use-package org-annotate-word)
 (use-package org-annotate-python)
 (use-package org-annotate-projects)
@@ -634,8 +635,9 @@ g  (interactive)
           (list
            (cons "Clock into task" #'dfeich/helm-org-clock-in))))
 ;; graphic in agenda
-(use-package org-timeline :ensure t)
-(add-hook 'org-agenda-finalize-hook 'org-timeline-insert-timeline :append)
+;; (use-package org-timeline :ensure t)
+;; (add-hook 'org-agenda-finalize-hook 'org-timeline-insert-timeline :append)
+
 ;; clock in with mru
 (use-package org-mru-clock
   :ensure t
@@ -702,15 +704,15 @@ g  (interactive)
 ;; (advice-remove 'jupyter-org-insert-src-block  'gm/org-add-src-name-maybe-advice)
 
 
-(defun gm/org-find-definition-at-point (&optional ask)
+(defun gm/find-pydef-at-point (&optional ask)
   "Find defition of symbol at point within the current org document.
 
 If ASK then ask for the symbol to find."
   (interactive "P")
   (let ((word (if ask (read-from-minibuffer "Symbol: ") (symbol-at-point))))
-  (gm/org-find-definition word)))
+  (gm/find-pydef-in-buffer word)))
 
-(defun gm/org-find-definition (&optional word)
+(defun gm/find-pydef-in-buffer (&optional word)
   "Find defition of WORD within the current org document."
   (interactive)
   (let* ((word (or word (read-from-minibuffer "Symbol: ") (symbol-at-point)))
@@ -722,8 +724,6 @@ If ASK then ask for the symbol to find."
 				(search-forward-regexp regex nil t)
 				(message "Found unique definition for %s" word)))
 	  ((> ncount 1) (occur regex)))))
-
-(defalias 'gm/org-find-definition 'gm/org-jump-definition)
 
 (defun gm/org-cut-and-dump-to-section ()
   "If return is pressed then cut active region and paste to org-goto location."

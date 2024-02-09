@@ -4,7 +4,7 @@
 (use-package jupyter
   :after (ob-jupyter ob-python)
   :config
-  (setq jupyter-api-authentication-method 'password)
+  (setq jupyter-api-authentication-method 'ask)
   (setq jupyter-eval-use-overlays nil)
   (setq org-babel-default-header-args:jupyter-python '((:session . "/jpy:localhost#8888:py")
                                                        (:kernel . "conda-env-edge-py")
@@ -253,6 +253,10 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
       (funcall func info)
       )))
 (advice-add 'org-babel-edit-prep:jupyter :around 'gm/advice-org-babel-edit-prep:jupyter)
+;; (advice-remove 'org-babel-edit-prep:jupyter 'gm/advice-org-babel-edit-prep:jupyter)
+;; To ensure python src blocks are opened in python-ts-mode
+(setf (alist-get "jupyter-python" org-src-lang-modes nil nil #'equal) 'python-ts)
+(setf (alist-get "python" org-src-lang-modes nil nil #'equal) 'python-ts)
 
 ;; Decorating Jupyter blocks
 ;; make dataframe output not have a RESULTS drawer by adding org-table property to results
@@ -278,35 +282,56 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
 (advice-add 'jupyter-org-export-block-or-pandoc :around #'gm/jupyter-org-table-string-maybe)
 ;; (advice-remove 'jupyter-org-export-block-or-pandoc 'gm/jupyter-org-table-string-maybe)
 
-(defun gm/jupyter-server-cull-kernel-names (&optional server)
-  "Ensure all names in `jupyter-server-kernel-names' map to existing kernels.
-If SERVER is non-nil only check the kernels on SERVER, otherwise
-check all kernels on all existing servers.
+;; (defun gm/jupyter-server-cull-kernel-names (&optional server)
+;;   "Ensure all names in `jupyter-server-kernel-names' map to existing kernels.
+;; If SERVER is non-nil only check the kernels on SERVER, otherwise
+;; check all kernels on all existing servers.
 
-Override. If I have not forwarded the port, I don't want my names culled."
-  (message "arg0: %s" jupyter-server-kernel-names)
-  (let ((servers (if server (list server)
-                   (jupyter-gc-servers)
-                   (jupyter-servers))))
-    (message "arg1: %s" jupyter-server-kernel-names)
-    (unless server
-      ;; Only remove non-existing servers when culling all kernels on all
-      ;; servers.
-      (let ((urls (mapcar (lambda (x) (oref x url)) servers)))
-        (cl-callf2 cl-remove-if-not (lambda (x) (member (car x) urls))
-                   jupyter-server-kernel-names))
-      (message "arg2: %s" jupyter-server-kernel-names)
-      )
-    (dolist (server servers)
-      (when-let* ((names (assoc (oref server url) jupyter-server-kernel-names)))
-        (setf (alist-get (oref server url)
-                         jupyter-server-kernel-names nil nil #'equal)
-              (cl-loop
-               for kernel across (jupyter-api-get-kernel server)
-               for name = (assoc (plist-get kernel :id) names)
-               when name collect name)))))
-  (message "arg3: %s" jupyter-server-kernel-names))
-
-(advice-add 'jupyter-server-cull-kernel-names :override #'gm/jupyter-server-cull-kernel-names)
+;; Override. If I have not forwarded the port, I don't want my names culled."
+;;   (message "arg0: %s" jupyter-server-kernel-names)
+;;   (let ((servers (if server (list server)
+;;                    (jupyter-gc-servers)
+;;                    (jupyter-servers))))
+;;     (message "arg1: %s" jupyter-server-kernel-names)
+;;     (unless server
+;;       ;; Only remove non-existing servers when culling all kernels on all
+;;       ;; servers.
+;;       (let ((urls (mapcar (lambda (x) (oref x url)) servers)))
+;;         (cl-callf2 cl-remove-if-not (lambda (x) (member (car x) urls))
+;;                    jupyter-server-kernel-names))
+;;       (message "arg2: %s" jupyter-server-kernel-names)
+;;       )
+;;     (dolist (server servers)
+;;       (when-let* ((names (assoc (oref server url) jupyter-server-kernel-names)))
+;;         (setf (alist-get (oref server url)
+;;                          jupyter-server-kernel-names nil nil #'equal)
+;;               (cl-loop
+;;                for kernel across (jupyter-api-get-kernel server)
+;;                for name = (assoc (plist-get kernel :id) names)
+;;                when name collect name)))))
+;;   (message "arg3: %s" jupyter-server-kernel-names))
+;; (advice-add 'jupyter-server-cull-kernel-names :override #'gm/jupyter-server-cull-kernel-names)
 ;; (advice-remove 'jupyter-server-cull-kernel-names 'gm/jupyter-server-cull-kernel-names)
+
+;; Issues with jupyter-emacs
+;;
+;; issue: shutdown kernel when killing repl
+;; https://github.com/emacs-jupyter/jupyter/commit/1daf4463c13402b5ee6be883ed8903812688247a
+;; issue: websocket gets disconnected, cannot reconnect
+;; https://github.com/emacs-jupyter/jupyter/issues/395
+(defun gm/jupyter-disconnect-and-kill-repl ()
+  (interactive nil 'jupyter-repl-interaction-mode)
+  (jupyter-disconnect jupyter-current-client)
+  (jupyter-repl-interaction-mode -1)
+  (kill-buffer)
+  )
+;; %debug uses minibuffer
+;; https://github.com/emacs-jupyter/jupyter/issues/184
+;; https://github.com/emacs-jupyter/jupyter/issues/35#issuecomment-497039866
+;; login endpoint is missing when no token/password
+(defun gm/jupyter-api-request-xsrf-cookie-error-advice (func &rest args)
+  (condition-case-unless-debug nil
+      (apply func args)
+    (jupyter-api-http-error nil)))
+(advice-add 'jupyter-api-request-xsrf-cookie :around #'gm/jupyter-api-request-xsrf-cookie-error-advice)
 

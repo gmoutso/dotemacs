@@ -64,6 +64,7 @@
 	)
     (message "missing args")
     ))
+(defalias 'eshell/vterm-run 'eshell/vterm-exec)
 
 (defun gm/tmux-command-to-string (cmd &optional user+host)
   (let ((default-directory "~"))
@@ -85,7 +86,8 @@
 		     nil nil nil nil "emacs-session"))
 
 (defun gm/tmux-make-buffer-name (user@host session-name)
-  (format "*tmux[%s:%s]*" user@host session-name))
+  ;;(format "*tmux[%s:%s]*" user@host session-name))
+  (format "*tmux[%s]*" user@host))
 
 (defun gm/vterm-tmux-create (user@host session-name buffer-name)
   (let ((default-directory "~")
@@ -126,4 +128,40 @@
   ;; \ePtmux;\e\e]%s\007\e\\
   ;; \\ePtmux;\\e\\e]%s\\007\\e\\\\
   (vterm-insert (format tmux-escaped msg))
+  ))
+
+(defun gm/vterm_printf (msg)
+  (let ((ifthenelse
+	 "if [ -n \"$TMUX\" ] && ([ \"${TERM%%-*}\" = \"tmux\" ] || [ \"${TERM%%-*}\" = \"screen\" ]); then
+        # Tell tmux to pass the escape sequences through
+        printf \"\\ePtmux;\\e\\e]%s\\007\\e\\\\\" \"$1\"
+    elif [ \"${TERM%%-*}\" = \"screen\" ]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+        printf \"\\eP\\e]%s\\007\\e\\\\\" \"$1\"
+    else
+        printf \"\\e]%s\\e\\\\\" \"$1\"
+    fi
+"))
+  (vterm-insert (replace-regexp-in-string "\\$1" msg ifthenelse))
+  ))
+
+(defun gm/vterm-sync ()
+  (interactive)
+  (let ((ifthenelse
+	 "if [ \"$TERM\" = \"screen\" ] && [ -n \"$TMUX\" ]; then %s; else %s; fi\n")
+	(tmux "printf \"\\ePtmux;\\e\\e]%s\\007\\e\\\\\"")
+	(notmux "printf \"\\e]%s\\e\\\\\"")
+	(msg "51;A$USER@$HOSTNAME:$(pwd)")
+	)
+  ;; tmux
+  ;; printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+  ;; "printf \"\\ePtmux;\\e\\e]%s\\007\\e\\\\"
+  ;; screen
+  ;; printf "\eP\e]%s\007\e\\" "$1"
+  ;; shell
+  ;; printf "\e]%s\e\\" "$1"
+  ;; (vterm-insert "printf \"\\e]\\e\\\\\"")
+  ;; \ePtmux;\e\e]%s\007\e\\
+  ;; \\ePtmux;\\e\\e]%s\\007\\e\\\\
+  (vterm-insert (format (format ifthenelse tmux notmux) msg msg))
   ))

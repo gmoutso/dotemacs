@@ -190,14 +190,18 @@ If remote, returns hostname removing any ssh protocol."
   (visit-tags-table "/home/moutsopoulosg/dev/master/TAGS" t)
   (helm-etags-select nil))
 
-(defconst gm/helm-source-worktree-names
-  (helm-build-sync-source "worktree"
-    :candidates (lambda () (mapcan 'last (magit-list-worktrees)))))
+(use-package magit-worktree)
+(defun gm/get-worktrees ()
+  (cl-loop for el in (magit-list-worktrees)
+	   collect (cons (nth 2 el) (nth 0 el))
+	   ))
+
 (defconst gm/helm-source-worktree-root-dirs
   (helm-build-sync-source "worktree"
-    :candidates (lambda () (mapcar (lambda (el) (cons (car (last el)) (nth 0 el))) (magit-list-worktrees)))))
+    :candidates 'gm/get-worktrees))
+
 (defun gm/ev-change-worktree (arg)
-  "Find file but in another worktree."
+  "Find file but in another worktree. With ARG keep current file."
   (interactive "P")
   (let ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
 	(worktree-path (helm gm/helm-source-worktree-root-dirs))
@@ -206,21 +210,6 @@ If remote, returns hostname removing any ssh protocol."
 	)
     (funcall func (replace-regexp-in-string from-string worktree-path filename nil t))))
 (defalias  'gm/ev-switch-worktree 'gm/ev-change-worktree)
-
-;; (defun gm/ev-replace-dev-root (arg)
-;;   "Find file but switch master <-> py36"
-;;   (interactive "P")
-;;   (let ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
-;; 	(regex "dev/\\([^/]*\\)")
-;; 	(from) (to) (target)
-;; 	(arg t))
-;;     (when (string-match regex filename)
-;;       (setq from (match-string 1 filename))
-;;       (setq to  (if arg (helm gm/helm-source-dev-roots)
-;; 		  (cond ((string= from "master") "py36")
-;; 			(t "master"))))
-;;       (find-file (replace-match to nil nil filename 1))
-;;       )))
 
 ;; (setq run-banks-kernel-on-phil-command
 ;;       "PYTHONPATH=/home/moutsopoulosg/dev/master/python; PATH=/home/moutsopoulosg/miniconda/bin:\$PATH; source activate banks; ipython kernel -f kernel-emacs-remote.json")

@@ -2,10 +2,18 @@
   :custom
   (code-cells-convert-ipynb-style
    '(("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--update" "--to" "ipynb")
-    ("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--to" "py:percent")
-    nil code-cells-convert-ipynb-hook))
+     ("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--to" "py:percent")
+     code-cells--guess-mode code-cells-convert-ipynb-hook))
+  (code-cells-eval-region-commands
+   '((jupyter-repl-interaction-mode . gm/jupyter-eval-region)
+    (python-ts-mode . python-shell-send-region)
+    (python-mode . python-shell-send-region)
+    (drepl--current . drepl-eval-region)
+    (emacs-lisp-mode . eval-region)
+    (lisp-interaction-mode . eval-region)))
   :hook
-  ((python-mode . code-cells-mode-maybe))
+  ((python-mode . code-cells-mode-maybe)
+   (python-ts-mode . code-cells-mode-maybe))
   )
 ;; (add-hook 'python-mode-hook 'code-cells-mode-maybe)
 
@@ -16,7 +24,7 @@
     (define-key map "e" (code-cells-speed-key 'code-cells-eval))
     (define-key map (kbd "TAB") (code-cells-speed-key 'outline-cycle))
     (define-key map (kbd "C-c C-c") 'code-cells-eval))
-  (add-to-list 'code-cells-eval-region-commands '(jupyter-repl-interaction-mode . gm/jupyter-eval-region)))
+  )
 
 (defun gm/jupyter-eval-region (beg end)
   (jupyter-eval-region nil beg end))
