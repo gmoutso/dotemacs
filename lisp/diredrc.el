@@ -7,9 +7,15 @@
   :config
   (bind-key "C-c C-r" 'dired-rsync dired-mode-map))
 
-(defun gm/get-filename (&optional filename)
+(defun gm/get-filename (&optional filename trailing-slash)
   "Get filename. If in dired, return current line, else ask."
-  (or filename (dired-get-filename nil t) (read-file-name "file :")))
+  (or filename
+      (if (derived-mode-p 'dired-mode)
+	  (if (and trailing-slash
+		   (member (dired-get-filename 'verbatim t) '("." "..")))
+	      (file-name-as-directory (dired-get-filename nil t))
+	    (dired-get-filename nil t)))
+      (read-file-name "file :")))
 
 ;;
 ;; using eaf in dired

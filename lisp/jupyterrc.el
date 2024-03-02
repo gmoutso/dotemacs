@@ -3,12 +3,12 @@
 ;; /home/moutsopoulosg/.emacs.d/elpa/jupyter-20220419.1852/jupyter-kernelspec.el:64
 (use-package jupyter
   :after (ob-jupyter ob-python)
+  :custom
+  (jupyter-org-auto-connect nil)
   :config
   (setq jupyter-api-authentication-method 'ask)
   (setq jupyter-eval-use-overlays nil)
-  (setq org-babel-default-header-args:jupyter-python '((:session . "/jpy:localhost#8888:py")
-                                                       (:kernel . "conda-env-edge-py")
-                                                       (:async . "yes")
+  (setq org-babel-default-header-args:jupyter-python '((:async . "yes")
 						       (:pandoc t)))
   (add-to-list 'savehist-additional-variables 'jupyter-server-kernel-names)
   (setq ob-async-no-async-languages-alist '("jupyter-python"))
@@ -20,6 +20,7 @@
  'org-babel-load-languages
  '((C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
    (jupyter . t)))
+;; why is this needed here. It is also an org-mode hook?
 (conda-with-env "emacs"
   (org-babel-jupyter-make-local-aliases))
 
@@ -243,17 +244,18 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
     ))
 
 ;; allow editing jupyter-src src blocks without errors
-(defun gm/advice-org-babel-edit-prep:jupyter (func info)
-  "Allow editing jupyter blocks when session is set to 'none'."
-  (let* ((params (nth 2 info))
-         (session (alist-get :session params))
-	 (kernel (alist-get :session params)))
-    (if (string-equal session "none")
-	nil
-      (funcall func info)
-      )))
-(advice-add 'org-babel-edit-prep:jupyter :around 'gm/advice-org-babel-edit-prep:jupyter)
+;; (defun gm/advice-org-babel-edit-prep:jupyter (func info)
+;;   "Allow editing jupyter blocks when session is set to 'none'."
+;;   (let* ((params (nth 2 info))
+;;          (session (alist-get :session params))
+;; 	 (kernel (alist-get :session params)))
+;;     (if (string-equal session "none")
+;; 	nil
+;;       (funcall func info)
+;;       )))
+;; (advice-add 'org-babel-edit-prep:jupyter :around 'gm/advice-org-babel-edit-prep:jupyter)
 ;; (advice-remove 'org-babel-edit-prep:jupyter 'gm/advice-org-babel-edit-prep:jupyter)
+;; superceded by jupyter-org-auto-connect
 ;; To ensure python src blocks are opened in python-ts-mode
 (setf (alist-get "jupyter-python" org-src-lang-modes nil nil #'equal) 'python-ts)
 (setf (alist-get "python" org-src-lang-modes nil nil #'equal) 'python-ts)

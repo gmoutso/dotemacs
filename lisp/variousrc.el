@@ -147,12 +147,13 @@ Keeps old as is."
 						 candidates nil t)))
 	  )))
 
-(defun gm/jump-to-vterm ()
+(defun gm/jump-to-vterm (&optional arg)
   "Switch to vterm (or create) with multiple vterm choice if they exist."
-  (interactive)
+  (interactive "P")
+  (if arg (multi-vterm)
   (if (multi-vterm-dedicated-exist-p)
       (multi-vterm-dedicated-open)
-      (gm/switch-to-buffer-or-create 'vterm-mode 'multi-vterm 'vterm-toggle)))
+      (gm/switch-to-buffer-or-create 'vterm-mode 'multi-vterm 'vterm-toggle))))
 
 (defun gm/org-remove-and-delete-file-link ()
   (interactive)

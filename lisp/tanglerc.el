@@ -8,7 +8,8 @@
     (let ((here (point))
 	  (beg (org-with-wide-buffer
 		(org-with-limited-levels (or (outline-previous-heading) (point-min))))))
-	   (let ((case-fold-search nil))(count-matches "^ *#\\+begin_src" beg here))))
+      (let ((case-fold-search nil))
+	(count-matches "^ *#\\+begin_src" beg here))))
 
 (defun gm/org-babel-tangle-collect-this-block ()
   "Tangle this block with correct counter.

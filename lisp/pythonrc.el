@@ -400,6 +400,12 @@
       :venv "miniconda3/envs/dick"
       :pythonpaths ("/home/beowulf/dev/py36/python")
       )
+    ("Python[beowulf@ted:dbsql]"
+      :cmd "ipython  --simple-prompt  -i"
+      :host "/ssh:beowulf@ted:"
+      :venv "miniconda3/envs/dpsql"
+      :pythonpaths ("/home/beowulf/dev/py310/python")
+      )
     ;; ("Python[migration-gm]"
     ;;  :cmd "ipython"
     ;;  :host "/ssh:test-migration-gm:"
@@ -599,7 +605,7 @@ This is necessary if a python repl was started with built-in `run-python'.
   "Convert python buffer to org-mode file.
 
 Pipes through jupytext and pandoc"
-  (interactive nil 'python-mode 'python-ts-mode)
+  (interactive nil 'python-base-mode)
   (let* ((header "jupyter-python")
 	(jupytext-cmd (format "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb"))
 	(pandoc-cmd "~/anaconda3/envs/bastille/bin/pandoc --from ipynb --to org")
@@ -690,3 +696,13 @@ last statement in BODY, as elisp."
 (advice-add 'org-babel-python-evaluate-session :override #'gm/org-babel-python-evaluate-session)
 
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
+
+(defun gm/lsp-ensure ()
+  (unless (file-remote-p default-directory)
+      (if (derived-mode-p 'python-base-mode)
+      (if (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
+					      "/home/moutsopoulosg/dev/cloud_migration_py2/"))
+	  (lsp-deferred)
+	(eglot-ensure)
+	  ))))
+(add-hook 'python-base-mode-hook 'gm/lsp-ensure)

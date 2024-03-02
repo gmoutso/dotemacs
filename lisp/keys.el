@@ -16,7 +16,7 @@
   :init-value t
   :lighter " myKeys"
   :keymap my-keys-mode-map)
-(my-keys-mode 1)
+;; (my-keys-mode 1)
 (defadvice load (after give-my-keybindings-priority)
   "Try to ensure that my keybindings always have priority."
   (if (not (eq (car (car minor-mode-map-alist)) 'my-keys-mode))
@@ -49,7 +49,7 @@
 (defvar my-gdb-navigation-mode-map (make-keymap) "my-gdb-navigation-mode keymap.")
 (define-minor-mode my-gdb-navigation-mode
   "A minor mode so that I navigate gdb steps."
-  :init-value t
+  :init-value nil
   :lighter " gdbNav"
   :keymap my-gdb-navigation-mode-map)
 (define-key my-gdb-navigation-mode-map (kbd "s") 'gud-step)

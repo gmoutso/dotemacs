@@ -712,6 +712,8 @@ If ASK then ask for the symbol to find."
   (let ((word (if ask (read-from-minibuffer "Symbol: ") (symbol-at-point))))
   (gm/find-pydef-in-buffer word)))
 
+(defalias 'gm/org-find-definition-at-point 'gm/find-pydef-at-point)
+
 (defun gm/find-pydef-in-buffer (&optional word)
   "Find defition of WORD within the current org document."
   (interactive)

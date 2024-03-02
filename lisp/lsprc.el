@@ -9,13 +9,13 @@
 
 
 (use-package lsp-mode
-  :hook
-  (python-mode . lsp-deferred)
-  (python-ts-mode . lsp-deferred)
-  (lsp-mode . lsp-enable-which-key-integration)
+  ;; :hook
+  ;; (python-base-mode . lsp-deferred)
   :commands (lsp lsp-deferred)
   :custom
-  (lsp-headerline-breadcrumb-enable nil))
+  (lsp-headerline-breadcrumb-enable nil)
+  :config
+  (lsp-enable-which-key-integration))
 
 (use-package lsp-python-ms
   :custom
