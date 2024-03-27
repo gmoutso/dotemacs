@@ -34,7 +34,11 @@
    )
    "Shells"
    (("e" eshell "eshell")
-    ("v" gm/jump-to-vterm "vterm"))))
+    ("v" gm/jump-to-vterm "vterm"))
+   "Misc."
+   (("xr" visit-tags-table "tags file")
+    ("k" gm/jupyter-kernels "jupyter kernels"))
+   ))
 
 (defhydra hydra-files-org-more (:exit t)
   "
@@ -68,7 +72,14 @@ more org rifle..\n"
   (:exit t :quit-key ("q" "<escape>"))
   ("Kernel"
   (("g" jupyter-repl-restart-kernel "restart")
-   ("r" org-recipes "recipes"))
+   ("c" jupyter-repl-interrupt-kernel "interrupt")
+   ("k" gm/jupyter-kernels "kernels")
+   ("l" jupyter-server-list-kernels "list")
+   )
+  "Code"
+  (("r" org-recipes "recipes")
+   ("w" gm/jupyter-whos "whos")
+   )
   ))
 
 (major-mode-hydra-define org-mode
@@ -107,9 +118,12 @@ more org rifle..\n"
     ("c" gm/org-result-decorate "caption"))
    "Jupyter"
    (("k" gm/jupyter-kernels "kernels")
-    ("." gm/org-find-definition-at-point "org def")
     ("w" gm/jupyter-whos "whos")
-    ("r" org-recipes "recipes")
+    )
+   "Code"
+   (("r" org-recipes "recipes")
+    ("tt" gm/tangle-and-goto-block "tangle")
+    ("." gm/org-find-definition-at-point "org def")
     )
    ))
 
@@ -334,10 +348,13 @@ _m_ (_M_): set mark (jump)                 _q_: quit
     ("I" gm/message-pydef "info defun")
     )
    "Code"
-   (("f" flycheck-list-errors "flycheck")
+   (
+    ;;("f" flycheck-list-errors "flycheck")
+    ("f" flymake-show-buffer-diagnostics "flymake")
     ("g" gtags-find-tag "gtags")
     ("e" conda-env-activate "activate env")
     ("r" org-recipes "recipes")
+    ("d" gm/detangle-and-goto-block "detangle")
     )
    "LSP"
    (("ll" lsp "LSP")

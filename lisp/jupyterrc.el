@@ -332,7 +332,7 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
 ;; https://github.com/emacs-jupyter/jupyter/issues/35#issuecomment-497039866
 ;; login endpoint is missing when no token/password
 (defun gm/jupyter-api-request-xsrf-cookie-error-advice (func &rest args)
-  (condition-case-unless-debug nil
+  (condition-case nil
       (apply func args)
     (jupyter-api-http-error nil)))
 (advice-add 'jupyter-api-request-xsrf-cookie :around #'gm/jupyter-api-request-xsrf-cookie-error-advice)

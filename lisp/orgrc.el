@@ -552,7 +552,7 @@ ARG is passed through to `org-copy-schedule-today'."
 (defun org-paste-link-xclip ()
   "Save an image in clipboard, eg a screenshot, into a time stamped unique-named file 
 in the same directory as the org-buffer and insert a link to this file."
-g  (interactive)
+  (interactive)
   (setq filename
         (concat
          (make-temp-name
@@ -711,7 +711,7 @@ If ASK then ask for the symbol to find."
   (interactive "P")
   (let ((word (if ask (read-from-minibuffer "Symbol: ") (symbol-at-point))))
   (gm/find-pydef-in-buffer word)))
-
+(defalias 'gm/org-find-definition 'gm/find-pydef-in-buffer)
 (defalias 'gm/org-find-definition-at-point 'gm/find-pydef-at-point)
 
 (defun gm/find-pydef-in-buffer (&optional word)
@@ -767,7 +767,7 @@ If ASK then ask for the symbol to find."
       ((eq format 'html) (source-data-uri desc keyword)); no output for html
       ((eq format 'latex)
        ;; write out the latex command
-       (format "\\textattachfile[description={attached file %s}, author={%s}, color=1 0 0]{%s}{%s}" keyword  "George Moutsopoulos" keyword desc)))))
+       (format "\\textattachfile[ucfilespec={%s}, description={attached file %s}, author={%s}, color=1 0 0]{%s}{%s}" (file-name-nondirectory keyword) keyword  "George Moutsopoulos" keyword desc)))))
 
 (defun source-data-uri (desc source)
     "Encode the string in SOURCE to a data uri."

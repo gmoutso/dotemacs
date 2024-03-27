@@ -403,7 +403,7 @@
     ("Python[beowulf@ted:dbsql]"
       :cmd "ipython  --simple-prompt  -i"
       :host "/ssh:beowulf@ted:"
-      :venv "miniconda3/envs/dpsql"
+      :venv "miniconda3/envs/dbsql"
       :pythonpaths ("/home/beowulf/dev/py310/python")
       )
     ;; ("Python[migration-gm]"

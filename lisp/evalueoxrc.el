@@ -52,7 +52,16 @@
   stringstyle=\\color{mymauve},     % string literal style
 }
 \\lstset{style=customc}
-\\usepackage{attachfile2}
+\\usepackage{marginnote}
+\\usepackage[color={0 0 0}]{attachfile2}
+% xelatex+caption+attachfile2 issue https://github.com/ho-tex/attachfile2/issues/8
+\\usepackage[singlelinecheck=false]{caption}
+\\usepackage{placeins}
+\\newcommand\\alwaysFloatBarrier{%
+   \\pretocmd{\\section}{\\FloatBarrier}{}{}%
+   \\pretocmd{\\subsection}{\\FloatBarrier}{}{}%
+   \\pretocmd{\\subsubsection}{\\FloatBarrier}{}{}%
+}
 [DEFAULT-PACKAGES]
 [PACKAGES]
 [EXTRA]
@@ -80,6 +89,7 @@
 \\usepackage{capt-of}
 \\usepackage[screen,centering]{geometry}
 \\usepackage{hyperref}
+\\usepackage{placeins}
 [NO-DEFAULT-PACKAGES]"
   ("\\section{%s}" . "\\section*{%s}")
   ("\\subsection{%s}" . "\\subsection*{%s}")

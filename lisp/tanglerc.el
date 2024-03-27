@@ -3,6 +3,9 @@
 ;;
 ;; to be used with header arguments :tangle yes :comments yes :noweb yes
 
+(setq org-babel-tangle-comment-format-beg
+ "%% [[%link][%source-name]]")
+
 (defun gm/org-babel-get-block-header (&optional property)
   "Returns alist of header properties of this block or specific PROPERTY.
 
@@ -78,5 +81,6 @@ https://emacs.stackexchange.com/a/69591"
 
 Note sure why this was written: all languages must be the same in org file."
   (interactive)
-  (org-babel-detangle)
+  (let ((org-src-preserve-indentation t))
+    (org-babel-detangle))
   (org-babel-tangle-jump-to-org))
