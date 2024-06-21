@@ -346,6 +346,12 @@
      :venv "anaconda3/envs/egan_reporter"
      :pythonpaths ("/home/moutsopoulosg/dev/py310/python")
      )
+    ("Python[local:dick]"
+     :cmd "ipython"
+     :host "~/"
+     :venv "anaconda3/envs/dick"
+     :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+     )
     ("Python[local:db3]"
      :cmd "ipython"
      :host "~/"
@@ -522,8 +528,9 @@ This is necessary if a python repl was started with built-in `run-python'.
 (defun gm/get-relative-pyroot-filename ()
   "Get filename relative to root. If in dired, return current line, else return buffer file."
   (let* ((pyroot (expand-file-name
-		  (or (file-name-concat (vc-root-dir) "..")
-		      (flycheck-python-find-project-root 'checker_))))
+		  (or 
+		   (flycheck-python-find-project-root 'checker_)
+		   (file-name-concat (vc-root-dir) ".."))))
 	 (filename
 	  (cond ((derived-mode-p 'dired-mode)
 		 (dired-get-filename nil t))
@@ -700,9 +707,11 @@ last statement in BODY, as elisp."
 (defun gm/lsp-ensure ()
   (unless (file-remote-p default-directory)
       (if (derived-mode-p 'python-base-mode)
-      (if (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
-					      "/home/moutsopoulosg/dev/cloud_migration_py2/"))
+	  (if (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
+						  ;"/home/moutsopoulosg/dev/py36/"
+					     "/home/moutsopoulosg/dev/cloud_migration_py2/"))
 	  (lsp-deferred)
-	(eglot-ensure)
+	  (eglot-ensure)
 	  ))))
+
 (add-hook 'python-base-mode-hook 'gm/lsp-ensure)

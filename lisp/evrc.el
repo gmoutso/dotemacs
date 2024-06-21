@@ -220,10 +220,13 @@ If remote, returns hostname removing any ssh protocol."
 
 (defun gm/ev-replace-commentary-tex-chars-buffer ()
   (interactive)
-  (dolist (rep '(("[\\]*%" "\\%")
+  (dolist (rep '(
+		 ("[\\]*%" "\\%")
 		 ("–" "--")
 		 ("[\\]*&" "\\&")
 		 ("’" "'")
+		 ("“" "``")
+		 ("”" "''")
 		 ))
   (replace-regexp-in-region (nth 0 rep) (nth 1 rep) (point-min) (point-max))
   ))

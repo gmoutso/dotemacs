@@ -71,6 +71,56 @@
   ("\\section{%s}" . "\\section*{%s}")
   ("\\subsection{%s}" . "\\subsection*{%s}")
   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+
+(add-to-list 'org-latex-classes
+             '("plain"
+"\\documentclass[10pt]{article}
+\\usepackage{amsmath}
+\\usepackage{amsthm}
+\\usepackage{graphicx}
+\\usepackage{grffile}
+\\usepackage{longtable}
+\\usepackage{wrapfig}
+\\usepackage{rotating}
+\\usepackage[normalem]{ulem}
+\\usepackage{amsmath}
+\\usepackage{textcomp}
+\\usepackage{amssymb}
+\\usepackage{capt-of}
+\\usepackage{color}
+\\usepackage{listings}
+\\definecolor{mygreen}{rgb}{0,0.6,0}
+\\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\\lstdefinestyle{customc}{
+  backgroundcolor=\\color{white},
+  basicstyle=\\footnotesize,        % the size of the fonts that are used for the code
+  commentstyle=\\color{mygreen},    % comment style
+  keywordstyle=\\color{blue},       % keyword style
+  numberstyle=\\tiny\\color{mygray}, % the style that is used for the line-numbers
+  stringstyle=\\color{mymauve},     % string literal style
+}
+\\lstset{style=customc}
+\\usepackage{marginnote}
+\\usepackage[color={0 0 0}]{attachfile2}
+% xelatex+caption+attachfile2 issue https://github.com/ho-tex/attachfile2/issues/8
+\\usepackage[singlelinecheck=false]{caption}
+\\usepackage{placeins}
+\\newcommand\\alwaysFloatBarrier{%
+   \\pretocmd{\\section}{\\FloatBarrier}{}{}%
+   \\pretocmd{\\subsection}{\\FloatBarrier}{}{}%
+   \\pretocmd{\\subsubsection}{\\FloatBarrier}{}{}%
+}
+[DEFAULT-PACKAGES]
+[PACKAGES]
+[EXTRA]
+"
+  ;; ("\\part{%s}" . "\\part*{%s}")
+  ;; ("\\chapter{%s}" . "\\chapter*{%s}")
+  ("\\section{%s}" . "\\section*{%s}")
+  ("\\subsection{%s}" . "\\subsection*{%s}")
+  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+
 (setq org-latex-title-command "\\maketitle\\thispagestyle{report}
 
 ")
@@ -87,7 +137,7 @@
 \\usepackage{textcomp}
 \\usepackage{amssymb}
 \\usepackage{capt-of}
-\\usepackage[screen,centering]{geometry}
+\\usepackage[screen]{geometry}
 \\usepackage{hyperref}
 \\usepackage{placeins}
 [NO-DEFAULT-PACKAGES]"
