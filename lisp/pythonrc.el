@@ -704,14 +704,22 @@ last statement in BODY, as elisp."
 
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 
+(defun gm/should-use-lsp-mode ()
+  (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
+				      "/home/moutsopoulosg/dev/cloud_migration_py2/")))
+(defun gm/should-not-use-lsp ()
+  (or
+   (not (buffer-file-name))
+   (not (derived-mode-p 'python-base-mode))
+   (file-remote-p default-directory)
+   (member (file-name-directory (buffer-file-name))
+       '("/home/moutsopoulosg/")
+       )))
+
 (defun gm/lsp-ensure ()
-  (unless (file-remote-p default-directory)
-      (if (derived-mode-p 'python-base-mode)
-	  (if (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
-						  ;"/home/moutsopoulosg/dev/py36/"
-					     "/home/moutsopoulosg/dev/cloud_migration_py2/"))
+  (unless (gm/should-not-use-lsp)
+    (if (gm/should-use-lsp-mode)
 	  (lsp-deferred)
 	  (eglot-ensure)
-	  ))))
-
+	  )))
 (add-hook 'python-base-mode-hook 'gm/lsp-ensure)

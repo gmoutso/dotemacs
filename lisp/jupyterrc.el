@@ -2,14 +2,18 @@
 ;; use (jupyter-command "kernelspec" "list" "--json" "--log-level=40")
 ;; /home/moutsopoulosg/.emacs.d/elpa/jupyter-20220419.1852/jupyter-kernelspec.el:64
 (use-package jupyter
-  :after (ob-jupyter ob-python)
+  ;; :after (ob-jupyter ob-python)
   :custom
   (jupyter-org-auto-connect nil)
+  (jupyter-api-authentication-method 'ask)
+  (jupyter-eval-use-overlays nil)
+  (jupyter-executable "~/anaconda3/bin/jupyter")
+  (jupyter-use-zmq nil)
   :config
-  (setq jupyter-api-authentication-method 'ask)
-  (setq jupyter-eval-use-overlays nil)
   (setq org-babel-default-header-args:jupyter-python '((:async . "yes")
-						       (:pandoc t)))
+						  (:pandoc . t)
+						  (:exports . "results")
+						  (:tangle . "yes")))
   (add-to-list 'savehist-additional-variables 'jupyter-server-kernel-names)
   (setq ob-async-no-async-languages-alist '("jupyter-python"))
   (add-to-list 'org-structure-template-alist '("j" . "src jupyter-python")))
@@ -336,4 +340,5 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
       (apply func args)
     (jupyter-api-http-error nil)))
 (advice-add 'jupyter-api-request-xsrf-cookie :around #'gm/jupyter-api-request-xsrf-cookie-error-advice)
+;; (advice-remove 'jupyter-api-request-xsrf-cookie 'gm/jupyter-api-request-xsrf-cookie-error-advice)
 

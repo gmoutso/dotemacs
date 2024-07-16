@@ -1,0 +1,24 @@
+# GENERAL
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline timestamp:t title:t toc:t todo:t |:t
+#+PROPERTY: header-args:jupyter-python+ :exports results :tangle yes
+
+# LATEX
+# # float images
+#+LATEX_HEADER_EXTRA: \usepackage{placeins}
+#+LATEX_HEADER_EXTRA: \newcommand\alwaysFloatBarrier{\pretocmd{\section}{\FloatBarrier}{}{}\pretocmd{\subsection}{\FloatBarrier}{}{}\pretocmd{\subsubsection}{\FloatBarrier}{}{}}
+#+LATEX_HEADER_EXTRA: \alwaysFloatBarrier
+# # admonitions
+#+LATEX_HEADER_EXTRA: \usepackage{awesomebox}  \newenvironment{tip}{\begin{tipblock}}{\end{tipblock}} \newenvironment{note}{\begin{noteblock}}{\end{noteblock}} \newenvironment{warning}{\begin{warningblock}}{\end{warningblock}} \newenvironment{caution}{\begin{cautionblock}}{\end{cautionblock}} \newenvironment{important}{\begin{importantblock}}{\end{importantblock}}
+# # rotated images/tables in rotated pages
+#+LATEX_HEADER_EXTRA: \usepackage{pdflscape} \newenvironment{rtable}{\begin{landscape}\begin{table}}{\end{table}\end{landscape}} \newenvironment{rfigure}{\begin{landscape}\begin{figure}}{\end{figure}\end{landscape}}
+
+# HTML
+# setupfile: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+OPTIONS: html-style:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+#+HTML_HEAD: <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+#+HTML_HEAD: <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+#+HTML_HEAD: <style> table {overflow: scroll; overflow: auto; display: block; } </style>
