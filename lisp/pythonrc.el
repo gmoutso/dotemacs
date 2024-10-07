@@ -505,6 +505,7 @@ so that the session gets registered for an org-mode session if needed.
 			    mode))))
 
 (defun gm/associate-repl-with-python-buffer (&optional repl-buffer)
+  "Sets the `python-shell-buffer-name' in a python buffer."
   (interactive nil 'python-mode 'python-ts-mode)
   (let* ((repl-buffer (or repl-buffer (gm/read-buffer-with-mode 'inferior-python-mode)))
 	(session (org-babel-python-without-earmuffs repl-buffer)))

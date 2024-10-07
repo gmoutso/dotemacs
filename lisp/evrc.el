@@ -118,9 +118,7 @@ If remote, returns hostname removing any ssh protocol."
   (let* ((default-directory "~/.unison/")
 	(pfd (file-expand-wildcards "*prf"))
 	(candidates (mapcar (lambda (x) (replace-regexp-in-string ".prf" "" x nil t)) pfd))
-	(selection (helm :sources (helm-build-sync-source "name"
-				    :candidates candidates)
-			 :buffer "*helm unison*"))
+	(selection (completing-read "PRF: " candidates nil t))
 	;; (switches (split-string-and-unquote args)
 	(termbuf (make-term "unison" "/home/moutsopoulosg/.local/bin/unison" nil selection "-auto")))
     (set-buffer termbuf)

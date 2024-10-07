@@ -850,24 +850,25 @@ Update the `org-id-locations' global hash-table, and update the
 ;; (require 'company)
 ;; (add-to-list 'company-backends 'company-ispell)
 
+(defvar gm/org-resize-images '(("large" . 1200)
+			      ("medium" . 800)
+			      ("small" . 500))
+  "Sizes used")
 (defun gm/org-resize-images ()
   "Resize images in this buffer and redisplay."
   (interactive)
-  (let ((org-image-actual-width (helm :sources (helm-build-sync-source "Size"
-						 :candidates '(("large" . 1200)
-							       ("medium" . 800)
-							       ("small" . 500))))
-				))
+  (let ((org-image-actual-width
+	 (alist-get (completing-read "Size: " gm/org-resize-images nil t)
+		    gm/org-resize-images nil nil 'equal)))
     (org-redisplay-inline-images)))
+
 (defun gm/org-set-size-images ()
   "Resize images in this session and redisplay.
 
 To make this permanent, use customize `org-image-actual-width'."
   (interactive)
-  (setq-local org-image-actual-width (helm :sources (helm-build-sync-source "Size"
-						      :candidates '(("large" . 1200)
-								    ("medium" . 800)
-								    ("small" . 500)))))
+  (setq-local org-image-actual-width (alist-get (completing-read "Size: " gm/org-resize-images nil t)
+		    gm/org-resize-images nil nil 'equal))
   (org-redisplay-inline-images))
 
 ;; Helm will show you the car of each cell, but return the cdr of the selected entry. 
