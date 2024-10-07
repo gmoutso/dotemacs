@@ -1,7 +1,7 @@
 (defun gm/org-get-image-or-latex-filename-at-point ()
   "Get filename of org-mode image link, overlay or latex fragment.
 
-Copied org-mode section from ox-clip.el by jkitchen."
+Copied org-mode section from https://github.com/jkitchin/ox-clip/ox-clip.el."
   (let ((scale nil) (el (org-element-context)))
     (cond
      ;; condition on a latex fragment
@@ -39,7 +39,7 @@ Copied org-mode section from ox-clip.el by jkitchen."
 
 
 (defun gm/copy-file-image-to-clipboard (image-file)
-  "Copied from ox-clip.el by jkitchen."
+  "Copied from https://github.com/jkitchin/ox-clip/ox-clip.el."
   (cond
 	    ((eq system-type 'windows-nt)
 	     (message "Not supported yet."))
