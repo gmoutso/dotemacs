@@ -19,11 +19,7 @@
 
 (use-package lsp-python-ms
   :custom
-  (lsp-python-ms-extra-paths 
-   '("/home/moutsopoulosg/dev/master/python"
-     "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7"
-     "/home/moutsopoulosg/anaconda3/envs/blade/lib/python2.7/site-packages"
-     ))
+  (lsp-python-ms-extra-major-modes '(python-ts-mode))
   (lsp-python-ms-python-executable "~/anaconda3/envs/banks/bin/python")
   )
 
