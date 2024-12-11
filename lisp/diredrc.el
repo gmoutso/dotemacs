@@ -81,10 +81,10 @@
     (with-current-buffer shortname
       (org-mode))))
 
-(use-package dired-x
-  :custom
-  (dired-omit-files "\\`[.]?[#~]")
-  )
+;; (use-package dired-x
+;;   :custom
+;;   (dired-omit-files "\\`[.]?[#~]")
+;;   )
 
 (defun gm/dired-insert-subdirs-using-glob (&optional glob)
   "In a dired buffer insert subdirs using a GLOB eg `*/output'.

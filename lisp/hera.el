@@ -1,5 +1,3 @@
-;;; hera.el --- Hera for Hydra
-;; Copyright (C) 2018 Dustin Lacewell
 
 ;; Author: Dustin Lacewell <dlacewell@gmail.com>
 ;; Version: 0.1

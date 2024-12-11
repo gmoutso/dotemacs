@@ -77,7 +77,6 @@
 ;; ;; give yas/dropdown-prompt in yas/prompt-functions a chance
 ;; ;(require 'dropdown-list)
 
-(require 'auto-complete-config)
-(require 'auto-complete-auctex)
-
-(load-library "texify")
+;; (require 'auto-complete-config)
+;; (require 'auto-complete-auctex)
+;; (load-library "texify")

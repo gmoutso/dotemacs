@@ -2,7 +2,7 @@
 (use-package general)
 (use-package pretty-hydra)
 (use-package major-mode-hydra)
-(use-package hera)
+(require 'hera)
 (general-def 'override
   "C-c C-m" 'major-mode-hydra)
 

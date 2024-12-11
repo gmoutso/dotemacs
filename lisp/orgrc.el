@@ -38,26 +38,26 @@
 (setq org-insert-heading-respect-content t)
 ;;(setq org-drill-hide-item-headings-p )
 ;; search through many org files
-(require 'helm-org-rifle)
-(use-package ox
-  :custom
-  (org-export-with-smart-quotes nil)
-  (org-export-with-emphasize t)
-  (org-export-with-special-strings t)
-  (org-export-with-fixed-width t)
-  (org-export-with-timestamps t)
-  (org-export-preserve-breaks nil)
-  (org-export-with-archived-trees nil)
-  (org-export-headline-levels 3)
-  (org-export-time-stamp-file t)
-  (org-export-with-toc t)
-  (org-export-with-todo-keywords t)
-  (org-export-with-sub-superscripts nil)
+(use-package helm-org-rifle)
+(custom-set-variables
+  '(org-export-with-smart-quotes nil)
+  '(org-export-with-smart-quotes nil)
+  '(org-export-with-emphasize t)
+  '(org-export-with-special-strings t)
+  '(org-export-with-fixed-width t)
+  '(org-export-with-timestamps t)
+  '(org-export-preserve-breaks nil)
+  '(org-export-with-archived-trees nil)
+  '(org-export-headline-levels 3)
+  '(org-export-time-stamp-file t)
+  '(org-export-with-toc t)
+  '(org-export-with-todo-keywords t)
+  '(org-export-with-sub-superscripts nil)
   )
 ;;(require 'org-tempo)
 (setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-(use-package ox-beamer)
+(require 'ox-beamer)
 (use-package helm-org)
 
 (setq org-adapt-indentation nil)
@@ -176,8 +176,8 @@
 		)))
   :custom
   (org-use-sub-superscripts nil))
-(use-package org-agenda
-  :bind (("C-c a" . org-agenda)))
+;; (use-package org-agenda
+;;   :bind (("C-c a" . org-agenda)))
 
 ;; when cycling TODO->DONE insert a CLOSED timestamp
 (setq org-log-done t)
@@ -322,15 +322,15 @@
                   ("C-c n t" . org-roam-tag-add)
                   ("C-c n a" . org-roam-alias-add)
                   ("C-c n l" . org-roam-buffer-toggle)))))
-(use-package org-roam-dailies
-  :custom
-  (org-roam-dailies-directory "daily/")
-  (org-roam-dailies-capture-templates
+(custom-set-variables
+  '(org-roam-dailies-directory "daily/")
+  '(org-roam-dailies-capture-templates
       '(("d" "default" entry
          "* %(format-time-string org-journal-time-format) %?"
          :target (file+head "%<%Y-%m-%d>.org"
                             "#+title: %<%Y-%m-%d>\n")
 	 :unnarrowed t))))
+
 (add-to-list 'display-buffer-alist
              '("\\*org-roam\\*"
                (display-buffer-in-direction)
@@ -342,9 +342,9 @@
 
 ;; (setq org-capture-templates-contexts '(("p" ((in-mode . "python-mode")))))
 (setq org-capture-templates-contexts '(("p" ((in-mode . "python-ts-mode")))))
-(use-package org-annotate-word)
-(use-package org-annotate-python)
-(use-package org-annotate-projects)
+(require 'org-annotate-word)
+(require 'org-annotate-python)
+(require 'org-annotate-projects)
 ;; also include the file to refile as header level 1
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
@@ -429,7 +429,7 @@ ARG is passed through to `org-copy-schedule-today'."
 ;;                   ] to go to next entry
 ;; When viewing a journal entry: C-c C-b to view previous entry
 ;;                               C-c C-f to view next entry
-(require 'org-journal)
+(use-package org-journal)
 (setq org-journal-dir (file-name-as-directory (expand-file-name "journal" org-directory)))
 (defun org-journal-find-location ()
   ;; Open today's journal, but specify a non-nil prefix argument in order to
@@ -563,6 +563,7 @@ in the same directory as the org-buffer and insert a link to this file."
   (insert (concat "[[" filename "]]"))
   (org-display-inline-images))
 
+(use-package htmlize)
 (require 'ox-clip)
 
 ;; (require 'org-link-edit)
@@ -814,9 +815,8 @@ Turning off the use of tab in org-mode stops this conversion."
 
 (use-package helm-org-ql)
 (use-package helm-rg)
-(use-package org-z
-  :config
-  (org-z-mode 1))
+(require 'org-z)
+(org-z-mode 1)
 
 ;; Org ID Properties
 (defun gm/org-id-remove-entry ()
@@ -945,6 +945,6 @@ To make this permanent, use customize `org-image-actual-width'."
   :group 'org-pandoc
   :type org-pandoc-option-type)
 (setq org-pandoc-command
-      "/home/moutsopoulosg/anaconda3/envs/bastille/bin/pandoc"
+      "/home/moutsopoulosg/miniforge/bin/pandoc"
       )
  

@@ -61,11 +61,9 @@
 
 ;; Which key intergration
 ;; https://github.com/justbur/emacs-which-key/issues/306
-(use-package which-key
-  :config
-  (which-key-mode))
+(use-package which-key)
 
-(if (daemonp)
-    (add-hook 'server-after-make-frame-hook 'which-key-mode)
-  (which-key-mode))
+;; (if (daemonp)
+;;     (add-hook 'server-after-make-frame-hook 'which-key-mode)
+;;   (which-key-mode))
 

@@ -3,11 +3,11 @@
 ;;
 ;; see also keys.el!!!
 ;; (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
-(use-package pixel-scroll
-  :custom
-  (pixel-dead-time 0) ; Never go back to the old scrolling behaviour.
-  (pixel-resolution-fine-flag t) ; Scroll by number of pixels instead of lines
-  )
+;; (use-package pixel-scroll
+;;   :custom
+;;   (pixel-dead-time 0) ; Never go back to the old scrolling behaviour.
+;;   (pixel-resolution-fine-flag t) ; Scroll by number of pixels instead of lines
+;;   )
 ;; (pixel-scroll-mode)  ;; does not work with fixed position scrolling?
 ;; (setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
 ;; (setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
@@ -268,4 +268,4 @@ buffer in current window."
 ;; :general :prefix "C-x t" "b" 'bufferlo-switch-to-buffer
 ;; )
 
-(use-package tab-bookmark)
+;; (use-package tab-bookmark)

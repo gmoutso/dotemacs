@@ -1,5 +1,5 @@
 ;; diminish: hide some minor modes
-(require 'delight)
+(use-package delight)
 (delight '(
 	    (abbrev-mode " Abv" abbrev)
 ;           (smart-tab-mode " \\t" smart-tab)
