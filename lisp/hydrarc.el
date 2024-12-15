@@ -346,6 +346,7 @@ _m_ (_M_): set mark (jump)                 _q_: quit
    (("n" (hera-push 'hydra-navigate-python/body) "navigate" :exit t)
     ("i" helm-imenu "imenu")
     ("I" gm/message-pydef "info defun")
+    ("C" treesitter-context-mode "context")
     )
    "Code"
    (
@@ -462,3 +463,7 @@ _→_/_←_: symbol        _m_/_M_: mark (jump)  _q_/_Q_: quit (back)
   ("C-<up>" backward-paragraph)
   ("<SPC>" View-scroll-half-page-forward)
   ("S-<SPC>" View-scroll-half-page-backward))
+
+(major-mode-hydra-define json-mode nil
+  ("General"
+   (("n" json-navigator-navigate-region "navigate"))))
