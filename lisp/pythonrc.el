@@ -102,17 +102,12 @@
 ;; )
 
 
-(defun open-in-pycharm ()
-  "Open visited file in pycharm."
-  (interactive)
-  (shell-command (concat "/home/moutsopoulosg/app/pycharm-community-2017.1.3/bin/pycharm.sh "
-" ~/dev/master/ --line " (format "%s" (line-number-at-pos)) " " (buffer-file-name))))
-
-(defun my-inferior-python-autoreload-hook ()
-  (python-shell-send-string "%load_ext autoreload")
-  (python-shell-send-string "%autoreload 2")
-  )
-(add-hook 'inferior-python-mode-hook 'my-inferior-python-autoreload-hook)
+;; why does this cause issues?
+;; (defun my-inferior-python-autoreload-hook ()
+;;   (python-shell-send-string "%load_ext autoreload")
+;;   (python-shell-send-string "%autoreload 2")
+;;   )
+;; (add-hook 'inferior-python-mode-hook 'my-inferior-python-autoreload-hook)
 
 
 ;; (defun my-run-existing-jupyter ()
@@ -346,84 +341,84 @@
      :venv "anaconda3/envs/egan_reporter"
      :pythonpaths ("/home/moutsopoulosg/dev/py310/python")
      )
-    ("Python[local:dick]"
-     :cmd "ipython"
-     :host "~/"
-     :venv "anaconda3/envs/dick"
-     :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
-     )
+    ;; ("Python[local:dick]"
+    ;;  :cmd "ipython"
+    ;;  :host "~/"
+    ;;  :venv "anaconda3/envs/dick"
+    ;;  :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+    ;;  )
     ("Python[local:db3]"
      :cmd "ipython"
      :host "~/"
-     :venv "anaconda3/envs/db3env"
+     :venv "conda_envs/db3env"
      :pythonpaths ("/home/moutsopoulosg/dev/db3/python")
      )
-    ("Python[local:banks]"
-     :cmd "ipython -i"
-      :host "~/"
-      :venv "anaconda3/envs/banks"
-      :pythonpaths ("/home/moutsopoulosg/dev/master/python")
-      )
+    ;; ("Python[local:banks]"
+    ;;  :cmd "ipython -i"
+    ;;   :host "~/"
+    ;;   :venv "anaconda3/envs/banks"
+    ;;   :pythonpaths ("/home/moutsopoulosg/dev/master/python")
+    ;;   )
     ;; ("Python[local:dick]"
     ;;  :cmd "ipython"
     ;;   :host "~/"
     ;;   :venv "anaconda3/envs/dick"
     ;;   :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
     ;;   )
-    ("Python[phil:banks]"
-      :cmd "ipython"
-      :host "/ssh:phil:"
-      :venv "miniconda/envs/banks"
-      :pythonpaths ("/home/moutsopoulosg/dev/master/python")
-      )
-     ("Python[phil:egan]"
-      :cmd "ipython -i --simple-prompt"
-      :host "/ssh:phil:"
-      :venv "miniconda/envs/egan"
-      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
-      )
-     ("Python[phil:dick]"
-      :cmd "ipython -i"
-      :host "/ssh:phil:"
-      :venv "miniconda/envs/dick"
-      :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
-      )
-    ("Python[beowulf@ted:banks]"
-      :cmd "ipython -i"
-      :host "/ssh:beowulf@ted:"
-      :venv "miniconda/envs/banks"
-      :pythonpaths ("/home/beowulf/dev/master/python")
-      )
-    ("Python[beowulf@ted:egan]"
-      :cmd "ipython -i --simple-prompt"
-      :host "/ssh:beowulf@ted:"
-      :venv "miniconda3/envs/egan"
-      :pythonpaths ("/home/beowulf/dev/py36/python")
-      )
-    ("Python[beowulf@ted:dick]"
-      :cmd "ipython -i --simple-prompt"
-      :host "/ssh:beowulf@ted:"
-      :venv "miniconda3/envs/dick"
-      :pythonpaths ("/home/beowulf/dev/py36/python")
-      )
-    ("Python[beowulf@ted:dbsql]"
-      :cmd "ipython  --simple-prompt  -i"
-      :host "/ssh:beowulf@ted:"
-      :venv "miniconda3/envs/dbsql"
-      :pythonpaths ("/home/beowulf/dev/py310/python")
-      )
+    ;;  ("Python[phil:banks]"
+    ;;   :cmd "ipython"
+    ;;   :host "/ssh:phil:"
+    ;;   :venv "miniconda/envs/banks"
+    ;;   :pythonpaths ("/home/moutsopoulosg/dev/master/python")
+    ;;   )
+    ;;  ("Python[phil:egan]"
+    ;;   :cmd "ipython -i --simple-prompt"
+    ;;   :host "/ssh:phil:"
+    ;;   :venv "miniconda/envs/egan"
+    ;;   :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+    ;;   )
+    ;;  ("Python[phil:dick]"
+    ;;   :cmd "ipython -i"
+    ;;   :host "/ssh:phil:"
+    ;;   :venv "miniconda/envs/dick"
+    ;;   :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
+    ;;   )
+    ;; ("Python[beowulf@ted:banks]"
+    ;;   :cmd "ipython -i"
+    ;;   :host "/ssh:beowulf@ted:"
+    ;;   :venv "miniconda/envs/banks"
+    ;;   :pythonpaths ("/home/beowulf/dev/master/python")
+    ;;   )
+    ;; ("Python[beowulf@ted:egan]"
+    ;;   :cmd "ipython -i --simple-prompt"
+    ;;   :host "/ssh:beowulf@ted:"
+    ;;   :venv "miniconda3/envs/egan"
+    ;;   :pythonpaths ("/home/beowulf/dev/py36/python")
+    ;;   )
+    ;; ("Python[beowulf@ted:dick]"
+    ;;   :cmd "ipython -i --simple-prompt"
+    ;;   :host "/ssh:beowulf@ted:"
+    ;;   :venv "miniconda3/envs/dick"
+    ;;   :pythonpaths ("/home/beowulf/dev/py36/python")
+    ;;   )
+    ;; ("Python[beowulf@ted:dbsql]"
+    ;;   :cmd "ipython  --simple-prompt  -i"
+    ;;   :host "/ssh:beowulf@ted:"
+    ;;   :venv "miniconda3/envs/dbsql"
+    ;;   :pythonpaths ("/home/beowulf/dev/py310/python")
+    ;;   )
     ;; ("Python[migration-gm]"
     ;;  :cmd "ipython"
     ;;  :host "/ssh:test-migration-gm:"
     ;;  :venv "miniconda3/envs/bankscloud"
     ;;  :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
     ;;  )
-    ("Python[aws-tests:bankscloud]"
-     :cmd "ipython"
-     :host "/ssh:cloud-tests-gm:"
-     :venv "miniconda3/envs/bankscloud"
-     :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
-     )
+    ;; ("Python[aws-tests:bankscloud]"
+    ;;  :cmd "ipython"
+    ;;  :host "/ssh:cloud-tests-gm:"
+    ;;  :venv "miniconda3/envs/bankscloud"
+    ;;  :pythonpaths ("/home/ubuntu/dev/cloud_migration_py2/python")
+    ;;  )
     ;; ("Python[aws-tests:db3]"
     ;;  :cmd "ipython --simple-prompt  -i"
     ;;  :host "/ssh:gm_aws_migration:"
@@ -435,8 +430,14 @@
     ("Python[cloud-tests:py310]"
      :cmd "ipython --simple-prompt  -i"
      :host "/ssh:cloud-tests-gm:"
-     :venv "miniconda3/envs/egan_simulator"
+     :venv "miniconda3/envs/egan_reporter"
      :pythonpaths ("/home/ubuntu/dev/py310/python")
+     )
+    ("Python[minh-aws:evsim]"
+     :cmd "ipython --simple-prompt -i"
+     :host "/ssh:mh-py310:"
+     :venv "miniconda3/envs/egan310"
+     :pythonpaths ("/home/ubuntu/dev/evsim/python")
      )
     ;; ("Python[gm_aws:db3.v1.debug]"
     ;;  :cmd "ipython --simple-prompt  -i"
@@ -447,7 +448,7 @@
     ;; 		   )
     ;;  )
      )
-  "Alist of configuratons of a name (usually host) => alist of setup (usually an environment on host) => plist of configs. Used in `gm/run-python' but nned not be remote."
+  "Alist of (tramp) python configuratons. Used in `gm/run-python'."
   )
 
 (defun gm/get-run-python-config ()
@@ -615,8 +616,8 @@ This is necessary if a python repl was started with built-in `run-python'.
 Pipes through jupytext and pandoc"
   (interactive nil 'python-base-mode)
   (let* ((header "jupyter-python")
-	(jupytext-cmd (format "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb"))
-	(pandoc-cmd "~/anaconda3/envs/bastille/bin/pandoc --from ipynb --to org")
+	(jupytext-cmd (format "~/conda_envs/bastille/bin/jupytext --from py:percent --to ipynb"))
+	(pandoc-cmd "~/conda_envs/bastille/bin/pandoc --from ipynb --to org")
 	(buffer (get-buffer-create (concat (file-name-sans-extension (buffer-name)) ".org")))
 	(command (format "%s | %s" jupytext-cmd pandoc-cmd)))
     (when (shell-command-on-region nil nil command buffer)
@@ -633,8 +634,8 @@ Pipes through jupytext and pandoc"
 
 Pipes through jupytext and nbconvert"
   (interactive nil 'python-mode 'python-ts-mode)
-  (let* ((jupytext-cmd "~/anaconda3/envs/bastille/bin/jupytext --from py:percent --to ipynb")
-	 (nbconvert-cmd "~/anaconda3/envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
+  (let* ((jupytext-cmd "~/conda_envs/bastille/bin/jupytext --from py:percent --to ipynb")
+	 (nbconvert-cmd "~/conda_envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
 	 (buffer (get-buffer-create (concat (file-name-sans-extension (buffer-name)) "-v3.ipynb")))
 	 (command (format "%s | %s" jupytext-cmd nbconvert-cmd)))
     (shell-command-on-region nil nil command buffer)
@@ -660,7 +661,7 @@ Pipes through jupytext and nbconvert"
 Pipes through jupytext and nbconvert"
   (interactive nil 'org-mode)
   (let* ((old-buffer (current-buffer))
-  	 (nbconvert-cmd "~/anaconda3/envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
+  	 (nbconvert-cmd "~/conda_envs/bastille/bin/jupyter nbconvert --to notebook --nbformat 3 --stdin --stdout --log-level=50")
 	 (buffer-v3 (get-buffer-create (concat (file-name-sans-extension (buffer-name)) "-v3.ipynb")))
 	 (buffer-v4))
     (with-temp-buffer

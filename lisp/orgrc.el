@@ -80,7 +80,8 @@
 (setq org-insert-heading-respect-content nil)
 
 ;; increase math
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 3.0))
+;; (setq org-format-latex-options (plist-put org-format-latex-options :scale 0.5))
+;; above does not get set? Customize?
 
 ;; (defun org-mode-reftex-setup ()
 ;;   (load-library "reftex")
@@ -672,9 +673,10 @@ in the same directory as the org-buffer and insert a link to this file."
     (if (eq (org-element-type element) 'src-block)
 	(org-element-property :name element)
       (error "Not a jupyter block"))))
+
 (defun gm/org-add-src-name-maybe ()
   "If it doesn't have a NAME property then add one and
-   assign it a UUID."
+   assign it a UUID. Adds a result line but no name."
   (interactive)
   (when (gm/jupyter-source-block-at-point-p)
     (if (gm/source-block-name)
@@ -687,6 +689,33 @@ in the same directory as the org-buffer and insert a link to this file."
 	  (insert "#+name: " name "\n")
 	  (org-babel-where-is-src-block-result 'insert)
 	  )))))
+
+(defun gm/change-this-src-name ()
+  (when (gm/jupyter-source-block-at-point-p)
+    (if (not (gm/source-block-name))
+	(message "Has no name")
+      (let ((old-name (gm/source-block-name))
+	    (new-name (gm/org-id-new))
+	    (has-results (if (org-babel-where-is-src-block-result)
+			     (line-number-at-pos (org-babel-where-is-src-block-result))))
+	    )
+	(save-excursion
+	  (goto-char (org-babel-where-is-src-block-head))
+	  (beginning-of-line)
+	  (forward-line -1)
+	  (re-search-forward (format "#\\+[nN][aA][mM][eE]: *%s" old-name) (pos-eol))
+	  (replace-match (format "#+name: %s" new-name))
+	  (forward-line 1)
+	  (if (not has-results)
+	      (org-babel-where-is-src-block-result 'insert)
+	    (goto-line has-results)
+	    (beginning-of-line)
+	    (re-search-forward (format "#\\+[Rr][Ee][Ss][Uu][Ll][Tt][Ss]: *%s" old-name) (pos-eol))
+	    (replace-match (format "#+RESULTS: %s" new-name))
+	    )
+	  )
+	(goto-line has-results)
+	))))
 
 (defun gm/org-result-decorate ()
   (interactive)
@@ -809,7 +838,7 @@ The scr code special edit is fine at first, but going back to org-mode makes the
 This happens when src block is not aligned the edge (eg begin in column 2). 
 Turning off the use of tab in org-mode stops this conversion."
    (setq indent-tabs-mode nil)
-   (setq tab-width 4)
+   ;; (setq tab-width 4)
    )
 (add-hook 'org-mode-hook 'gm/org-tab-config)
 
@@ -944,7 +973,5 @@ To make this permanent, use customize `org-image-actual-width'."
   "Pandoc options for ipynb"
   :group 'org-pandoc
   :type org-pandoc-option-type)
-(setq org-pandoc-command
-      "/home/moutsopoulosg/miniforge/bin/pandoc"
-      )
- 
+
+

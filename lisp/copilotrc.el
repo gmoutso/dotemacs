@@ -12,15 +12,17 @@
 (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
 (add-to-list 'copilot-major-mode-alist '("python-ts-mode" . "python"))
 
+
 (defun gm/new-tab-copilot-chat (&rest args)
   (tab-bar-new-tab)
   (tab-bar-rename-tab "copilot"))
+
 (use-package copilot-chat
   :quelpa (copilot-chat :fetcher github :repo "chep/copilot-chat.el" :files ("*.el"))
   :custom
   (copilot-chat-frontend 'org)
   :config
-  (advice-add 'copilot-chat-display :before 'gm/new-tab-copilot-chat)
+   ;(advice-add 'copilot-chat-display :before 'gm/new-tab-copilot-chat)
   :bind (
 	 :map copilot-chat-prompt-mode-map
 	      ("C-c C-c" . copilot-chat-prompt-send)

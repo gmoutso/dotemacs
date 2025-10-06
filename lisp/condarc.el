@@ -62,7 +62,7 @@
 
 (use-package blacken
   :custom
-  (blacken-executable "/home/moutsopoulosg/anaconda3/envs/emacs/bin/black"))
+  (blacken-executable "/home/moutsopoulosg/conda_envs/emacs/bin/black"))
 
 ;;(gm/with-emacs-venv-advice-remove 'blacken-buffer)
 ;; (use-package code-cells)

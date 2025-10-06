@@ -12,15 +12,18 @@
     (helm :sources helm-source-ev-hosts
 	  :prompt prompt
 	  :buffer "*helm-ev-host*")))
+
+(defun helm-source-rsync-tree-args-action (candidate)
+  (helm-marked-candidates)
+  )
 (defconst helm-source-rsync-tree-args (helm-build-sync-source "arguments"
 					:candidates (list
 						     "-avz" "-rvz" "-n" "-u" "--delete" "--delete-excluded"
 						     "--exclude \".dexy/\" --exclude \".cache/\" --exclude \"*.pyc\" --exclude \"README.md\" --exclude \".trash\""
 						     "--exclude=\"/.*\""
 						     "-m --include=\"*/\" --include=\"*output/***\" --exclude=\"*\"")
-					:action (lambda (candidate) (helm-marked-candidates))))
+					:action 'helm-source-rsync-tree-args-action))
 (defvar rsync-tree-history nil)
-
 ;;
 ;; rsync a whole tree
 ;;

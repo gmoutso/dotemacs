@@ -26,7 +26,7 @@
 (use-package lsp-pyright
   :custom
   ;; (lsp-pyright-multi-root nil)
-  (lsp-pyright-python-executable-cmd (expand-file-name "~/anaconda3/envs/emacs/bin/python"))
+  (lsp-pyright-python-executable-cmd (expand-file-name "~/conda_envs/emacs/bin/python"))
   )
 
 ;; (add-to-list 'lsp-disabled-clients 'pyright)

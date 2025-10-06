@@ -1,8 +1,8 @@
 (use-package code-cells
   :custom
   (code-cells-convert-ipynb-style
-   '(("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--update" "--to" "ipynb")
-     ("/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext" "--to" "py:percent")
+   '(("/home/moutsopoulosg/conda_envs/bastille/bin/jupytext" "--update" "--to" "ipynb")
+     ("/home/moutsopoulosg/conda_envs/bastille/bin/jupytext" "--to" "py:percent")
      code-cells--guess-mode code-cells-convert-ipynb-hook))
   (code-cells-eval-region-commands
    '((jupyter-repl-interaction-mode . gm/jupyter-eval-region)
@@ -63,7 +63,7 @@
   (let ((filename (gm/get-filename filename)))
     (if (not (string-equal (file-name-extension filename) "ipynb"))
 	(error "Only on ipynb files."))
-    (async-shell-command (format "/home/moutsopoulosg/anaconda3/envs/bastille/bin/jupytext --update --to py:percent --test %s" filename)
+    (async-shell-command (format "/home/moutsopoulosg/conda_envs/bastille/bin/jupytext --update --to py:percent --test %s" filename)
 			 "*code-cells-roundtrip*")
     )
   )
