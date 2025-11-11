@@ -57,6 +57,7 @@
   )
 ;;(require 'org-tempo)
 (setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
+(use-package cdlatex)
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 ;; (require 'ox-beamer)
 (use-package helm-org)
