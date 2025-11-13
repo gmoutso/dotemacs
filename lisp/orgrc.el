@@ -691,31 +691,35 @@ in the same directory as the org-buffer and insert a link to this file."
 	  )))))
 
 (defun gm/change-this-src-name ()
+  "Changes NAME of source block and RESULTS name
+
+  Changes the same RESULTS name but only below the source block,
+so that copying, pasting, and then using this function will work well."
+  (interactive)
   (when (gm/jupyter-source-block-at-point-p)
     (if (not (gm/source-block-name))
 	(message "Has no name")
       (let ((old-name (gm/source-block-name))
 	    (new-name (gm/org-id-new))
-	    (has-results (if (org-babel-where-is-src-block-result)
-			     (line-number-at-pos (org-babel-where-is-src-block-result))))
+	    (has-results (org-babel-where-is-src-block-result))
+	    (case-fold-search t)
 	    )
 	(save-excursion
 	  (goto-char (org-babel-where-is-src-block-head))
 	  (beginning-of-line)
 	  (forward-line -1)
-	  (re-search-forward (format "#\\+[nN][aA][mM][eE]: *%s" old-name) (pos-eol))
-	  (replace-match (format "#+name: %s" new-name))
-	  (forward-line 1)
+	  (re-search-forward (format "#\\+NAME: *%s" old-name) (pos-eol))
+	  (replace-match (format "#+NAME: %s" new-name))
 	  (if (not has-results)
-	      (org-babel-where-is-src-block-result 'insert)
-	    (goto-line has-results)
-	    (beginning-of-line)
-	    (re-search-forward (format "#\\+[Rr][Ee][Ss][Uu][Ll][Tt][Ss]: *%s" old-name) (pos-eol))
-	    (replace-match (format "#+RESULTS: %s" new-name))
-	    )
-	  )
-	(goto-line has-results)
-	))))
+	      (org-babel-where-is-src-block-result 'insert))
+	  (when has-results
+	    (org-babel-goto-named-src-block new-name)
+	    (let ((next (save-excursion (ignore-errors (org-babel-next-src-block)))))
+	      (if (re-search-forward (format "#\\+RESULTS: *%s" old-name) next t)
+		  (replace-match (format "#+RESULTS: %s" new-name))
+		  (org-babel-where-is-src-block-result 'insert)
+		  )
+	)))))))
 
 (defun gm/org-result-decorate ()
   (interactive)
@@ -725,7 +729,8 @@ in the same directory as the org-buffer and insert a link to this file."
       (goto-char (org-babel-where-is-src-block-result))
       (insert "#+ATTR_LATEX: \n#+NAME: \n#+CAPTION: \n")
     )
-  ))
+    ))
+
 ;; automatically add a #+NAME: above a source block
 (defun gm/org-add-src-name-maybe-advice (&rest dumby) (gm/org-add-src-name-maybe))
 ;; (advice-add 'jupyter-org-insert-src-block :after #'gm/org-add-src-name-maybe-advice)

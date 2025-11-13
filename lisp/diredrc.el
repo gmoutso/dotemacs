@@ -62,7 +62,7 @@
 (defun gm/shr-open-xlsx (&optional filename)
   "Open FILENAME as an html file."
   (interactive)
-  (let ((filename (gm/get-filename filename))
+  (let* ((filename (gm/get-filename filename))
 	 (shortname (file-name-nondirectory filename)))
     (with-temp-buffer
       (gm/xlsx-to-html-string filename (current-buffer))
