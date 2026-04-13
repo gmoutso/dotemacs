@@ -383,12 +383,12 @@
     ;;   :venv "miniconda/envs/dick"
     ;;   :pythonpaths ("/home/moutsopoulosg/dev/py36/python")
     ;;   )
-    ;; ("Python[beowulf@ted:banks]"
-    ;;   :cmd "ipython -i"
-    ;;   :host "/ssh:beowulf@ted:"
-    ;;   :venv "miniconda/envs/banks"
-    ;;   :pythonpaths ("/home/beowulf/dev/master/python")
-    ;;   )
+    ("Python[beowulf@ace:banks]"
+      :cmd "ipython -i"
+      :host "/ssh:beowulf@ted:"
+      :venv "miniconda/envs/banks"
+      :pythonpaths ("/home/beowulf/dev/master/python")
+      )
     ;; ("Python[beowulf@ted:egan]"
     ;;   :cmd "ipython -i --simple-prompt"
     ;;   :host "/ssh:beowulf@ted:"
@@ -565,6 +565,14 @@ This is necessary if a python repl was started with built-in `run-python'.
   (interactive)
   (message (gm/get-pydef)))
 
+(defun gm/copy-pydef ()
+  (interactive)
+  (let ((pydef (replace-regexp-in-string "::" "." (gm/get-pydef) nil t)))
+    (kill-new pydef)
+    (message "copied %s" pydef)
+    )
+  )
+
 (defun gm/copy-file-location-pydef ()
   (interactive)
   (let ((module-pydef (gm/get-pydef)))
@@ -708,7 +716,8 @@ last statement in BODY, as elisp."
 
 (defun gm/should-use-lsp-mode ()
   (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
-				      "/home/moutsopoulosg/dev/cloud_migration_py2/")))
+				      "/home/moutsopoulosg/dev/cloud_migration_py2/"
+				      )))
 (defun gm/should-not-use-lsp ()
   (or
    (not (buffer-file-name))
@@ -716,7 +725,10 @@ last statement in BODY, as elisp."
    (file-remote-p default-directory)
    (member (file-name-directory (buffer-file-name))
        '("/home/moutsopoulosg/")
-       )))
+       )
+   (member (projectile-project-root) '("/home/moutsopoulosg/dev/ev/cloud_migration_py2/"
+				      "/home/moutsopoulosg/dev/ev/evmodel_master/"
+				      ))))
 
 (defun gm/lsp-ensure ()
   (unless (gm/should-not-use-lsp)

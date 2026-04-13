@@ -95,3 +95,30 @@ Keeps old as is."
   (let ((default-directory (projectile-project-root)))
    (shell-command "find . -type f -iname \"*.py\" | emacs.etags -")
   ))
+
+(defun gm/shell-command-on-filename (&optional command filename output-buffer)
+  "Run a shell COMMAND, replacing %f with FILENAME (default: current buffer's file).
+With C-u, prompt for FILENAME."
+  (interactive
+   (list (read-shell-command "Shell command (%f for filename insertion): ")
+          (if current-prefix-arg
+                    (read-file-name "File: " nil nil t)
+                  (buffer-file-name))
+	  (when current-prefix-arg (read-buffer "Output buffer: " "*Shell Command Output*"))))
+  (unless filename
+    (user-error "No filename provided and buffer is not visiting a file"))
+  (let* ((safe-filename (shell-quote-argument filename))
+         (final-cmd (replace-regexp-in-string "%f" safe-filename command t t)))
+    (shell-command final-cmd output-buffer)))
+
+(defun gm/shell-command-on-buffer (command &optional output-buffer)
+  "Run shell COMMAND on the entire buffer as input (stdin).
+If OUTPUT-BUFFER is non-nil, insert output there; otherwise, use *Shell Command Output*."
+  (interactive
+   (list (read-shell-command "Shell command: ")
+         (when current-prefix-arg
+           (read-buffer "Output buffer: " "*Shell Command Output*"))))
+  (shell-command-on-region
+   (point-min) (point-max)
+   command
+   nil output-buffer))

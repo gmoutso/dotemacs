@@ -34,6 +34,9 @@
 
 (add-to-list 'org-latex-listings-langs '(jupyter-python "Python"))
 (setq org-latex-listings-options '(
+				   ("breaklines" "true")
+				   ("prebreak" "\\textbackslash")
+				   ("breakatwhitespace" "true")
 				   ("backgroundcolor" "\\color{white}")
 				   ("basicstyle" "\\footnotesize")
 				   ("commentstyle" "\\color{green}")
