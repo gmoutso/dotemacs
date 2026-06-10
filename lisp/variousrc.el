@@ -122,3 +122,12 @@ If OUTPUT-BUFFER is non-nil, insert output there; otherwise, use *Shell Command 
    (point-min) (point-max)
    command
    nil output-buffer))
+
+(defun gm/snapshot-backup-file ()
+  "Create a backup of the current file in its own directory."
+  (interactive)
+  (if (buffer-file-name)
+      (let ((backup-name (concat (buffer-file-name) ".~" (format-time-string "%Y%m%d-%H%M%S") "~")))
+        (copy-file (buffer-file-name) backup-name t)
+        (message "Manual backup created: %s" (file-name-nondirectory backup-name)))
+    (message "Buffer is not visiting a file!")))

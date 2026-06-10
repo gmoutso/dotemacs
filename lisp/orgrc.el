@@ -1,3 +1,4 @@
+(use-package org)
 (use-package org-variable-pitch
   :hook (org-variable-pitch-minor . org-mode))
 (add-hook 'after-init-hook #'org-variable-pitch-setup)
@@ -57,7 +58,7 @@
 ;;(require 'org-tempo)
 (setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
 (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-(require 'ox-beamer)
+;; (require 'ox-beamer)
 (use-package helm-org)
 
 (setq org-adapt-indentation nil)
@@ -544,11 +545,17 @@ ARG is passed through to `org-copy-schedule-today'."
 (defun org-open-pdf  ()
   "Open pdf file with same name"
   (interactive)
-(org-open-file (expand-file-name
+  (let ((filename (expand-file-name
 		(concat
 		 (file-name-sans-extension
 		  (or (file-name-nondirectory buffer-file-name))) "." "pdf")
 		(file-name-directory buffer-file-name))))
+    ;; if filename exists, open it else message it does not exist
+    (if (file-exists-p filename)
+	(org-open-file filename)
+      (message "No pdf file %s like org file %s" (file-name-nondirectory filename) (file-name-nondirectory buffer-file-name)))
+	)
+    )
 
 (defun org-paste-link-xclip ()
   "Save an image in clipboard, eg a screenshot, into a time stamped unique-named file 

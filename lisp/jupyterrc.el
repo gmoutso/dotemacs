@@ -24,9 +24,11 @@
  'org-babel-load-languages
  '((C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
    (jupyter . t)))
+
 ;; why is this needed here. It is also an org-mode hook?
-(conda-with-env "emacs"
-  (org-babel-jupyter-make-local-aliases))
+;; (conda-with-env "emacs"
+;;   (org-babel-jupyter-make-local-aliases))
+(org-babel-jupyter-make-local-aliases) ;; will it find them??
 
 ;;
 ;; jupyter repl
