@@ -344,3 +344,15 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
 (advice-add 'jupyter-api-request-xsrf-cookie :around #'gm/jupyter-api-request-xsrf-cookie-error-advice)
 ;; (advice-remove 'jupyter-api-request-xsrf-cookie 'gm/jupyter-api-request-xsrf-cookie-error-advice)
 
+;; https://github.com/emacs-jupyter/jupyter/issues/607
+(defun my/jupyter-org-results-drawer-pre-blank-fix (element)
+    "Advice to ensure the RESULTS drawer has a :pre-blank 0 property.
+This prevents 'wrong-type-argument wholenump nil' errors in newer Org versions."
+    (if (and element (eq (org-element-type element) 'drawer))
+        (progn
+          (org-element-put-property element :pre-blank 0)
+          element)
+      element))
+  (advice-add 'jupyter-org-results-drawer 
+              :filter-return 
+              #'my/jupyter-org-results-drawer-pre-blank-fix)

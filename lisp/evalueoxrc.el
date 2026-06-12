@@ -1,18 +1,18 @@
 (require 'ox)
-
-(add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
 (use-package ox-latex
   :custom
-  ;; minted needs -shell-escape
   (org-latex-pdf-process '("%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
 			   "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
 			   "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"))
   (org-latex-default-class "evalue")
   (org-latex-compiler "xelatex")
   )
+(setq org-export-async-init-file
+      (expand-file-name "~/.emacs.d/lisp/evalueoxrc.el"))
 ;; use minted for org source blocks
-(setq org-latex-listings 'minted)
-(setq org-latex-listings 'listings)
+(add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
+;; (setq org-latex-src-block-backend 'minted)
+(setq org-latex-src-block-backend 'listings)
 
 (dolist (item '(
 	 ("" "minted")
@@ -26,7 +26,6 @@
 	 ("" "booktabs")
 	 ("" "hyperref")
 	 ("color={0 0 0}" "attachfile2")
-	 ;; xelatex+caption+attachfile2 issue https://github.com/ho-tex/attachfile2/issues/8
 	 ("singlelinecheck=false" "caption" nil ("xelatex"))
 	 ("" "pdflscape")
 	 ))
@@ -117,7 +116,7 @@
                (insert-file-contents-literally source)
               (buffer-string)))
             (file-name-nondirectory source))))
-(defun my-org-html-export-with-inline ()
+(defun gm/org-html-export-to-html-inline-images ()
   (interactive)
   (cl-flet ((org-html--format-image (source attributes info) (my-org-html--format-image source attributes info)))
     (org-html-export-to-html)))
