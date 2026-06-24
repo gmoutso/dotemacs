@@ -17,7 +17,7 @@
 				       "jedi-language-server"
 				       "ruff-lsp"
 				       ))))
-  )
+  (add-hook 'eglot-managed-mode-hook (lambda () (eglot-inlay-hints-mode -1))))
 
 (defun gm/which-current-eglot-server ()
   (interactive)

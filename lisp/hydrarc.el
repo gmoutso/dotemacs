@@ -125,6 +125,11 @@ more org rifle..\n"
     ("tt" gm/tangle-and-goto-block "tangle")
     ("." gm/org-find-definition-at-point "org def")
     )
+   "AI"
+   (("ait" gh-copilot-chat-transient "gh-chat")
+    ("aig" gptel-menu "gptel")
+    ("aic" copilot-complete "complete")
+    )
    ))
 
 ;; (defhydra hydra-rifle (:exit t)
@@ -362,7 +367,11 @@ _m_ (_M_): set mark (jump)                 _q_: quit
     ("ld" lsp-ui-doc-glance "document")
     ("ls" lsp-signature-activate "signature")
     ("s" lsp-treemacs-symbols "symbols"))
-   ))
+   "AI"
+   (("ait" gh-copilot-chat-transient "gh-chat")
+    ("aig" gptel-menu "gptel")
+    ("aic" copilot-complete "complete")
+    )))
 
 ;; python-nav-forward-block "forward block")
 ;; ("nba" python-nav-backward-block "backward block")

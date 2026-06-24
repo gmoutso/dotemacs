@@ -5,14 +5,13 @@
   (gptel-context-deletion-face ((t (:background "#ff5555" :foreground "#282a36" :weight bold))))
   (gptel-context-highlight-face ((t (:background "#6272a4" :foreground "#f8f8f2" :slant italic))))
   :config
+  (setq gptel-model 'gpt-4o)
   ;; --- BACKEND 1: GitHub Copilot (Company Official) ---
   (defun my/get-copilot-token ()
     (string-trim (shell-command-to-string "gh auth token")))
-
   ;; (setq my/copilot-backend
   ;;       (gptel-make-github "Copilot"
   ;; 			   :header (lambda () `(("Authorization" . ,(concat "Bearer " (my/get-copilot-token)))))))
-
   (setq my/copilot-backend
 	(gptel-make-openai "GitHub Copilot"
           :host "api.githubcopilot.com"
@@ -21,7 +20,6 @@
           :key (lambda ()
                  (string-trim (shell-command-to-string "gh auth token")))
           :models '(gpt-4o gpt-4-turbo)))
-
   ;; --- BACKEND 2: Gemini (Your AI Studio Key) ---
   (setq my/gemini-backend
         (gptel-make-gemini "Gemini"
@@ -31,7 +29,6 @@
                        (if (functionp secret) (funcall secret) secret)
                      (error "Check your .authinfo.gpg!"))))
           :stream t))
-
   ;; Start with Copilot as default for safety
   (setq gptel-backend my/copilot-backend))
 

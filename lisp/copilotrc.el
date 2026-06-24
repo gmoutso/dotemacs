@@ -8,26 +8,21 @@
                    :files ("*.el"))
   :custom
   (copilot-node-executable "/home/moutsopoulosg/anaconda3/envs/test_node/bin/node")
-  (copilot-idle-delay nil))
-(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-(add-to-list 'copilot-major-mode-alist '("python-ts-mode" . "python"))
+  (copilot-idle-delay nil)
+  :config
+  ;; Trigger completion manually with M-C-<return> (or choose your own)
+  (define-key copilot-mode-map (kbd "M-C-<return>") #'copilot-complete)
+  ;; Standard navigation inside the ghost text overlay
+  (define-key copilot-mode-map (kbd "<tab>") #'copilot-accept-completion)
+  (define-key copilot-mode-map (kbd "TAB") #'copilot-accept-completion)
+  (define-key copilot-mode-map (kbd "M-f") #'copilot-accept-completion-by-word)
+  (define-key copilot-mode-map (kbd "M-n") #'copilot-next-completion)
+  (define-key copilot-mode-map (kbd "M-p") #'copilot-previous-completion)
+  (add-to-list 'copilot-major-mode-alist '("python-ts-mode" . "python")))
 
-
-;; (defun gm/new-tab-copilot-chat (&rest args)
-;;   (tab-bar-new-tab)
-;;   (tab-bar-rename-tab "copilot"))
-
-;; copilot-chat has (20260513) a namespace conflict with copilot (issue 239)
-;; https://github.com/chep/gh-copilot-chat.el/issues/239
-;; (use-package copilot-chat
-;;   :quelpa (copilot-chat :fetcher github :repo "chep/copilot-chat.el" :files ("*.el"))
-;;   :custom
-;;   (copilot-chat-frontend 'org)
-;;   :config
-;;    ;(advice-add 'copilot-chat-display :before 'gm/new-tab-copilot-chat)
-;;   :bind (
-;; 	 :map copilot-chat-prompt-mode-map
-;; 	      ("C-c C-c" . copilot-chat-prompt-send)
-;; 	      )
-;;   )
+(use-package gh-copilot-chat
+  :custom
+  (copilot-chat-frontend 'org)
+  ;; :quelpa (copilot-chat :fetcher github :repo "chep/copilot-chat.el" :files ("*.el"))
+  :bind (:map gh-copilot-chat-prompt-mode-map
+              ("C-c C-c" . gh-copilot-chat-prompt-send)))

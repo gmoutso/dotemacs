@@ -879,17 +879,18 @@ Update the `org-id-locations' global hash-table, and update the
     (if (or (org-map-entries '(org-entry-delete (point) "ID") nil 'file))
 	(org-id-update-id-locations nil 'silent)))
 
-;; (defun gm/org-ispell ()
-;;   "Configure `ispell-skip-region-alist' for `org-mode'."
-;;   (make-local-variable 'ispell-skip-region-alist)
-;;   (add-to-list 'ispell-skip-region-alist '(org-property-drawer-re))
-;;   (add-to-list 'ispell-skip-region-alist '("~" "~"))
-;;   (add-to-list 'ispell-skip-region-alist '("=" "="))
-;;   (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_SRC" . "^#\\+END_SRC"))
-;;   ) 
-;; (add-hook 'org-mode-hook #'gm/org-ispell)
-;; (require 'company)
-;; (add-to-list 'company-backends 'company-ispell)
+(defun gm/org-ispell-config ()
+  "Configure `ispell-skip-region-alist' for `org-mode'."
+  (make-local-variable 'ispell-skip-region-alist)
+  (add-to-list 'ispell-skip-region-alist '(org-property-drawer-re))
+  (add-to-list 'ispell-skip-region-alist '("~" "~"))
+  (add-to-list 'ispell-skip-region-alist '("=" "="))
+  (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_SRC" . "^#\\+END_SRC"))
+  (add-to-list 'ispell-skip-region-alist '(":\\(PROPERTIES\\|LOGBOOK\\):" . ":END:"))
+  (add-to-list 'ispell-skip-region-alist '("#\\+BEGIN_EXAMPLE" . "#\\+END_EXAMPLE")))
+(eval-after-load "ispell"
+  '(progn
+     (add-hook 'org-mode-hook #'gm/org-ispell-config)))
 
 (defvar gm/org-resize-images '(("large" . 1200)
 			      ("medium" . 800)

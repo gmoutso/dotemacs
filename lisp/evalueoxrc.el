@@ -101,6 +101,13 @@
 ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")
 ))
 
+;;
+;; html
+;;
+(use-package ox-pandoc
+  :custom
+  (org-pandoc-options '((standalone . t) (embed-resources . t)))
+  )
 ;; export to html - also applies to org-mime-org-mode-htmlize
 (setq org-html-with-latex t)
 ;; exports images -- messes with mime?
@@ -120,5 +127,3 @@
   (interactive)
   (cl-flet ((org-html--format-image (source attributes info) (my-org-html--format-image source attributes info)))
     (org-html-export-to-html)))
-
-

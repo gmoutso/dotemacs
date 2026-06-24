@@ -1,5 +1,10 @@
-(setq dired-dwim-target t)
-(add-hook 'dired-mode-hook 'dired-hide-details-mode)
+(use-package dired
+  :custom
+  (dired-dwim-target t)
+  :config
+  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+)
+
 ;; ;; esc-esc-esc annoying
 (setq-default buffer-quit-function
 	      #'(lambda () (message "Are you trying to quit?")))
