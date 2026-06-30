@@ -29,36 +29,6 @@
 (global-set-key (kbd "C-x z") 'bury-buffer)
 (global-set-key  (kbd "C-x <down>") 'bury-buffer)
 
-;;
-;; tab-line-mode
-;;
-(defun gm/tab-line-buffer-names () (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
-(defun gm/tab-line-bury-marked-buffers-action (_ignore)
-  (let* ((bufs (helm-marked-candidates))
-         (killed-bufs (cl-count-if 'bury-buffer bufs)))
-    (when (buffer-live-p helm-buffer)
-      (with-helm-buffer
-        (setq helm-marked-candidates nil
-              helm-visible-mark-overlays nil)))
-    (message "Bury %s buffer(s)" killed-bufs)))
-(defun gm/tab-line-bury-marked-buffers-run-action ()
-  "Run bury buffer action from `helm-source-buffers-list'."
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'gm/tab-line-bury-marked-buffers-action)))
-(put 'gm/tab-line-bury-marked-buffers-run-action 'helm-only t)
-(defclass gm/helm-source-tab-line-buffers (helm-source-buffers) ())
-(defun gm/helm-switch-to-tab-line-tab-buffer ()
-    (interactive) 
-    (let* ((candidates (gm/tab-line-buffer-names)) ;; note needs to call this outside helm
-	   (source (helm-make-source "Window buffers" 'gm/helm-source-tab-line-buffers
-		     :buffer-list (lambda () candidates)
-		     :action (helm-make-actions
-			      "Bury buffers" 'gm/tab-line-bury-marked-buffers-action))))
-      (helm-add-action-to-source "Bury buffers" 'gm/tab-line-bury-marked-buffers-action source)
-      (helm :sources source)))
-;; (global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
-
 
 ;;
 ;; tab-bar-mode
@@ -260,6 +230,21 @@ buffer in current window."
   )
 (which-key-add-key-based-replacements "C-c TAB s" "tab switch/create")
 (which-key-setup-side-window-right-bottom)
+
+(defun gm/tab-line-buffer-names () (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
+(defun gm/switch-to-tab-line-buffer ()
+  "Switch to a buffer from the tab-line buffer list using consult."
+  (interactive)
+  (let* ((buffers (gm/tab-line-buffer-names))
+         (buffer (consult--read
+                  buffers
+                  :prompt "Tab-line buffer: "
+                  :require-match t
+                  :category 'buffer
+                  :sort nil)))
+    (when buffer
+      (switch-to-buffer buffer))))
+(global-set-key  (kbd "C-x <up>") 'gm/switch-to-tab-line-buffer)
 
 
 ;; (use-package bufferlo

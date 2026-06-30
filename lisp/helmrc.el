@@ -68,4 +68,32 @@
   :keymaps 'tabspaces-mode-map
   ;; :prefix "C-c TAB" if without remap
   [remap tabspaces-switch-to-buffer] (cons "tabspace buffer" 'gm/helm-switch-to-workspace-buffers))
+
+;;
+;; tab-line-mode
+;;
+(defun gm/tab-line-bury-marked-buffers-action (_ignore)
+  (let* ((bufs (helm-marked-candidates))
+         (killed-bufs (cl-count-if 'bury-buffer bufs)))
+    (when (buffer-live-p helm-buffer)
+      (with-helm-buffer
+        (setq helm-marked-candidates nil
+              helm-visible-mark-overlays nil)))
+    (message "Bury %s buffer(s)" killed-bufs)))
+(defun gm/tab-line-bury-marked-buffers-run-action ()
+  "Run bury buffer action from `helm-source-buffers-list'."
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action 'gm/tab-line-bury-marked-buffers-action)))
+(put 'gm/tab-line-bury-marked-buffers-run-action 'helm-only t)
+(defclass gm/helm-source-tab-line-buffers (helm-source-buffers) ())
+(defun gm/helm-switch-to-tab-line-tab-buffer ()
+    (interactive) 
+    (let* ((candidates (gm/tab-line-buffer-names)) ;; note needs to call this outside helm
+	   (source (helm-make-source "Window buffers" 'gm/helm-source-tab-line-buffers
+		     :buffer-list (lambda () candidates)
+		     :action (helm-make-actions
+			      "Bury buffers" 'gm/tab-line-bury-marked-buffers-action))))
+      (helm-add-action-to-source "Bury buffers" 'gm/tab-line-bury-marked-buffers-action source)
+      (helm :sources source)))
 (global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)

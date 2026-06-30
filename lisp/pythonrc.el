@@ -171,7 +171,16 @@
 ;; ;; (add-hook 'python-mode-hook 'setup-importmagic)
 ;; (defadvice importmagic--query-imports-for-statement-and-fix (after send-import-statement (statement) activate) (python-shell-send-string statement))
 
+(defun gm/insert-above (string)
+  (save-excursion
+    (beginning-of-line-text)
+    (insert string)
+    (newline-and-indent)
+    ))
+
+;;
 ;; work with helm-etags-select
+;;
 (defun gm/etags-python-helm-process-candidate (candidate)
   "Return list of MODULE and OBJECT of an helm-etags-select CANDIDATE."
   (let* ((split (helm-grep-split-line candidate))
@@ -192,10 +201,7 @@
 	   (module (car p))
 	   (object (cadr p))
 	   (string (concat "from " module " import " object "\n")))
-    (save-excursion
-      (beginning-of-line)
-      (insert string)
-      )))
+    (gm/insert-above string)))
 (defun gm/etags-python-helm-action-insert-symbol (candidate)
     "Action to insert symbol using helm-etags-select source."
   (let* ((p (gm/etags-python-helm-process-candidate candidate))
@@ -217,8 +223,84 @@
 (defun gm/etags=python-helm-add-action-post-build ()
 (helm-add-action-to-source "Insert import" 'gm/etags-python-helm-action-insert-import helm-source-etags-select)
 (helm-add-action-to-source "Insert symbol" 'gm/etags-python-helm-action-insert-symbol helm-source-etags-select))
-; do it
-(gm/etags=python-helm-add-action-post-build)
+(with-eval-after-load 'helm-etags
+  (gm/etags=python-helm-add-action-post-build))
+
+;;
+;; embark actions for xref
+;;
+;; This uses gm/etags-python-helm-process-candidate logic."
+;;   (let* ((summary (xref-item-summary xref))
+;;          (location (xref-item-location xref))
+;;          (file (xref-file-location-file location))
+;;          (line (xref-file-location-line location))
+;;          (elm summary)
+;;          ;; Use your tagpattern and modulepattern from pythonrc.el
+;;          (tagpattern "\\(?:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)[(:]")
+;;          (elmpattern (string-match tagpattern elm))
+;;          (object (and elmpattern (match-string 1 elm)))
+;;          (modulepattern "\\(?:\\(?:src\\|python\\|cython\\)/\\)?\\(?1:.*\\)\\.py")
+;;          (modulematch (string-match modulepattern file))
+;;          (module (and modulematch (replace-regexp-in-string "/" "." (match-string-no-properties 1 file))))
+;;          (import-str (when (and module object)
+;;                        (format "from %s import %s" module object))))
+
+(defun gm/python-symbol-act (symbol file &optional line action)
+  (let* ((project-file (gm/relative-pyroot-filename file))
+	 (module (replace-regexp-in-string "/" "." (file-name-sans-extension project-file)))
+	 (import-str (format "from %s import %s" module symbol)))
+   (pcase action
+      ('import (insert import-str))
+      ('symbol (insert symbol))
+      ('copy (kill-new import-str)
+             (message "Copied: %s" import-str))
+      (_ (message (format "%s in %s" symbol module)))))
+  )
+
+(defun gm/xref-python-act (xref &optional action)
+  "Insert or copy import/symbol for XREF location.
+ACTION is one of 'import, 'symbol, or 'copy."
+  (let* ((summary (xref-item-summary xref))
+         (location (xref-item-location xref))
+         (file (xref-file-location-file location))
+	 (line (xref-file-location-line location))
+	 (column (xref-file-location-column location))
+         (symbol (car (split-string summary "[ (]" t))))
+    (gm/python-symbol-act symbol file line action)))
+
+(defun gm/consult-eglot-symbol-act (candidate &optional action)
+  "Insert a Python import statement for the consult-eglot-symbols CANDIDATE."
+  (let* ((symbol-info (get-text-property 0 'consult--candidate candidate))
+         (name (plist-get symbol-info :name))
+         (location (plist-get symbol-info :location))
+         (uri (plist-get location :uri))
+         (file (eglot-uri-to-path uri))
+	 (line (plist-get (plist-get (plist-get location :range) :start) :line)))
+    (gm/python-symbol-act name file line action)))
+
+(with-eval-after-load 'embark
+  (defvar-keymap embark-consult-eglot-symbols-map
+    "i" #'gm/consult-eglot-symbol-act
+    "c" #'gm/consult-eglot-copy-import)
+  (add-to-list 'embark-keymap-alist
+               '(consult-eglot-symbols . embark-consult-eglot-symbols-map)))
+
+;; (with-eval-after-load 'embark
+;;   (defun gm/embark-xref-insert-import (xref)
+;;     (interactive (list (embark--target)))
+;;     (gm/xref-python-act xref 'import))
+;;   (defun gm/embark-xref-insert-symbol (xref)
+;;     (interactive (list (embark--target)))
+;;     (gm/xref-python-act xref 'symbol))
+;;   (defun gm/embark-xref-copy-import (xref)
+;;     (interactive (list (embark--target)))
+;;     (gm/xref-python-act xref 'copy))
+;;   (setf (alist-get 'xref-location embark-keymap-alist)
+;;         (let ((map (make-sparse-keymap)))
+;;           (define-key map (kbd "i") #'gm/embark-xref-insert-import)
+;;           (define-key map (kbd "s") #'gm/embark-xref-insert-symbol)
+;;           (define-key map (kbd "c") #'gm/embark-xref-copy-import)
+;;           map)))
 
 ;; defintions in buffer
 ;; (defconst gm/top-pydef-regex
@@ -527,20 +609,30 @@ This is necessary if a python repl was started with built-in `run-python'.
     (with-current-buffer buffer
       (setq-local org-babel-python--initialized t))))
 
+(defun gm/pyroot ()
+  (expand-file-name
+   (or
+    (flycheck-python-find-project-root 'checker_)
+    (file-name-concat (vc-root-dir) "..")
+    (project-root (project-current)))
+))
+
+(defun gm/relative-pyroot-filename (filename)
+  "Get filename relative to root. If in dired, return current line, else return buffer file."
+  (file-relative-name filename (gm/pyroot)))
+
+(defun gm/get-filename-dwim ()
+  (cond ((derived-mode-p 'dired-mode)
+	 (dired-get-filename nil t))
+	((buffer-file-name))
+	((null (buffer-file-name))
+	 (user-error "Current buffer is not associated with a file."))
+	)
+  )
+
 (defun gm/get-relative-pyroot-filename ()
   "Get filename relative to root. If in dired, return current line, else return buffer file."
-  (let* ((pyroot (expand-file-name
-		  (or 
-		   (flycheck-python-find-project-root 'checker_)
-		   (file-name-concat (vc-root-dir) ".."))))
-	 (filename
-	  (cond ((derived-mode-p 'dired-mode)
-		 (dired-get-filename nil t))
-		((buffer-file-name))
-		((null (buffer-file-name))
-		 (user-error "Current buffer is not associated with a file."))
-		)))
-    (file-relative-name filename pyroot)))
+  (gm/relative-pyroot-filename (gm/get-filename-dwim)))
 
 (defun gm/get-pydef (&optional with-variable no-module)
   (let* ((filename (gm/get-relative-pyroot-filename))
