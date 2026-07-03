@@ -1,3 +1,9 @@
+;; ;; enable cua
+(cua-mode t)
+(setq cua-prefix-override-inhibit-delay 0.7)
+(setq cua-keep-region-after-copy nil)
+(setq cua-enable-cua-keys nil)
+
 ;; remove cua-scrolling
 (defun gm/set-cua-scroll ()
      (interactive)
@@ -14,7 +20,6 @@
 )
 (gm/unset-cua-scroll)
 
-
 (defun gm/swap-line/up () (interactive)
        (let ((beg) (end))
 	 (beginning-of-line)
@@ -25,6 +30,7 @@
 	 (previous-line)
 	 (yank)
 	 ))
+
 (defun gm/swap-line/down () (interactive)
        (let ((beg) (end))
 	 (beginning-of-line)
@@ -90,6 +96,7 @@ Keeps old as is."
     (activate-mark)
     )
   )
+
 (defun gm/run-etags ()
   (interactive)
   (let ((default-directory (projectile-project-root)))
@@ -131,3 +138,118 @@ If OUTPUT-BUFFER is non-nil, insert output there; otherwise, use *Shell Command 
         (copy-file (buffer-file-name) backup-name t)
         (message "Manual backup created: %s" (file-name-nondirectory backup-name)))
     (message "Buffer is not visiting a file!")))
+
+(defun gm/tramp-to-kio (name)
+  (let ((fullname (expand-file-name name)))
+    (if (file-remote-p fullname)
+	   (let* ((struc (tramp-dissect-file-name fullname))
+		 (localname (tramp-file-name-localname struc))
+		 (host (tramp-file-name-host-port struc))
+		 (user (tramp-file-name-user struc))
+		 (method (tramp-file-name-method struc))
+		 (kioclient (cdr (assoc method '(("ssh" . "fish"))))))
+	     (concat kioclient "://" user (if user "@") host localname))
+      fullname)))
+
+(defun gm/konsole ()
+  (interactive)
+  (if (not (file-remote-p default-directory))
+      (call-process "konsole" nil 0 nil "--new-tab")
+    (let* ((struc (tramp-dissect-file-name default-directory))
+	   (localname (tramp-file-name-localname struc))
+	   (host (tramp-file-name-host-port struc))
+	   (user (tramp-file-name-user struc))
+	   (method (tramp-file-name-method struc)))
+      (call-process "konsole" nil 0 nil "--new-tab" "-e" method (concat user (if user "@") host localname))
+    )))
+
+(defun gm/kde-open (&optional filename)
+  "Works remotely and local files.
+
+Does not work with snap firefox because it cannot access hidden files in .cache"
+  (interactive)
+  (let ((filename (or filename (dired-get-filename nil t) default-directory)))
+    ;; (cmd (shell-quote-argument (concat "kde-open5 " (gm/tramp-to-kio filename)))))
+    (if filename
+	(make-process
+         :name "kio-open" :connection-type nil :noquery t
+         :buffer nil
+	 :command (list  "setsid" "-w" "kde-open5" (gm/tramp-to-kio filename))
+	 )
+      (message "Cannot guess url to open."))))
+(with-eval-after-load 'dired
+  (define-key dired-mode-map [remap browse-url-of-dired-file] 'gm/kde-open))
+
+;; ;; esc-esc-esc annoying
+(setq-default buffer-quit-function
+	      #'(lambda () (message "Are you trying to quit?")))
+
+;; unfill-paragraph from Stefan Monnier <foo at acm.org>.
+;; It is the opposite of fill-paragraph    
+(defun unfill-paragraph (&optional region)
+  "Takes a multi-line paragraph and makes it into a single line of text."
+  (interactive (progn (barf-if-buffer-read-only) '(t)))
+  (let ((fill-column (point-max))
+	;; This would override `fill-column' if it's an integer.
+	(emacs-lisp-docstring-fill-column t))
+    (fill-paragraph nil region)))
+
+;; ;; I want to kill-ring-save a whole line if no region is selected
+(defun my-kill-ring-save (beg end flash)
+  (interactive (if (use-region-p)
+		   (list (region-beginning) (region-end) nil)
+		 (list (line-beginning-position)
+		       (line-beginning-position 2) 'flash)))
+  (kill-ring-save beg end)
+  (when flash
+    (save-excursion
+      (if (equal (current-column) 0)
+	  (goto-char end)
+	(goto-char beg))
+      (sit-for blink-matching-delay))))
+
+(global-set-key [remap kill-ring-save] 'my-kill-ring-save)
+;; I want to kill-region a whole line if no region is selected
+(defun my-kill-region (beg end flash)
+  "kills the selected region, or kills the whole line (including EOL) at point if a region is not selected."
+  (interactive (if (use-region-p)
+		   (list (region-beginning) (region-end) nil)
+		 (list (line-beginning-position)
+		       (line-beginning-position 2) 'flash)))
+  (kill-region beg end)
+  )
+(global-set-key [remap kill-region] 'my-kill-region)
+
+;; ;; sentences end with a single space (for use with sentence navigation)
+(setq sentence-end-double-space nil)
+
+;; ;; global visual line mode
+(global-visual-line-mode 1)
+
+;; ;; Change "yes or no" to "y or n"
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; ;; undo-tree mode
+(global-undo-tree-mode)
+(setq undo-tree-visualizer-timestamps t)
+(setq undo-tree-visualizer-diff nil)
+
+;; cursor
+(setq
+ blink-cursor-mode nil
+ cursor-type (quote box)
+ )
+
+;; rename file and buffer
+(defun rename-file-and-buffer ()
+  "Rename the current buffer and file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " filename)))
+        (cond
+         ((vc-backend filename) (vc-rename-file filename new-name))
+         (t
+          (rename-file filename new-name t)
+          (set-visited-file-name new-name t t)))))))

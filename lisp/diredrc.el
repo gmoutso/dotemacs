@@ -5,9 +5,6 @@
   (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 )
 
-;; ;; esc-esc-esc annoying
-(setq-default buffer-quit-function
-	      #'(lambda () (message "Are you trying to quit?")))
 (use-package dired-rsync
   :config
   (bind-key "C-c C-r" 'dired-rsync dired-mode-map))
@@ -76,7 +73,7 @@
       (rename-buffer shortname 'unique)
       (read-only-mode t))
     shortname))
-(defun gm/org-open-xlsx (&optional filename)
+(defun gm/open-xlsx-as-org (&optional filename)
   "Open FILENAME as an org file."
   (interactive)
   (let* ((filename (expand-file-name (gm/get-filename filename)))
@@ -85,11 +82,6 @@
     (shell-command command shortname)
     (with-current-buffer shortname
       (org-mode))))
-
-;; (use-package dired-x
-;;   :custom
-;;   (dired-omit-files "\\`[.]?[#~]")
-;;   )
 
 (defun gm/dired-insert-subdirs-using-glob (&optional glob)
   "In a dired buffer insert subdirs using a GLOB eg `*/output'.

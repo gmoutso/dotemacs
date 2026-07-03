@@ -1,5 +1,6 @@
 ;; generic
 (use-package vterm
+  :defer t
   :bind (:map vterm-mode-map
 	      ("C-y" . vterm-yank)
 	      ("C-q" . vterm-send-next-key)
@@ -12,7 +13,8 @@
   (vterm-enable-manipulate-selection-data-by-osc52 t) ;; tmux set -g set-clipboard on
   )
 
-(use-package multi-vterm)
+(use-package multi-vterm
+  :defer t)
 
 ;; tmux configuration
 

@@ -37,15 +37,6 @@
 ;; (defun tab-bar-rename-after-create (&rest _) (call-interactively #'tab-bar-rename-tab))
 ;; (add-hook 'tab-bar-tab-post-open-functions 'tab-bar-rename-after-create)
 
-;; (variable-pitch-mode 0)
-;; (use-package mixed-pitch
-;;   :hook
-;;   ;; If you want it in all text modes:
-;;   (org-mode . mixed-pitch-mode))
-;; use variable pitch font
-;; (add-hook 'org-mode-hook 'variable-pitch-mode)
-;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-;; (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
 (setq tab-bar-new-tab-choice "*scratch*")
 
 

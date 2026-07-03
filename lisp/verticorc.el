@@ -23,20 +23,7 @@
               ("C-k" . vertico-previous)
               ("C-f" . vertico-exit)
               ("?" . minibuffer-completion-help))
-  :config
-  ;; Enable vertico-multiform for per-command/category display
-  (vertico-multiform-mode)
-  
-  ;; Configure display per command
-  (setq vertico-multiform-commands
-        '((consult-imenu buffer indexed)
-          (consult-line buffer)
-          (execute-extended-command unobtrusive)))
-  
-  ;; Configure display per completion category
-  (setq vertico-multiform-categories
-        '((file grid)
-          (consult-grep buffer))))
+)
 
 ;; ;; Option 1: Additional bindings
 ;; (keymap-set vertico-map "?" #'minibuffer-completion-help)
@@ -44,6 +31,19 @@
 ;; ;; (keymap-set vertico-map "M-TAB" #'minibuffer-complete)
 ;; ;; Option 2: Replace `vertico-insert' to enable TAB prefix expansion.
 ;; (keymap-set vertico-map "TAB" #'minibuffer-complete)
+
+(use-package vertico-multiform
+  :custom
+  (vertico-multiform-commands
+        '((consult-imenu buffer indexed)
+          (consult-line buffer)
+          (execute-extended-command unobtrusive)))
+  
+  ;; Configure display per completion category
+  (vertico-multiform-categories
+        '((file grid)
+          (consult-grep buffer))) 
+  )
 
 
 ;; ============================================================================
@@ -79,6 +79,7 @@
   :bind (;; C-x bindings (ctl-x-map)
          ("C-x M-:" . consult-complex-command)
          ("C-x b" . consult-buffer)
+	 ("C-x C-b" . consult-buffer)
          ("C-x 4 b" . consult-buffer-other-window)
          ("C-x 5 b" . consult-buffer-other-frame)
          ("C-x r b" . consult-bookmark)
@@ -158,32 +159,6 @@
           "\\`\\*jupyter-traceback"
           "\\`TAGS\\'")))
 
-;; ============================================================================
-;; Embark - Contextual actions on completion candidates
-;; ============================================================================
-
-(use-package embark
-  :bind
-  (
-   ("C-." . embark-act)
-   ;("C-;" . embark-dwim)
-   ("C-h B" . embark-bindings))
-  
-  :init
-  ;; Replace the key help with a completing-read interface
-  (setq prefix-help-command #'embark-prefix-help-command)
-  
-  :config
-  ;; Hide the mode line of the Embark live/completions buffers
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
-
-;; Embark integration with Consult
-(use-package embark-consult
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; ============================================================================
 ;; Savehist - Persist history for better sorting
@@ -312,13 +287,9 @@
 (use-package helm
  ;; bind M-x to helm-M-x and make sure helm-mode is off!
  :bind
- (("M-x" . helm-M-x)
+ (
   ("C-h a" . helm-apropos)))
 (require 'helm-tags)
-
-(require 'embark)
-(require 'consult-eglot)
-(require 'consult-eglot-embark)
 (require 'consult-xref)
 
 (provide 'verticorc)

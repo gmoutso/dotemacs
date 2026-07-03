@@ -1,4 +1,23 @@
+;;; wlrc.el --- wondelust config
+
 (require 'wl)
+
+;; this needs to be done before SEMI:
+(setq mime-view-mailcap-files '("~/.mailcap")) 
+(autoload 'wl-user-agent-compose "wl-draft" nil t) 
+(if (boundp 'mail-user-agent)                      
+    (setq mail-user-agent 'wl-user-agent))         
+(if (fboundp 'define-mail-user-agent)              
+    (define-mail-user-agent                        
+      'wl-user-agent                               
+      'wl-user-agent-compose                       
+      'wl-draft-send                               
+      'wl-draft-kill                               
+      'mail-send-hook))
+(setq message-mail-user-agent t)
+(setq wl-init-file "~/.emacs.d/lisp/wlrc.el"
+      wl-folders-file "~/.emacs.d/wl-folders")
+
 ;;
 ;; directories
 ;;
@@ -557,3 +576,6 @@
 ;; 3. Set up sasl-xoauth2-host-url-table and sasl-xoauth2-host-user-id-table variables. (done in customize)
 ;; 4. When passphrase is asked, input client secret.
 ;; 5. set xoauth2 authentication type in wl-folders config file
+
+(provide 'wlrc)
+;;; wlrc.el ends here
