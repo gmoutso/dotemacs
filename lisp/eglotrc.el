@@ -1,3 +1,10 @@
+;;; eglotrc.el --- Eglot LSP configuration
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package eglot
   :custom
   (eglot-max-file-watches nil)
@@ -38,3 +45,6 @@
 
 (use-package consult-eglot)
 (use-package consult-eglot-embark)
+
+(provide 'eglotrc)
+;;; eglotrc.el ends here

@@ -1,3 +1,10 @@
+;;; diredrc.el --- Dired mode configuration
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package dired
   :custom
   (dired-dwim-target t)
@@ -93,3 +100,6 @@
     (dolist (subdir subdirs)
       (dired-maybe-insert-subdir subdir))
     ))
+
+(provide 'diredrc)
+;;; diredrc.el ends here

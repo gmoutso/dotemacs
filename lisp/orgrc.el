@@ -1,3 +1,10 @@
+;;; orgrc.el --- Org-mode configuration
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package org
   :pin gnu
   :bind
@@ -994,3 +1001,6 @@ To make this permanent, use customize `org-image-actual-width'."
 				      '("evpysnip.org" "ipython.org" "emacssnip.org" "evaws.org")))
   (setq org-wiki-location nil)
   )
+
+(provide 'orgrc)
+;;; orgrc.el ends here

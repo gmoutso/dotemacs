@@ -1,3 +1,10 @@
+;;; modelinerc.el --- (defadvice powerline-major-mode (around delight-powerline-major-mode activate)
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; (defadvice powerline-major-mode (around delight-powerline-major-mode activate)
 ;;   "Ensure that powerline's major mode names are delighted."
 ;;   (let ((inhibit-mode-name-delight nil))
@@ -18,3 +25,6 @@
 ;(setq mode-icons-change-mode-name nil)
 ;(require 'mode-icons)
 ;(mode-icons-mode 1)
+
+(provide 'modelinerc)
+;;; modelinerc.el ends here

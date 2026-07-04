@@ -1,3 +1,10 @@
+;;; tanglerc.el --- tangle functions org version 9.4
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;;
 ;; tangle functions org version 9.4
 ;;
@@ -138,4 +145,6 @@ Note sure why this was written: all languages must be the same in org file."
     (org-src-switch-to-buffer target-buffer t)
     (goto-char target-char)
     body))
-	     
+
+(provide 'tanglerc)
+;;; tanglerc.el ends here

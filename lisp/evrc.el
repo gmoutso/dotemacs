@@ -1,3 +1,10 @@
+;;; evrc.el --- helm rsync tree to/from ted
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package s)
 
 ;;
@@ -232,3 +239,6 @@ If remote, returns hostname removing any ssh protocol."
 		 ))
   (replace-regexp-in-region (nth 0 rep) (nth 1 rep) (point-min) (point-max))
   ))
+
+(provide 'evrc)
+;;; evrc.el ends here

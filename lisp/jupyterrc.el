@@ -1,3 +1,10 @@
+;;; jupyterrc.el --- (conda-env-activate "emacs")
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; (conda-env-activate "emacs")
 ;; use (jupyter-command "kernelspec" "list" "--json" "--log-level=40")
 ;; /home/moutsopoulosg/.emacs.d/elpa/jupyter-20220419.1852/jupyter-kernelspec.el:64
@@ -356,3 +363,6 @@ This prevents 'wrong-type-argument wholenump nil' errors in newer Org versions."
   (advice-add 'jupyter-org-results-drawer 
               :filter-return 
               #'my/jupyter-org-results-drawer-pre-blank-fix)
+
+(provide 'jupyterrc)
+;;; jupyterrc.el ends here

@@ -1,3 +1,10 @@
+;;; diminishrc.el --- diminish: hide some minor modes
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; diminish: hide some minor modes
 (use-package delight)
 (delight '(
@@ -23,3 +30,6 @@
 (yas-global-mode nil t)
 (eldoc-mode nil "eldoc")
 ))
+
+(provide 'diminishrc)
+;;; diminishrc.el ends here

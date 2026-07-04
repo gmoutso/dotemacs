@@ -1,3 +1,10 @@
+;;; termrc.el --- https://github.com/wangchen/redguardtoo-emacs.d/blob/master/lisp/init-term-mode.el
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package multi-term)
 ;; https://github.com/wangchen/redguardtoo-emacs.d/blob/master/lisp/init-term-mode.el
 ;; https://stackoverflow.com/questions/2886184/copy-paste-in-emacs-ansi-term-shell
@@ -26,3 +33,6 @@
   (interactive)
   (term-send-raw-string
    "printf \"\\033AnSiTh %s\\n\\033AnSiTu %s\\n\\033AnSiTc %s\\n\" $HOSTNAME $USER $PWD\n"))
+
+(provide 'termrc)
+;;; termrc.el ends here

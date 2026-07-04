@@ -1,3 +1,10 @@
+;;; gptelrc.el --- --- BACKEND 1: GitHub Copilot (Company Official) ---
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package gptel
   :ensure t
   :custom-face
@@ -46,3 +53,6 @@
   ;; 2. Optional: If your company uses a specific model or enterprise endpoint
   ;; (setq agent-shell-github-arguments '("--model" "gpt-4o")))
   )
+
+(provide 'gptelrc)
+;;; gptelrc.el ends here

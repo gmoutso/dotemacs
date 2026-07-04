@@ -1,3 +1,10 @@
+;;; imagesrc.el --- condition on a latex fragment
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (defun gm/org-get-image-or-latex-filename-at-point ()
   "Get filename of org-mode image link, overlay or latex fragment.
 
@@ -93,3 +100,5 @@ image-mode buffers, image-at-point (assumes png)."
 	(message "no image found"))
 	   ))
 
+(provide 'imagesrc)
+;;; imagesrc.el ends here

@@ -1,3 +1,10 @@
+;;; term-tmuxrc.el --- I need to set TMPDIR in .bashrc before non-interactive exit!
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; I need to set TMPDIR in .bashrc before non-interactive exit!
 (load-library "multi-term-tmux")
 (defun gm/multi-term-tmux-remote-open (&optional user+host session-name buffer-name)
@@ -25,3 +32,6 @@
   (interactive)
   (term-send-raw-string
    "printf \"\\033AnSiTh %s\\n\\033AnSiTu %s\\n\\033AnSiTc %s\\n\" $HOSTNAME $USER $PWD\n"))
+
+(provide 'term-tmuxrc)
+;;; term-tmuxrc.el ends here

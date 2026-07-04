@@ -1,5 +1,10 @@
 ;;; eshellrc.el --- configuration for shells
 
+;;; Commentary:
+;; Custom configuration for eshell and shell modes.
+
+;;; Code:
+
 (use-package general)
 ;; use helm for complete
 ;; (add-hook 'eshell-mode-hook

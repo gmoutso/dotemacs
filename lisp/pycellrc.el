@@ -1,3 +1,10 @@
+;;; pycellrc.el --- Python code cells configuration
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package code-cells
   :custom
   (code-cells-convert-ipynb-style
@@ -67,3 +74,6 @@
 			 "*code-cells-roundtrip*")
     )
   )
+
+(provide 'pycellrc)
+;;; pycellrc.el ends here

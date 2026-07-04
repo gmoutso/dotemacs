@@ -1,3 +1,10 @@
+;;; condarc.el --- if you want interactive shell support, include:
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package conda
   :hook eshell python
   :init
@@ -81,3 +88,5 @@
 
 ;; (setq eaf-python-command "LD_LIBRARY_PATH=/home/moutsopoulosg/anaconda3/envs/emacs/lib/python3.10/site-packages/PyQt6/Qt6/lib /home/moutsopoulosg/anaconda3/envs/emacs/bin/python")
 
+(provide 'condarc)
+;;; condarc.el ends here

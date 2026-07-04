@@ -1,3 +1,10 @@
+;;; keys.el --- treemacs
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; ace
 
 (use-package ace-window
@@ -67,3 +74,5 @@
 ;;     (add-hook 'server-after-make-frame-hook 'which-key-mode)
 ;;   (which-key-mode))
 
+(provide 'keys)
+;;; keys.el ends here

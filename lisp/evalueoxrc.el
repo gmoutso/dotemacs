@@ -1,3 +1,10 @@
+;;; evalueoxrc.el --- Evalueox configuration
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (require 'ox)
 (use-package ox-latex
   :custom
@@ -127,3 +134,6 @@
   (interactive)
   (cl-flet ((org-html--format-image (source attributes info) (my-org-html--format-image source attributes info)))
     (org-html-export-to-html)))
+
+(provide 'evalueoxrc)
+;;; evalueoxrc.el ends here

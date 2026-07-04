@@ -1,3 +1,10 @@
+;;; vtermrc.el --- generic
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; generic
 (use-package vterm
   :defer t
@@ -167,3 +174,6 @@
   ;; \\ePtmux;\\e\\e]%s\\007\\e\\\\
   (vterm-insert (format (format ifthenelse tmux notmux) msg msg))
   ))
+
+(provide 'vtermrc)
+;;; vtermrc.el ends here

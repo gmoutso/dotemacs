@@ -1,3 +1,10 @@
+;;; windowsrc.el --- scrolling
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;;
 ;; scrolling
 ;;
@@ -245,3 +252,6 @@ buffer in current window."
 ;; )
 
 ;; (use-package tab-bookmark)
+
+(provide 'windowsrc)
+;;; windowsrc.el ends here

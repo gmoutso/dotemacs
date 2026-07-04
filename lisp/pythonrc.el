@@ -1,3 +1,10 @@
+;;; pythonrc.el --- pythonrc -- Summary
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; pythonrc -- Summary
 ;; configuration for python
 ;;; Commentary:
@@ -741,3 +748,5 @@ last statement in BODY, as elisp."
 	  )))
 (add-hook 'python-base-mode-hook 'gm/lsp-ensure)
 
+(provide 'pythonrc)
+;;; pythonrc.el ends here

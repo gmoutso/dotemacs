@@ -1,3 +1,10 @@
+;;; copilotrc.el --- https://github.com/copilot-emacs/copilot.el
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; https://github.com/copilot-emacs/copilot.el
 (use-package quelpa)
 (use-package quelpa-use-package)
@@ -38,3 +45,6 @@
   ;; :quelpa (copilot-chat :fetcher github :repo "chep/copilot-chat.el" :files ("*.el"))
   :bind (:map gh-copilot-chat-prompt-mode-map
               ("C-c C-c" . gh-copilot-chat-prompt-send)))
+
+(provide 'copilotrc)
+;;; copilotrc.el ends here

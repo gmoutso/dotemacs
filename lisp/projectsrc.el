@@ -1,4 +1,10 @@
 ;;; projectsrc.el --- configs for project management
+
+;;; Commentary:
+;; Custom configuration for project management with Projectile.
+
+;;; Code:
+
 (use-package projectile
   :bind
   (:map projectile-mode-map

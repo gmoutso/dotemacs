@@ -1,5 +1,8 @@
 ;;; completerc.el --- load yas company etc           -*- lexical-binding: t; -*-
 
+;;; Code:
+
+
 ;; Copyright (C) 2017  George Moutsopoulos
 
 ;; Author: George Moutsopoulos <moutsopoulosg@evaluex003>
@@ -58,3 +61,6 @@
 ;; cape-rfc1345: Complete Unicode char using RFC 1345 mnemonics.
 ;; cape-sgml: Complete Unicode char from SGML entity, e.g., &alpha.
 ;; cape-tex: Complete Unicode char from TeX command, e.g. \hbar.
+
+(provide 'completerc)
+;;; completerc.el ends here

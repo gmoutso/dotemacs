@@ -1,3 +1,10 @@
+;;; acerc.el --- add ace option to helm switch buffer
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (require 'ace-window)
 
 ;; add ace option to helm switch buffer
@@ -39,3 +46,6 @@
                         (find-file file)))
       (find-file-other-window file))))
 (define-key dired-mode-map "o" 'find-file-ace-window)
+
+(provide 'acerc)
+;;; acerc.el ends here

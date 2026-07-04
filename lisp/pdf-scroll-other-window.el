@@ -1,3 +1,10 @@
+;;; pdf-scroll-other-window.el --- (scroll-other-window 2)
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (defun gm/other-window-for-scrolling ()
   (next-window))
 (defun gm/pdf-tools/scroll-other-window-up ()
@@ -41,3 +48,6 @@
 
 (add-hook 'pdf-view-mode-hook 'pdf-view-fit-page-to-window)
 (add-hook 'pdf-view-mode-hook 'scroll-all-pdf-mode)
+
+(provide 'pdf-scroll-other-window)
+;;; pdf-scroll-other-window.el ends here

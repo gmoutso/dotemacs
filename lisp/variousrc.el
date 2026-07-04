@@ -1,3 +1,10 @@
+;;; variousrc.el --- ;; enable cua
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; ;; enable cua
 (cua-mode t)
 (setq cua-prefix-override-inhibit-delay 0.7)
@@ -253,3 +260,6 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
          (t
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
+
+(provide 'variousrc)
+;;; variousrc.el ends here

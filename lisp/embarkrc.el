@@ -1,3 +1,10 @@
+;;; embarkrc.el --- ============================================================================
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; ============================================================================
 ;; Embark - Contextual actions on completion candidates
 ;; ============================================================================
@@ -108,3 +115,5 @@
              ;; '(consult-xref . eglot-xref-symbols-map))
   )
 
+(provide 'embarkrc)
+;;; embarkrc.el ends here

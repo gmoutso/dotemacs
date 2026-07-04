@@ -1,3 +1,10 @@
+;;; hydrarc.el --- Hydra configuration
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package hydra)
 (use-package general)
 (use-package pretty-hydra)
@@ -476,3 +483,6 @@ _→_/_←_: symbol        _m_/_M_: mark (jump)  _q_/_Q_: quit (back)
 (major-mode-hydra-define json-mode nil
   ("General"
    (("n" json-navigator-navigate-region "navigate"))))
+
+(provide 'hydrarc)
+;;; hydrarc.el ends here
