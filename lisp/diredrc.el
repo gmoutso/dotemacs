@@ -5,6 +5,7 @@
 
 ;;; Code:
 
+(require 'dired) ;; bug in package-installed-p?
 (use-package dired
   :ensure nil
   :custom
