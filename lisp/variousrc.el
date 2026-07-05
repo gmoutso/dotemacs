@@ -4,6 +4,7 @@
 ;; Custom configuration file.
 
 ;;; Code:
+(savehist-mode t)
 
 ;; ;; enable cua
 (cua-mode t)
@@ -26,6 +27,40 @@
 (define-key cua-global-keymap [remap scroll-down-command] nil)
 )
 (gm/unset-cua-scroll)
+
+
+(use-package general)
+(use-package desktop
+  :init
+  (setq desktop-dirname user-emacs-directory)
+  )
+;; (add-to-list 'desktop-modes-not-to-save 'dired-mode 'image-mode)
+;; (setq desktop-load-locked-desktop t) ; to always load after a crash
+;; (setq desktop-restore-frames nil)
+;; (setq desktop-restore-forces-onscreen nil)
+(use-package exec-path-from-shell
+  :custom
+  (exec-path-from-shell-copy-env "PATH"))
+(use-package term/tmux
+  :defer t
+  :custom
+  (xterm-tmux-extra-capabilities '(modifyOtherKeys setSelection)))
+
+(require 'iedit)
+(use-package "eshellrc"
+  :after eshell
+  )
+(use-package pdf-tools
+  :defer t
+  :mode "\\.pdf\\'"
+  :magic ("%PDF" . pdf-view-mode)
+  :config
+  (pdf-tools-install :no-query nil :no-error)
+  (load-library "pdf-scroll-other-window")
+  )
+(require 'expand-region)
+(global-set-key (kbd "C-M-SPC") 'er/expand-region)
+
 
 (defun gm/swap-line/up () (interactive)
        (let ((beg) (end))
@@ -233,13 +268,46 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
 ;; ;; global visual line mode
 (global-visual-line-mode 1)
 
+;; ;; Automatically reload files was modified by external program
+(global-auto-revert-mode 1)
+
+;; ;; show matching parentheses (is a global mode)
+(show-paren-mode 1)
+
+;; ;; parentheses pairing
+;; (electric-pair-mode 1)
+(smartparens-global-mode 1)
+
+;; ;; turn off menu bar
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+
 ;; ;; Change "yes or no" to "y or n"
 (defalias 'yes-or-no-p 'y-or-n-p)
+
+(setq make-backup-files t ; stop creating backup~ files
+      backup-by-copying t
+      ;; backup in one flat place
+      backup-directory-alist '(("." . (concat user-emacs-directory "backup-files")))
+      delete-old-versions t
+      kept-new-versions 2
+      version-control t
+      ;; kept-old-versions 2
+      )
+(setq initial-scratch-message "Welcome!"
+      inhibit-startup-screen t)
 
 ;; ;; undo-tree mode
 (global-undo-tree-mode)
 (setq undo-tree-visualizer-timestamps t)
 (setq undo-tree-visualizer-diff nil)
+
+(use-package recentf
+  :init
+  (recentf-mode t)
+  :config
+  (run-at-time nil (* 10 60) 'recentf-save-list)
+  )
 
 ;; cursor
 (setq
@@ -260,6 +328,39 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
          (t
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
+
+
+;; tramp
+;; solve issue of unix_listener: path "/home/moutsopoulosg/snap/alacritty/common/.cache/emacs/tramp.1f55902153a4e212109d8c0b9d51574abd36be19.m1bxsVtM9G8FDNKC" too long for Unix domain socket
+;; https://lists.libreplanet.org/archive/html/tramp-devel/2024-11/msg00007.html
+;; (unless small-temporary-file-directory
+  ;;          (customize-set-variable
+    ;;         'small-temporary-file-directory
+      ;;       (format "/run/user/%d/emacs/" (user-uid)))
+        ;;    (make-directory small-temporary-file-directory t))
+
+;; (setq tramp-connection-properties nil)
+;; (add-to-list 'tramp-connection-properties
+;;              (list (regexp-quote "/ssh:")
+;;                    "remote-shell" "/bin/bash"))
+
+;; ;; view-mode
+(eval-after-load "view"
+  '(progn
+     (define-key view-mode-map "k" 'View-scroll-line-backward)
+       (define-key view-mode-map "j" 'View-scroll-line-forward)))
+(define-key ctl-x-map "\C-q" 'view-mode)
+
+;; ;; My signature
+;; (setq
+;;  browse-url-browser-function 'browse-url-generic
+;;  browse-url-generic-program "kde-open5"
+;;  browse-url-default-browser "kde-open5";; used by shr
+;;  )
+
+;; (setq ffap-machine-p-known 'reject)
+;; (put 'narrow-to-region 'disabled nil)
+;; (put 'scroll-left 'disabled nil)
 
 (provide 'variousrc)
 ;;; variousrc.el ends here

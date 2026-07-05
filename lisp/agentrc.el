@@ -1,4 +1,4 @@
-;;; gptelrc.el --- --- BACKEND 1: GitHub Copilot (Company Official) ---
+;;; agentrc.el --- --- BACKEND 1: GitHub Copilot (Company Official) ---
 
 ;;; Commentary:
 ;; Custom configuration file.
@@ -48,11 +48,18 @@
 
   ;; 1. Point to the ACP-aware command
   ;; Note: Ensure 'gh' is in your PATH and you have the copilot extension installed
-  (setq agent-shell-github-acp-command '("gh" "copilot" "chat" "--acp"))
+  ;; (setq agent-shell-github-acp-command '("gh" "copilot" "chat" "--acp"))
+  ;; (setq agent-shell-github-acp-command '("copilot" "--acp"))
 
   ;; 2. Optional: If your company uses a specific model or enterprise endpoint
   ;; (setq agent-shell-github-arguments '("--model" "gpt-4o")))
   )
 
-(provide 'gptelrc)
-;;; gptelrc.el ends here
+;; (use-package agent-shell-tramp
+;;   :straight (:host github :repo "junyi-hou/agent-shell-tramp")
+;;   :after agent-shell
+;;   :config
+;;   (agent-shell-tramp-mode 1))
+
+(provide 'agentrc)
+;;; agentrc.el ends here

@@ -1,3 +1,14 @@
+;; ;;
+;; ;; gnus init file
+;; ;;
+;; (setq
+;;  gnus-directory "~/.emacs.d/gnus/" ;; most vars initiated from 
+;;  gnus-home-directory "~/.emacs.d/gnus/" ;; all vars initiated from
+;;  gnus-init-file "~/.emacs.d/lisp/gnusrc.el"
+;;  send-mail-function (quote smtpmail-send-it)
+;;  )
+
+
 (require 'nnir)
 (require 'smtpmail-multi)
 (require 'smtpmail)

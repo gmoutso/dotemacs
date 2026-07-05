@@ -140,8 +140,8 @@
    :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-recent-file
-   consult--source-project-recent-file
+   consult-source-bookmark consult-source-recent-file
+   consult-source-project-recent-file
    :preview-key "M-.")
   
   ;; Configure buffer filtering (replaces helm-boring-buffer-regexp-list)
@@ -157,6 +157,7 @@
           "\\`\\*lsp-log"
           "\\`\\*mspyls"
           "\\`\\*jupyter-traceback"
+	  "\\`\\*helm "
           "\\`TAGS\\'")))
 
 

@@ -25,15 +25,19 @@
   :keymap my-keys-mode-map)
 ;; (my-keys-mode 1)
 (defadvice load (after give-my-keybindings-priority)
-  "Try to ensure that my keybindings always have priority."
+  "Try to ensure that my keybindings always have priority.
+
+But is it needed?"
   (if (not (eq (car (car minor-mode-map-alist)) 'my-keys-mode))
       (let ((mykeys (assq 'my-keys-mode minor-mode-map-alist)))
-        (assq-delete-all 'my-keys-mode minor-mode-map-alist)
-        (add-to-list 'minor-mode-map-alist mykeys)))
+	(when mykeys 
+	(setq minor-mode-map-alist (cons mykeys (assq-delete-all 'my-keys-mode minor-mode-map-alist))))
+        ))
   (if (not (eq (car (car minor-mode-map-alist)) 'scroll-all-pdf-mode))
       (let ((mykeys (assq 'scroll-all-pdf-mode minor-mode-map-alist)))
-        (assq-delete-all 'scroll-all-pdf-mode minor-mode-map-alist)
-        (add-to-list 'minor-mode-map-alist mykeys))))
+	(when mykeys
+	(setq minor-mode-map-alist (cons mykeys (assq-delete-all 'scroll-all-pdf-mode minor-mode-map-alist))))
+        )))
 (ad-activate 'load)
 
 ;;; Scrolling.

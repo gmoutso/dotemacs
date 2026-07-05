@@ -6,9 +6,12 @@
 ;;; Code:
 
 ;; https://github.com/copilot-emacs/copilot.el
-(use-package quelpa)
+(use-package quelpa
+  :custom
+  (quelpa-update-melpa-p nil))
 (use-package quelpa-use-package)
 (use-package copilot
+  :defer t
   :quelpa (copilot :fetcher github
                    :repo "copilot-emacs/copilot.el"
                    :branch "main"
@@ -40,6 +43,7 @@
   (add-to-list 'copilot-major-mode-alist '("python-ts-mode" . "python")))
 
 (use-package gh-copilot-chat
+  :defer t
   :custom
   (copilot-chat-frontend 'org)
   ;; :quelpa (copilot-chat :fetcher github :repo "chep/copilot-chat.el" :files ("*.el"))
