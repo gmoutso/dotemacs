@@ -229,20 +229,8 @@ buffer in current window."
 (which-key-add-key-based-replacements "C-c TAB s" "tab switch/create")
 (which-key-setup-side-window-right-bottom)
 
-(defun gm/tab-line-buffer-names () (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
-(defun gm/switch-to-tab-line-buffer ()
-  "Switch to a buffer from the tab-line buffer list using consult."
-  (interactive)
-  (let* ((buffers (gm/tab-line-buffer-names))
-         (buffer (consult--read
-                  buffers
-                  :prompt "Tab-line buffer: "
-                  :require-match t
-                  :category 'buffer
-                  :sort nil)))
-    (when buffer
-      (switch-to-buffer buffer))))
-(global-set-key  (kbd "C-x <up>") 'gm/switch-to-tab-line-buffer)
+(defun gm/tab-line-buffer-names ()
+  (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
 
 
 ;; (use-package bufferlo

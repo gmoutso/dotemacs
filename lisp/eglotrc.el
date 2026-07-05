@@ -43,8 +43,5 @@
 ;;                                         :useLibraryCodeForTypes t
 ;;                                         :diagnosticMode "openFilesOnly")))))
 
-(use-package consult-eglot)
-(use-package consult-eglot-embark)
-
 (provide 'eglotrc)
 ;;; eglotrc.el ends here
