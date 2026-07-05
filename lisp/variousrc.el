@@ -64,7 +64,9 @@
   (pdf-tools-install :no-query nil :no-error)
   (load-library "pdf-scroll-other-window")
   )
+
 (require 'expand-region)
+;; also consider expreg https://github.com/casouri/expreg that uses treesitter
 (global-set-key (kbd "C-M-SPC") 'er/expand-region)
 
 
@@ -282,7 +284,12 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
 
 ;; ;; parentheses pairing
 ;; (electric-pair-mode 1)
-(smartparens-global-mode 1)
+(use-package smartparens
+  :ensure t
+  :config
+  (smartparens-global-mode 1)
+  )
+
 
 ;; ;; turn off menu bar
 (menu-bar-mode -1)
@@ -304,9 +311,11 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
       inhibit-startup-screen t)
 
 ;; ;; undo-tree mode
-(global-undo-tree-mode)
-(setq undo-tree-visualizer-timestamps t)
-(setq undo-tree-visualizer-diff nil)
+(use-package undo-tree
+  :ensure t
+  :init
+  (global-undo-tree-mode)
+)
 
 (use-package recentf
   :init

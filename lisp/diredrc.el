@@ -6,6 +6,7 @@
 ;;; Code:
 
 (use-package dired
+  :ensure nil
   :custom
   (dired-dwim-target t)
   :config
