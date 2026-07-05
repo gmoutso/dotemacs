@@ -1,3 +1,11 @@
+;;; latexrc.el --- ;; enable cua
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
+
 ;; only start server for okular comms when in latex mode
 (add-hook 'LaTeX-mode-hook 'server-start)
 
@@ -80,3 +88,7 @@
 ;; (require 'auto-complete-config)
 ;; (require 'auto-complete-auctex)
 ;; (load-library "texify")
+
+(provide 'latexrc)
+;;; latexrc.el ends here
+

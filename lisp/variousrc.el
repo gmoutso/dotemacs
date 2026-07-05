@@ -4,13 +4,19 @@
 ;; Custom configuration file.
 
 ;;; Code:
-(savehist-mode t)
+
+(use-package savehist
+  :init
+  (savehist-mode))
 
 ;; ;; enable cua
-(cua-mode t)
-(setq cua-prefix-override-inhibit-delay 0.7)
-(setq cua-keep-region-after-copy nil)
-(setq cua-enable-cua-keys nil)
+(cua-selection-mode t)
+(transient-mark-mode t)
+(setq mark-even-if-inactive nil)
+;; (cua-mode t)
+;; (setq cua-prefix-override-inhibit-delay 0.7)
+;; (setq cua-keep-region-after-copy nil)
+;; (setq cua-enable-cua-keys nil)
 
 ;; remove cua-scrolling
 (defun gm/set-cua-scroll ()
@@ -306,7 +312,7 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
   :init
   (recentf-mode t)
   :config
-  (run-at-time nil (* 10 60) 'recentf-save-list)
+  ;; (run-at-time nil (* 10 60) 'recentf-save-list)
   )
 
 ;; cursor

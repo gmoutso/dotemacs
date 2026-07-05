@@ -1,3 +1,11 @@
+;;; helmrc.el --- ;; helm configuration
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
+
 ;; (require 'helm-config)
 (require 'general)
 (use-package helm
@@ -97,3 +105,6 @@
       (helm-add-action-to-source "Bury buffers" 'gm/tab-line-bury-marked-buffers-action source)
       (helm :sources source)))
 (global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
+
+(provide 'helmrc)
+;;; helmrc.el ends here
