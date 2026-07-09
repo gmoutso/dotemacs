@@ -524,12 +524,19 @@ This is necessary if a python repl was started with built-in `run-python'.
     (with-current-buffer buffer
       (setq-local org-babel-python--initialized t))))
 
+(defun gm/project-root ()
+  "Return the project root"
+  (project-root (project-current)))
+
 (defun gm/pyroot ()
+  "Return the python root or project root."
   (expand-file-name
    (or
+    ;; uses flycheck-python-project-files including .pyroot
     (flycheck-python-find-project-root 'checker_)
+    (project-root (project-current))
     (file-name-concat (vc-root-dir) "..")
-    (project-root (project-current)))
+    )
 ))
 
 (defun gm/relative-pyroot-filename (filename)
@@ -723,30 +730,6 @@ last statement in BODY, as elisp."
 (advice-add 'org-babel-python-evaluate-session :override #'gm/org-babel-python-evaluate-session)
 
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
-
-(defun gm/should-use-lsp-mode ()
-  (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
-				      "/home/moutsopoulosg/dev/cloud_migration_py2/"
-				      )))
-(defun gm/should-not-use-lsp ()
-  (or
-   (not (buffer-file-name))
-   (not (derived-mode-p 'python-base-mode))
-   (file-remote-p default-directory)
-   (member (file-name-directory (buffer-file-name))
-       '("/home/moutsopoulosg/")
-       )
-   (member (projectile-project-root) '("/home/moutsopoulosg/dev/ev/cloud_migration_py2/"
-				      "/home/moutsopoulosg/dev/ev/evmodel_master/"
-				      ))))
-
-(defun gm/lsp-ensure ()
-  (unless (gm/should-not-use-lsp)
-    (if (gm/should-use-lsp-mode)
-	  (lsp-deferred)
-	  (eglot-ensure)
-	  )))
-(add-hook 'python-base-mode-hook 'gm/lsp-ensure)
 
 (provide 'pythonrc)
 ;;; pythonrc.el ends here

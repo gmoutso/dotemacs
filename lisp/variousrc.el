@@ -149,7 +149,7 @@ Keeps old as is."
 
 (defun gm/run-etags ()
   (interactive)
-  (let ((default-directory (projectile-project-root)))
+  (let ((default-directory (project-root (project-current))))
    (shell-command "find . -type f -iname \"*.py\" | emacs.etags -")
   ))
 
@@ -307,7 +307,7 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
       version-control t
       ;; kept-old-versions 2
       )
-(setq initial-scratch-message "Welcome!"
+(setq initial-scratch-message "Welcome!\n"
       inhibit-startup-screen t)
 
 ;; ;; undo-tree mode
@@ -330,19 +330,6 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
  cursor-type (quote box)
  )
 
-;; rename file and buffer
-(defun rename-file-and-buffer ()
-  "Rename the current buffer and file it is visiting."
-  (interactive)
-  (let ((filename (buffer-file-name)))
-    (if (not (and filename (file-exists-p filename)))
-        (message "Buffer is not visiting a file!")
-      (let ((new-name (read-file-name "New name: " filename)))
-        (cond
-         ((vc-backend filename) (vc-rename-file filename new-name))
-         (t
-          (rename-file filename new-name t)
-          (set-visited-file-name new-name t t)))))))
 
 
 ;; tramp
@@ -376,6 +363,74 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
 ;; (setq ffap-machine-p-known 'reject)
 ;; (put 'narrow-to-region 'disabled nil)
 ;; (put 'scroll-left 'disabled nil)
+
+(require 'cl-lib)
+
+(defun move-current-file (&optional filename)
+  "Move current file and update buffer, with overwrite confirmation."
+  (interactive (list (if current-prefix-arg
+                        (read-file-name "Move file: ")
+                      buffer-file-name)))
+  (cl-assert filename nil '("filename is nil"))
+  (let* ((target (read-file-name "Choose file or directory: " nil nil nil nil
+                                 (lambda (f) (or (file-directory-p f) (file-regular-p f)))))
+         (final-target (if (file-directory-p target)
+                           (expand-file-name (file-name-nondirectory filename) target)
+                         target)))
+    (when (and (file-exists-p final-target)
+               (not (yes-or-no-p (format "File %s exists. Overwrite? " final-target))))
+      (user-error "Move cancelled"))
+    (rename-file filename final-target t)
+    (set-visited-file-name final-target t t)
+    (message "Moved %s to %s" filename final-target)))
+
+(defun copy-current-file (&optional filename)
+  "Move current file and update buffer, with overwrite confirmation."
+  (interactive (list (if current-prefix-arg
+                         (read-file-name "Move file: ")
+                      buffer-file-name)))
+  (cl-assert filename nil '("filename is nil"))
+  (let* ((target (read-file-name "Choose file or directory: " nil nil nil nil
+                                 (lambda (f) (or (file-directory-p f) (file-regular-p f)))))
+         (final-target (if (file-directory-p target)
+                           (expand-file-name (file-name-nondirectory filename) target)
+                         target)))
+    (when (and (file-exists-p final-target)
+               (not (yes-or-no-p (format "File %s exists. Overwrite? " final-target))))
+      (user-error "Copy cancelled"))
+    (copy-file filename final-target t)
+    (message "Copy %s to %s" filename final-target)))
+
+;; rename file and buffer (and maybe git rename)
+(defun rename-file-and-buffer ()
+  "Rename the current buffer and file it is visiting. May use git rename."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " default-directory nil nil (file-name-nondirectory filename))))
+        (cond
+         ((vc-backend filename) (vc-rename-file filename new-name))
+         (t
+          (rename-file filename new-name t)
+          (set-visited-file-name new-name t t)))))))
+
+
+(defun gm/get-filename-dwim ()
+  (cond ((derived-mode-p 'dired-mode)
+	 (dired-get-filename nil t))
+	((buffer-file-name))
+	((null (buffer-file-name))
+	 (user-error "Current buffer is not associated with a file."))
+	)
+  )
+
+(defun gm/copy-filename ()
+  (interactive)
+  "Copy current file name."
+  (let ((name (gm/get-filename-dwim)))
+    (kill-new name)
+    (message "copied %s" name)))
 
 (provide 'variousrc)
 ;;; variousrc.el ends here

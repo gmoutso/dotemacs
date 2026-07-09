@@ -14,7 +14,7 @@
 	  ("C-c l t" . org-toggle-link-display)
 	  ("C-c l i" . org-insert-link)
 	  ("C-c C-." . org-time-stamp)
-	  ("C-c C-j" . helm-org-in-buffer-headings)
+	  ("C-c C-j" . consult-org-heading)
 	  )))
   :init
   (defun gm/org-hooks ()
@@ -164,15 +164,17 @@
 
 ;; I like one python babel session
 ;; note the variable is buffer-local
-(with-eval-after-load "ob"
+(with-eval-after-load 'ob
   (add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
 )
-(eval-after-load 'ob-python '(add-to-list 'org-babel-default-header-args:python '(:session . "*org-python*")))
+(with-eval-after-load 'ob-python
+  (add-to-list 'org-babel-default-header-args:python '(:session . "*org-python*")))
 ;; (eval-after-load 'ob-ipython '(add-to-list 'org-babel-default-header-args:ipython '(:session . "ipython")))
 ;; (remove-hook 'org-mode-hook 'ob-ipython-auto-configure-kernels)
 ;; use <p[tab] for python block
-(eval-after-load 'org '(add-to-list 'org-structure-template-alist '("p" . "src python")))
-(eval-after-load 'org '(add-to-list 'org-structure-template-alist '("d" . "src dot")))
+(with-eval-after-load 'org
+  (add-to-list 'org-structure-template-alist '("p" . "src python"))
+  (add-to-list 'org-structure-template-alist '("d" . "src dot")))
 ;; ob-ipython incompatible with emacs-jupyter
 ;; (require 'ob-ipython)
 (org-babel-do-load-languages
@@ -855,10 +857,14 @@ Turning off the use of tab in org-mode stops this conversion."
    )
 (add-hook 'org-mode-hook 'gm/org-tab-config)
 
-(use-package helm-org-ql)
-(use-package helm-rg)
-(require 'org-z)
-(org-z-mode 1)
+(use-package helm-org-ql
+  :defer t)
+(use-package helm-rg
+  :defer t)
+(use-package org-z ;; needs helm
+  :defer t
+  :config
+  (org-z-mode 1))
 
 ;; Org ID Properties
 (defun gm/org-id-remove-entry ()
@@ -996,6 +1002,7 @@ To make this permanent, use customize `org-image-actual-width'."
   )
 
 (use-package org-recipes
+  :after helm
   :config
   (setq org-recipes-file-list (mapcar (lambda (fn) (concat (file-name-as-directory org-directory) fn))
 				      '("evpysnip.org" "ipython.org" "emacssnip.org" "evaws.org")))

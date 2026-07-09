@@ -15,7 +15,7 @@
   (let* ((file-absolute
 	  (file-truename (gm/get-filename (buffer-file-name) t)))
 	 (project-root (or (gm/value-if-bound rsync-local-path)
-			   (projectile-project-root)))
+			   (project-root (project-current))))
 	 (file-relative (file-relative-name file-absolute project-root))
 	 (remote-root (if (bound-and-true-p rsync-remote-paths)
 			  (completing-read "Rsync project to: " rsync-remote-paths nil t)

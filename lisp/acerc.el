@@ -8,7 +8,7 @@
 (require 'ace-window)
 
 ;; add ace option to helm switch buffer
-(with-eval-after-load 'helm
+(with-eval-after-load 'helm-types
 (defun helm-buffer-ace-window (buffer)
   "Use ‘ace-window’ to select a window to display BUFFER."
   (ace-select-window)

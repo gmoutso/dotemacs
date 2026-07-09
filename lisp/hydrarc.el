@@ -27,7 +27,7 @@
     ("F" find-dired "find")
     )
    "Places"
-   (("p" helm-projectile "projects") 
+   (("p" project-switch-project "projects") 
     ("b" helm-filtered-bookmarks "bookmarks")
     ("t" treemacs "treemacs"))
    "Org"
@@ -40,8 +40,9 @@
    ;; ("oa" helm-org-rifle-agenda-files "agenda")
    )
    "Shells"
-   (("e" eshell "eshell")
-    ("v" gm/jump-to-vterm "vterm"))
+   (("me" eshell "eshell")
+    ("mv" gm/jump-to-vterm "vterm")
+    ("mg" ghostel))
    "Misc."
    (("xr" visit-tags-table "tags file")
     ("k" gm/jupyter-kernels "jupyter kernels"))
@@ -138,47 +139,6 @@ more org rifle..\n"
     ("aic" copilot-complete "complete")
     )
    ))
-
-;; (defhydra hydra-rifle (:exit t)
-;;    ("c" helm-org-rifle-current-buffer "current")
-;;    ("b" helm-org-rifle "buffers")
-;;    ("d" helm-org-rifle-directories "directories")
-;;    ("o" helm-org-rifle-org-directory "org-directory")
-;;    ("f" helm-org-rifle-files "files")
-;;    ("a" helm-org-rifle-agenda-files "agenda")
-;;    ("q" nil "cancel"))
-
-;; (pretty-hydra-define hydra-projectile (:exit t)
-;;   ("Open"
-;;    (("f" helm-projectile-find-file "file")
-;;     ("r" helm-projectile-recent "recent")
-;;     ("p" helm-projectile-switch-project "project")
-;;     ("d" helm-projectile-find-dir "directory"))
-;;    "Search"
-;;    (("o" projectile-multi-occur "occur")
-;;     ("a" projectile-ag))
-;;    "Buffers"
-;;    (("b" helm-projectile-switch-to-buffer "switch")
-;;     ("k" helm-projectile-kill-buffers "kill"))
-;;    "Cache"
-;;    (("C" projectile-invalidate-cache "clear")
-;;     ("x" projectile-remove-known-project "remove project")
-;;     ("X" projectile-cleanup-known-projects "cleanup"))))
-
-;; (pretty-hydra-define hydra-registers (:exit t)
-;;   ("Point"
-;;    (("r" point-to-register "save point")
-;;     ("j" jump-to-register "jump")
-;;     ("v" view-register "view all"))
-;;    "Text"
-;;    (("c" copy-to-register "copy region")
-;;     ("C" copy-rectangle-to-register "copy rect")
-;;     ("i" insert-register "insert")
-;;     ("p" prepend-to-register "prepend")
-;;     ("a" append-to-register "append"))
-;;    "Macros"
-;;    (("m" kmacro-to-register "store")
-;;     ("e" jump-to-register "execute"))))
 
 ;;
 ;; windows management

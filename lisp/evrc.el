@@ -1,10 +1,11 @@
-;;; evrc.el --- helm rsync tree to/from ted
+;;; evrc.el --- ev configurations
 
 ;;; Commentary:
 ;; Custom configuration file.
 
 ;;; Code:
 
+(require 'helm)
 (use-package s)
 
 ;;
@@ -212,7 +213,7 @@ If remote, returns hostname removing any ssh protocol."
   (interactive "P")
   (let ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
 	(worktree-path (helm gm/helm-source-worktree-root-dirs))
-	(from-string (projectile-project-root))
+	(from-string (project-root (project-current)))
 	(func (if arg 'find-file 'find-alternate-file))
 	)
     (funcall func (replace-regexp-in-string from-string worktree-path filename nil t))))
