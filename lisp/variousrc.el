@@ -298,7 +298,7 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
 ;; ;; Change "yes or no" to "y or n"
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(setq make-backup-files t ; stop creating backup~ files
+(setq make-backup-files t
       backup-by-copying t
       ;; backup in one flat place
       backup-directory-alist '(("." . (concat user-emacs-directory "backup-files")))

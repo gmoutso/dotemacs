@@ -534,6 +534,7 @@ This is necessary if a python repl was started with built-in `run-python'.
    (or
     ;; uses flycheck-python-project-files including .pyroot
     (flycheck-python-find-project-root 'checker_)
+    ;; project-vc-extra-root-markers does not include .pyroot
     (project-root (project-current))
     (file-name-concat (vc-root-dir) "..")
     )
