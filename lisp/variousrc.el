@@ -313,6 +313,8 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
 ;; ;; undo-tree mode
 (use-package undo-tree
   :ensure t
+  :custom
+  (undo-tree-auto-save-history nil)
   :init
   (global-undo-tree-mode)
 )

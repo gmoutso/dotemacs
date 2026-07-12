@@ -29,7 +29,7 @@
 (use-package emamuxrc)
 ;; (load-library "einrc")
 (use-package jupyterrc
-  :config
+  :custom
   (jupyter-executable "~/anaconda3/bin/jupyter"))
 ;; ;; auto-complete
 ;; (load-library "autocompleterc")
