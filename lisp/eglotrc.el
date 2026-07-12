@@ -43,7 +43,7 @@
 ;;                                         :useLibraryCodeForTypes t
 ;;                                         :diagnosticMode "openFilesOnly")))))
 
-(defvar gm/eglot-ensure-projects-names '("py310" "evsim" "evlisp"))
+(defvar gm/eglot-ensure-projects-names '("py310" "evsim" "evlisp")
   "Which project names to start eglot")
 (defun gm/eglot-ensure ()
   (let (project-name (project-name (project-current)))

@@ -19,6 +19,11 @@
 ;; (setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
 ;; (setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
 
+;; Miscellaneous options
+(setq window-resize-pixelwise t)
+(setq frame-resize-pixelwise t)
+
+
 (scroll-bar-mode 0)
 
 ;;scroll window up/down by one line

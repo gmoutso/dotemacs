@@ -28,7 +28,9 @@
 (use-package evalueoxrc)
 (use-package emamuxrc)
 ;; (load-library "einrc")
-(use-package jupyterrc)
+(use-package jupyterrc
+  :config
+  (jupyter-executable "~/anaconda3/bin/jupyter"))
 ;; ;; auto-complete
 ;; (load-library "autocompleterc")
 (use-package completerc)
@@ -40,7 +42,6 @@
 (use-package windowsrc)
 (use-package hydrarc)
 (use-package evrc)
-(use-package variousrc)
 (use-package imagesrc)
 (use-package termrc)
 (use-package term-tmuxrc)

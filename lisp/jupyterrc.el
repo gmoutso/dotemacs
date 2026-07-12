@@ -9,12 +9,12 @@
 ;; use (jupyter-command "kernelspec" "list" "--json" "--log-level=40")
 ;; /home/moutsopoulosg/.emacs.d/elpa/jupyter-20220419.1852/jupyter-kernelspec.el:64
 (use-package jupyter
+  :after org
   ;; :after (ob-jupyter ob-python)
   :custom
   (jupyter-org-auto-connect nil)
   (jupyter-api-authentication-method 'ask)
   (jupyter-eval-use-overlays nil)
-  (jupyter-executable "~/anaconda3/bin/jupyter")
   (jupyter-use-zmq nil)
   :config
   (setq org-babel-default-header-args:jupyter-python '((:async . "yes")
