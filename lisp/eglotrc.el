@@ -46,11 +46,10 @@
 (defvar gm/eglot-ensure-projects-names '("py310" "evsim" "evlisp")
   "Which project names to start eglot")
 (defun gm/eglot-ensure ()
-  (let (project-name (project-name (project-current)))
-    (if (member project-name gm/eglot-ensure-projects-names)
-	(eglot-ensure))))
-(add-hook 'python-mode-hook 'gm/eglot-ensure)
-(add-hook 'python-ts-mode-hook 'gm/eglot-ensure)
+  (let (name (project-root (project-current)))
+    (if (member name gm/eglot-ensure-projects-names)
+      (eglot-ensure))))
+(add-hook 'python-base-mode-hook 'gm/eglot-ensure)
 
 (provide 'eglotrc)
 ;;; eglotrc.el ends here

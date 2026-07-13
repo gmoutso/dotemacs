@@ -94,8 +94,7 @@
   (display-line-numbers-mode t)
   (column-number-mode t)
   )
-(add-hook 'python-mode-hook 'gm/python-mode-hook)
-(add-hook 'python-ts-mode-hook 'gm/python-mode-hook)
+(add-hook 'python-base-mode-hook 'gm/python-mode-hook)
 
 
 ;; (defun my-run-python (&optional new)
@@ -255,17 +254,17 @@
 
 
 ; (setq gm/python-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
-(setq gm/python-imenu-expression '(("Sections" "^#+ *%+ *\\(.*\\)"
-				    1)))
-(defun gm/python-imenu-index-function ()
-  "Appends the imenu index created from default function with the imenu index created from expression."
-  (let ((mode-imenu (python-imenu-create-index))
-        (custom-imenu (imenu--generic-function gm/python-imenu-expression)))
-    (append custom-imenu mode-imenu)))
-(defun gm/python-imenu-merge-hook ()
-  "Set up imenu for python."
-  (setq imenu-create-index-function 'gm/python-imenu-index-function))
-(add-hook 'python-mode-hook 'gm/python-imenu-merge-hook)
+;; (setq gm/python-imenu-expression '(("Sections" "^#+ *%+ *\\(.*\\)"
+;; 				    1)))
+;; (defun gm/python-imenu-index-function ()
+;;   "Appends the imenu index created from default function with the imenu index created from expression."
+;;   (let ((mode-imenu (python-imenu-create-index))
+;;         (custom-imenu (imenu--generic-function gm/python-imenu-expression)))
+;;     (append custom-imenu mode-imenu)))
+;; (defun gm/python-imenu-merge-hook ()
+;;   "Set up imenu for python."
+;;   (setq imenu-create-index-function 'gm/python-imenu-index-function))
+;; (add-hook 'python-base-mode-hook 'gm/python-imenu-merge-hook)
 
 (defun gm/to_open_dataarray (beginning end)
   (interactive "*r")
