@@ -45,6 +45,8 @@
   (flycheck-flake8rc "~/.emacs.d/lisp/flakerc")
   )
 
+(use-package blacken)
+
 (use-package python
   :init
   (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
@@ -53,8 +55,7 @@
   ;; :custom
   ;; (python-shell-interpreter "ipython") (python-shell-interpreter-args "-i")
   ;; (python-shell-interpreter "python")  ; ipython does not not exist eg for pydoc
-  ;; (python-shell-extra-pythonpaths
-  ;; '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
+  ;; (python-shell-extra-pythonpaths '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
   )
 
 ;;
@@ -154,28 +155,6 @@
 ;; 	 ;(next-line) (move-beginning-of-line nil)
 ;; 	 )))
 
-
-;; change to tkagg in matplotlib, set ion
-;; this is useful for virtualenv that lack qt or others
-;; (defun python-shell-mpl-use-tk ()
-;;   (interactive)
-;;   (python-shell-send-string "
-;; import matplotlib
-;; matplotlib.use('tkagg')
-;; import matplotlib.pyplot as plt
-;; plt.ion()
-;; print('plt ion with tkagg')" )
-;;   (message "plt is interactive with tk backend"))
-
-;; (require 'importmagic)
-;; (define-key importmagic-mode-map (kbd "C-c C-l") 'importmagic-fix-symbol-at-point)
-;; (defun setup-importmagic ()
-;;   (interactive)
-;;   (conda-env-activate conda-env-current-name)
-;;   (importmagic-mode 1)
-;;   (importmagic--async-add-dir "/home/moutsopoulosg/dev/master/python"))
-;; ;; (add-hook 'python-mode-hook 'setup-importmagic)
-;; (defadvice importmagic--query-imports-for-statement-and-fix (after send-import-statement (statement) activate) (python-shell-send-string statement))
 
 (defun gm/insert-above (string)
   (save-excursion
@@ -535,16 +514,18 @@ This is necessary if a python repl was started with built-in `run-python'.
     (flycheck-python-find-project-root 'checker_)
     ;; project-vc-extra-root-markers does not include .pyroot
     (project-root (project-current))
-    (file-name-concat (vc-root-dir) "..")
     )
 ))
 
 (defun gm/relative-pyroot-filename (filename)
   "Get filename relative to root. If in dired, return current line, else return buffer file."
   (let ((project-file (file-relative-name filename (gm/pyroot))))
-    (if (string-prefix-p "python/" project-file)
-      (substring project-file (length "python/"))
-    project-file)))
+    (cond ((string-prefix-p "python/" project-file)
+	   (substring project-file (length "python/"))
+	   (string-prefix-p "src/" project-file)
+	   (substring project-file (length "src/"))
+	   t project-file)
+    )))
 
 (defun gm/get-filename-dwim ()
   (cond ((derived-mode-p 'dired-mode)

@@ -334,20 +334,6 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
 
 
 
-;; tramp
-;; solve issue of unix_listener: path "/home/moutsopoulosg/snap/alacritty/common/.cache/emacs/tramp.1f55902153a4e212109d8c0b9d51574abd36be19.m1bxsVtM9G8FDNKC" too long for Unix domain socket
-;; https://lists.libreplanet.org/archive/html/tramp-devel/2024-11/msg00007.html
-;; (unless small-temporary-file-directory
-  ;;          (customize-set-variable
-    ;;         'small-temporary-file-directory
-      ;;       (format "/run/user/%d/emacs/" (user-uid)))
-        ;;    (make-directory small-temporary-file-directory t))
-
-;; (setq tramp-connection-properties nil)
-;; (add-to-list 'tramp-connection-properties
-;;              (list (regexp-quote "/ssh:")
-;;                    "remote-shell" "/bin/bash"))
-
 ;; ;; view-mode
 (eval-after-load "view"
   '(progn

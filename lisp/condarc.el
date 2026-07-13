@@ -7,12 +7,6 @@
 
 (use-package conda
   :hook eshell python
-  :init
-  (setenv "PATH" (concat (getenv "PATH") ":/home/moutsopoulosg/anaconda3/bin:/home/moutsopoulosg/anaconda3/condabin"))
-  (setq exec-path (append exec-path '("/home/moutsopoulosg/anaconda3/bin" "/home/moutsopoulosg/anaconda3/condabin")))
-  :custom
-  (conda-anaconda-home "/home/moutsopoulosg/anaconda3/")
-  (conda-env-home-directory "/home/moutsopoulosg/anaconda3/")  ; was in separate setq
   :config
   ;; if you want interactive shell support, include:
   (conda-env-initialize-interactive-shells)
@@ -66,10 +60,6 @@
   "Remove advice of FUNC added by `with-venv-advice-add'."
   (advice-remove func
                  'gm/with-emacs-venv-advice))
-
-(use-package blacken
-  :custom
-  (blacken-executable "/home/moutsopoulosg/conda_envs/emacs/bin/black"))
 
 ;;(gm/with-emacs-venv-advice-remove 'blacken-buffer)
 ;; (use-package code-cells)
