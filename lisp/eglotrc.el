@@ -35,10 +35,12 @@
   (let ((name (project-root (project-current))))
   (setq gm/eglot-ensure-projects-names (remove name gm/eglot-ensure-projects-names))))
 (defun gm/eglot-ensure ()
-  (let ((name (project-root (project-current))))
-    (if (member name gm/eglot-ensure-projects-names)
-      (eglot-ensure))))
-(add-hook 'python-base-mode-hook 'gm/eglot-ensure)
+  (when-let ((proj (project-current)))
+    (let ((name (project-root proj)))
+      (when (member name gm/eglot-ensure-projects-names)
+        (eglot-ensure)))))
+;; (add-hook 'python-base-mode-hook 'gm/eglot-ensure)
+;; (remove-hook 'python-base-mode-hook 'gm/eglot-ensure)
 
 (provide 'eglotrc)
 ;;; eglotrc.el ends here

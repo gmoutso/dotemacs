@@ -20,7 +20,8 @@
   (defun gm/org-hooks ()
   ;; (setq line-spacing '0.25)
   ;; (iscroll-mode)
-  )
+    )
+  (setq org-export-backends '(pdf html latex odt))
   :hook
   (org-mode . turn-on-org-cdlatex)
   (org-mode . gm/org-hooks)

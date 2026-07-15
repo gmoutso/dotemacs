@@ -171,14 +171,54 @@ If remote, returns hostname removing any ssh protocol."
 ;;   (gtags-rootdir "/home/moutsopoulosg/dev/master/python"))
 
 ;; workspace links
-(defvar workspace-folder "~/workspace/moutsopoulosg")
+(defvar gm/workspace-root "~/spaces/workspace" 
+  "Root directory containing workspace folders.")
+;; org links for workspace folders
 (defun org-workspace-follow (path)
-  (find-file (format "%s%s" (file-name-as-directory workspace-folder) path)))
+  (find-file (format "%s%s" (file-name-as-directory gm/workspace-root) path)))
 (defun org-workspace-complete ()
-  (concat "workspace:"(file-relative-name (read-file-name "File: " (file-name-as-directory workspace-folder)) workspace-folder)))
+  (concat "workspace:"(file-relative-name (read-file-name "File: " (file-name-as-directory gm/workspace-root)) gm/workspace-root)))
 (org-link-set-parameters "workspace"
 			 :follow 'org-workspace-follow
 			 :complete 'org-workspace-complete)
+;; advice to project.el on workspace folders
+(defun gm/project-find-workspace-projects (dir)
+  "Treat DIR as a project root if it's under my massive Project workspace.
+
+Returns a project root like `~/spaces/workspace/X/'
+"
+  (let* ((parent-root (expand-file-name gm/workspace-root))
+         (relative-path (file-relative-name dir parent-root)))
+    (when (not (string-prefix-p ".." relative-path))
+      (let ((subfolder (car (split-string relative-path "/"))))
+        (cons 'transient (file-name-as-directory (abbreviate-file-name (expand-file-name subfolder parent-root))))))))
+(add-hook 'project-find-functions #'gm/project-find-workspace-projects)
+
+;; selecting projects in workspace
+(defun gm/find-workspace-file ()
+ "Jump to project folder or find file with preview."
+(interactive)
+(let ((default-directory gm/workspace-root))
+ (consult-fd)))
+(defun gm/find-workspace-folder () 
+  "Select a subfolder in projects root and open in dired, sorted by date." 
+  (interactive) 
+  (let* ((default-directory (file-name-as-directory (expand-file-name gm/workspace-root)))
+	 (folders (sort (directory-files default-directory nil "^[^.]" t)
+			(lambda (a b)
+			  (time-less-p
+			   (file-attribute-modification-time (file-attributes (expand-file-name b)))
+			   (file-attribute-modification-time (file-attributes (expand-file-name a)))))))
+	 (choice (completing-read "Project: "
+				  (lambda (str pred action)
+				    (if (eq action 'metadata)
+					'(metadata (display-sort-function . identity)
+						   (cycle-sort-function . identity)
+						   (category . file))
+				      (complete-with-action action folders str pred)))
+				  nil t)))
+    (dired (expand-file-name choice))))
+
 
 ;; (use-package ggtags
 ;;   :custom
