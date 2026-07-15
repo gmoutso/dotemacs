@@ -52,14 +52,14 @@
   :hook
   (org-mode . org-appear-mode)
   :custom
-  (org-appear-autolinks nil) ;; https://github.com/awth13/org-appear/issues/34
+  (org-appear-autolinks t) ;; https://github.com/awth13/org-appear/issues/34 for org-pretty-table
   ;; org-appear-inside-latex is about pretty UTF elements, not image fragments like fragtog
   (org-appear-inside-latex nil) ;; relevant if org-pretty-entities
   (org-pretty-entities nil) ;; non-nil means use UTF8 for \something
   (org-appear-autoentities nil) ;; relavent if org-appear-inside-latex
   (org-appear-autosubmarkers t) ;; relavent if org-appear-inside-latex
-  (org-appear-delay 2)
-  ) 
+  (org-appear-delay 1)
+  )
 
 ;; toggle latex framgents when cursor is on them
 (use-package org-fragtog
