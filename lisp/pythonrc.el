@@ -521,11 +521,11 @@ This is necessary if a python repl was started with built-in `run-python'.
   "Get filename relative to root. If in dired, return current line, else return buffer file."
   (let ((project-file (file-relative-name filename (gm/pyroot))))
     (cond ((string-prefix-p "python/" project-file)
-	   (substring project-file (length "python/"))
-	   (string-prefix-p "src/" project-file)
-	   (substring project-file (length "src/"))
+	   (substring project-file (length "python/")))
+	   ((string-prefix-p "src/" project-file)
+	   (substring project-file (length "src/")))
 	   t project-file)
-    )))
+    ))
 
 (defun gm/get-filename-dwim ()
   (cond ((derived-mode-p 'dired-mode)
