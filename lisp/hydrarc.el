@@ -28,6 +28,7 @@
     )
    "Places"
    (("p" project-switch-project "projects") 
+    ("w" gm/find-workspace-folder "workspace")
     ("b" helm-filtered-bookmarks "bookmarks")
     ("t" treemacs "treemacs"))
    "Org"
