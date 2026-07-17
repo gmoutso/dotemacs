@@ -31,6 +31,7 @@
 ;; anaconda
 ;;
 (use-package anaconda-mode
+  :defer t
   :config
   ;; (conda-env-autoactivate-mode)
   (anaconda-eldoc-mode)
