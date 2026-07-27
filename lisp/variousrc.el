@@ -301,7 +301,7 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
 (setq make-backup-files t
       backup-by-copying t
       ;; backup in one flat place
-      backup-directory-alist '(("." . (concat user-emacs-directory "backup-files")))
+      backup-directory-alist '(("." . "~/.emacs.d/backup-files"))
       delete-old-versions t
       kept-new-versions 2
       version-control t
@@ -419,6 +419,50 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
   (let ((name (gm/get-filename-dwim)))
     (kill-new name)
     (message "copied %s" name)))
+
+
+
+;;; Shell environment variable selection with embark actions
+(defun gm/env-candidates ()
+  "Return alist of env candidates from `process-environment'."
+  (mapcar (lambda (entry)
+            (let* ((parts (split-string entry "=" nil))
+                   (var (car parts))
+                   (val (string-join (cdr parts) "=")))
+              (cons (format "%-30s %s" var (propertize val 'face 'shadow)) val)))
+          (sort (copy-sequence process-environment) #'string<)))
+
+(defun gm/env-insert (candidate)
+  "Insert the value of the selected environment variable."
+  (insert (cdr (assoc candidate (gm/env-candidates)))))
+
+(defun gm/env-copy (candidate)
+  "Copy the value of the selected environment variable to kill ring."
+  (let ((val (cdr (assoc candidate (gm/env-candidates)))))
+    (kill-new val)
+    (message "Copied: %s" val)))
+
+(defvar-keymap gm/env-embark-map
+  :doc "Embark keymap for environment variable actions."
+  :parent embark-general-map
+  "i" #'gm/env-insert
+  "w" #'gm/env-copy)
+
+(add-to-list 'embark-keymap-alist '(env-variable . gm/env-embark-map))
+
+(defun gm/select-env-variable ()
+  "Select a shell environment variable and act on it with embark."
+  (interactive)
+  (let* ((candidates (gm/env-candidates))
+         (metadata '(metadata (category . env-variable)))
+         (collection (lambda (string pred action)
+                       (if (eq action 'metadata)
+                           metadata
+                         (complete-with-action action candidates string pred))))
+         (selected (completing-read "Env: " collection nil t)))
+    (when selected
+      (let ((val (cdr (assoc selected candidates))))
+        (insert val)))))
 
 (provide 'variousrc)
 ;;; variousrc.el ends here

@@ -96,23 +96,6 @@
 	  "\\`\\*helm "
           "\\`TAGS\\'")))
 
-(with-eval-after-load 'tab-line
-(defun gm/switch-to-tab-line-buffer ()
-  "Switch to a buffer from the tab-line buffer list using consult."
-  (interactive)
-  (let* ((buffers (gm/tab-line-buffer-names))
-         (buffer (consult--read
-                  (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers))
-                  :prompt "Tab-line buffer: "
-                  :require-match t
-                  :category 'buffer
-                  :sort nil)))
-    (when buffer
-      (switch-to-buffer buffer))))
-;; todo:  add only when tab-line
-(global-set-key  (kbd "C-x <up>") 'gm/switch-to-tab-line-buffer)
-)
-
 (use-package consult-eglot)
 (use-package consult-eglot-embark)
 

@@ -522,9 +522,9 @@ This is necessary if a python repl was started with built-in `run-python'.
   (let ((project-file (file-relative-name filename (gm/pyroot))))
     (cond ((string-prefix-p "python/" project-file)
 	   (substring project-file (length "python/")))
-	   ((string-prefix-p "src/" project-file)
+	  ((string-prefix-p "src/" project-file)
 	   (substring project-file (length "src/")))
-	   t project-file)
+	   (t project-file))
     ))
 
 (defun gm/get-filename-dwim ()

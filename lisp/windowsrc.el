@@ -197,7 +197,9 @@ buffer in current window."
    (current-buffer)))
 
 ;; tabspaces
+;;
 ;; tabspaces is too focused on project.el
+;;
 (defun gm/tabspaces-make-default-tab ()
   (when tabspaces-default-tab
     (if (member tabspaces-default-tab (tabspaces--list-tabspaces))
@@ -230,12 +232,48 @@ buffer in current window."
    ;; "2" (cons "new tab" 'gm/tabspaces-new-tab-and-rename)
    ;; "b" (cons "tabspace buffer" 'gm/helm-switch-to-workspace-buffers) ;; in helmrc.el
    )
+  :config
+  (with-eval-after-load 'consult
+    ;; hide full buffer list (still available with "b" prefix)
+    ;; (plist-put consult-source-buffer :hidden t)
+    ;; (plist-put consult-source-buffer :default nil)
+    ;; set consult-workspace buffer list
+    (defvar consult--source-workspace
+      (list :name     "Workspace Buffers"
+            :narrow   ?w
+            :history  'buffer-name-history
+            :category 'buffer
+            :state    #'consult--buffer-state
+            :default  t
+            :items    (lambda () (consult--buffer-query
+                             :predicate #'tabspaces--local-buffer-p
+                             :sort 'visibility
+                             :as #'buffer-name)))
+
+      "Set workspace buffer list for consult-buffer.")
+    (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   )
 (which-key-add-key-based-replacements "C-c TAB s" "tab switch/create")
 (which-key-setup-side-window-right-bottom)
 
 (defun gm/tab-line-buffer-names ()
   (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
+(with-eval-after-load 'consult
+(defun gm/switch-to-tab-line-buffer ()
+  "Switch to a buffer from the tab-line buffer list using consult."
+  (interactive)
+  (let* ((buffers (gm/tab-line-buffer-names))
+         (buffer (consult--read
+                  (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers))
+                  :prompt "Tab-line buffer: "
+                  :require-match t
+                  :category 'buffer
+                  :sort nil)))
+    (when buffer
+      (switch-to-buffer buffer))))
+;; todo:  add only when tab-line
+(global-set-key  (kbd "C-x <up>") 'gm/switch-to-tab-line-buffer)
+)
 
 
 ;; (use-package bufferlo
