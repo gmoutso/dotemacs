@@ -49,8 +49,29 @@
 ;; (defun tab-bar-rename-after-create (&rest _) (call-interactively #'tab-bar-rename-tab))
 ;; (add-hook 'tab-bar-tab-post-open-functions 'tab-bar-rename-after-create)
 
-(setq tab-bar-new-tab-choice "*scratch*")
 
+(use-package tab-bar
+  :hook
+  (server-after-make-frame . gm/tab-bar-make-default-tab)
+  :custom
+  (tab-bar-new-tab-choice "*scratch*")
+  :general
+  ([remap tab-new] (cons "new tab" 'gm/new-tab-and-rename))
+  :init
+  (defun gm/tab-bar-make-default-tab ()
+    (when tabspaces-default-tab
+      (if (member tabspaces-default-tab (tabspaces--list-tabspaces))
+	  (tab-switch tabspaces-default-tab)
+	(tab-bar-rename-tab tabspaces-default-tab))))
+  (defun gm/new-tab-and-rename ()
+    (interactive)
+    (tab-new)
+    (tab-rename (read-from-minibuffer "New tab name: "))))
+
+
+;;
+;; windmove
+;;
 
 (windmove-default-keybindings 'shift)
 ;; https://orgmode.org/manual/Conflicts.html
@@ -196,26 +217,12 @@ buffer in current window."
      "%s is up for grabs.")
    (current-buffer)))
 
+;;
 ;; tabspaces
 ;;
-;; tabspaces is too focused on project.el
-;;
-(defun gm/tabspaces-make-default-tab ()
-  (when tabspaces-default-tab
-    (if (member tabspaces-default-tab (tabspaces--list-tabspaces))
-	(tab-switch tabspaces-default-tab)
-      (tab-bar-rename-tab tabspaces-default-tab))))
-(defun gm/tabspaces-new-tab-and-rename ()
-  (interactive)
-  (tab-new)
-  (tab-rename (read-from-minibuffer "New tab name: "))
-  )
-(general-def
-  [remap tab-new] (cons "new tab" 'gm/tabspaces-new-tab-and-rename))
 (use-package tabspaces
   :hook
   (after-init . tabspaces-mode)
-  (server-after-make-frame . gm/tabspaces-make-default-tab)
   :commands (tabspaces-switch-or-create-workspace
              tabspaces-open-or-create-project-and-workspace)
   :custom
@@ -229,9 +236,9 @@ buffer in current window."
   :general
   (:keymaps 'tabspaces-mode-map
    :prefix "C-c TAB"
-   ;; "2" (cons "new tab" 'gm/tabspaces-new-tab-and-rename)
-   ;; "b" (cons "tabspace buffer" 'gm/helm-switch-to-workspace-buffers) ;; in helmrc.el
    )
+  (:keymaps 'tabspaces-mode-map
+   [remap project-other-tab-command] (cons "open project tab" 'tabspaces-open-or-create-project-and-workspace))
   :config
   (with-eval-after-load 'consult
     ;; hide full buffer list (still available with "b" prefix)
