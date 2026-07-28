@@ -51,4 +51,9 @@
 (require 'orgrc)
 (require 'tanglerc)
 (require 'ghostelrc)
+;; (use-package ecarc)
 (require 'themerc)
+
+;; Install and configure password-store
+(use-package password-store-menu)
+
