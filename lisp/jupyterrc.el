@@ -18,9 +18,9 @@
   (jupyter-use-zmq nil)
   :config
   (setq org-babel-default-header-args:jupyter-python '((:async . "yes")
-						  (:pandoc . t)
-						  (:exports . "results")
-						  (:tangle . "yes")))
+						       (:pandoc . t)
+						       (:exports . "results")
+						       (:tangle . "yes")))
   (add-to-list 'savehist-additional-variables 'jupyter-server-kernel-names)
   (setq ob-async-no-async-languages-alist '("jupyter-python"))
   (add-to-list 'org-structure-template-alist '("j" . "src jupyter-python")))
@@ -32,10 +32,7 @@
  '((C . t) (python . t) (emacs-lisp . t) (dot . t) (plantuml . t)
    (jupyter . t)))
 
-;; why is this needed here. It is also an org-mode hook?
-;; (conda-with-env "emacs"
-;;   (org-babel-jupyter-make-local-aliases))
-(org-babel-jupyter-make-local-aliases) ;; will it find them??
+(org-babel-jupyter-make-local-aliases)
 
 ;;
 ;; jupyter repl

@@ -45,7 +45,9 @@
 (require 'imagesrc)
 (require 'latexrc)
 ;; (require 'texify)
-(require 'jupyterrc) ;; specify jupyterlab exec!
+(use-package jupyterrc
+  :custom
+  (jupyter-executable "~/miniforge3/bin/jupyter-lab"))
 (require 'completerc)
 (require 'copilotrc)
 (require 'orgrc)
