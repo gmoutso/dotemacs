@@ -1,11 +1,12 @@
+;;; condarc.el --- if you want interactive shell support, include:  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package conda
   :hook eshell python
-  :init
-  (setenv "PATH" (concat (getenv "PATH") ":/home/moutsopoulosg/anaconda3/bin:/home/moutsopoulosg/anaconda3/condabin"))
-  (setq exec-path (append exec-path '("/home/moutsopoulosg/anaconda3/bin" "/home/moutsopoulosg/anaconda3/condabin")))
-  :custom
-  (conda-anaconda-home "/home/moutsopoulosg/anaconda3/")
-  (conda-env-home-directory "/home/moutsopoulosg/anaconda3/")  ; was in separate setq
   :config
   ;; if you want interactive shell support, include:
   (conda-env-initialize-interactive-shells)
@@ -60,10 +61,6 @@
   (advice-remove func
                  'gm/with-emacs-venv-advice))
 
-(use-package blacken
-  :custom
-  (blacken-executable "/home/moutsopoulosg/conda_envs/emacs/bin/black"))
-
 ;;(gm/with-emacs-venv-advice-remove 'blacken-buffer)
 ;; (use-package code-cells)
 ;; conda install jupytext
@@ -81,3 +78,5 @@
 
 ;; (setq eaf-python-command "LD_LIBRARY_PATH=/home/moutsopoulosg/anaconda3/envs/emacs/lib/python3.10/site-packages/PyQt6/Qt6/lib /home/moutsopoulosg/anaconda3/envs/emacs/bin/python")
 
+(provide 'condarc)
+;;; condarc.el ends here

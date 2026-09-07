@@ -1,3 +1,5 @@
+;;; eafrc.el --- eafrc config  -*- lexical-binding: t; -*-
+
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
   :custom

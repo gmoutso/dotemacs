@@ -1,117 +1,15 @@
+;;; evrc.el --- ev configurations  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
+(require 'helm)
 (use-package s)
-
-;;
-;; helm rsync tree to/from ted
-;;
-(defconst helm-source-ev-hosts
-  (helm-build-sync-source "Host"
-    :candidates (list "~/" "ted:" "beowulf@ted:" "phil:" "beowulf@phil:")))
-(defun helm-ev-host (&optional prompt)
-  "Choose ev host name."
-  (let ((prompt (or prompt "Host: ")))
-    (helm :sources helm-source-ev-hosts
-	  :prompt prompt
-	  :buffer "*helm-ev-host*")))
-
-(defun helm-source-rsync-tree-args-action (candidate)
-  (helm-marked-candidates)
-  )
-(defconst helm-source-rsync-tree-args (helm-build-sync-source "arguments"
-					:candidates (list
-						     "-avz" "-rvz" "-n" "-u" "--delete" "--delete-excluded"
-						     "--exclude \".dexy/\" --exclude \".cache/\" --exclude \"*.pyc\" --exclude \"README.md\" --exclude \".trash\""
-						     "--exclude=\"/.*\""
-						     "-m --include=\"*/\" --include=\"*output/***\" --exclude=\"*\"")
-					:action 'helm-source-rsync-tree-args-action))
-(defvar rsync-tree-history nil)
-;;
-;; rsync a whole tree
-;;
-(defun ev-rsync-tree (&optional init-directory)
-  "Rsync a folder in two different homes that have the same tree structure."
-  (interactive)
-  (let* ((init-directory (file-local-name (or init-directory default-directory dired-directory)))
-	 (dirname (read-directory-name "Directory: " init-directory))
-	 (from (helm-ev-host "From: "))
-	 (to (helm-ev-host "To: "))
-	 (args (helm :sources helm-source-rsync-tree-args
-		     :buffer "*helm rsync args*")))
-    (ev-do-rsync dirname from to args nil t)
-  ))
-
-(defun ev-do-rsync (dirname from to args &optional output-buffer confirm)
-  "Rsync convenience that translates dirname to evalue hostnames.
-
-FROM and TO are hosts, eg `beowulf@ted' or `~/', and DIRNAME can be any local or remote directory that `ev-tramp-this' recognizes, eg in dev/master or workspace.
-"
-  (let* ((from (ev-tramp-this dirname from))
-	 (from (replace-regexp-in-string "^/ssh:" "" from t nil))
-	 (to (ev-tramp-this dirname to))
-	 (to (replace-regexp-in-string "^/ssh:" "" to t nil))
-	 (command (concat (concat "rsync "  from " " to " ") (s-join " " args)))
-	 (output-buffer (or output-buffer "*rsync*")))
-    (if confirm (setq command (read-string "rsync: " command 'rsync-tree-history)))
-    (message command)
-    (let ((default-directory (expand-file-name "~/")))
-      (async-shell-command command output-buffer))
-    ))
-
-;;
-;; open with tramp this
-;;
-(defun gm/remote-host (host)
-  "Return hostname or nil. 
-
-Remoteness is detected from a semi-column `:' in HOST.
-If remote, returns hostname removing any ssh protocol."
-  (if (string-match-p ".*:" host) (replace-regexp-in-string "\\(/ssh:\\)?\\([^:]*\\):.*" "\\2:" host)))
-
-(defun ev-tramp-this (filename host)
-  "Convert filename to tramp version on evalue space.
-
-   HOST is either a local or remote path, eg `~/somewhere' or `beowulf@ted:'.
-   HOST can accept tramp names like `/ssh:beowulf@ted:somewhere'.
-   Remoteness is detected from a semi-column `:' in HOST.
-   the FILENAME might be /home/someones/ with or without host info."
-  (let* ((is-remote-host (gm/remote-host host))
-	 (is-remote-file (file-remote-p filename)) ; /ssh:host:
-	 (absolute-path (expand-file-name filename))
-	 (filelocal (file-local-name absolute-path))
-	 (converted (cond ((and
-				 (string-match-p "workspace" filelocal)
-				 is-remote-host)
-				(replace-regexp-in-string
-				 "/home/moutsopoulosg/workspace"
-				 "/spool/workspace"
-				 filelocal))
-			       ((and
-				 (string-match-p "workspace" filelocal)
-				 (not is-remote-host))
-				(replace-regexp-in-string
-				 "/spool/workspace"
-				 "/home/moutsopoulosg/workspace"
-				 filelocal))
-			       (filelocal)))
-	 (homeless (replace-regexp-in-string "^/home/[^/]*/" "" converted))
-	 (path-prefix (if is-remote-host
-			  (format "/ssh:%s" is-remote-host)
-			"~/"))
-	 (target (concat path-prefix homeless))
-	 )
-    target))
-
-(defun ev-tramp-here ()
-  "Open the current file/dir in an evalue host."
-  (interactive)
-  (let* ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
-	 (host (helm-ev-host "Host: "))
-	 (is-remote-host (gm/remote-host host))
-	 (is-remote-file (file-remote-p filename)))
-    (let ((target (ev-tramp-this filename host)))
-      (if (eq major-mode 'eshell-mode)
-	  (cd target)
-	(find-file target)))
-    ))
+(require 'transient)
+(require 'cl-lib)
+(require 'ev-tramp)
 
 ;;
 ;; unison
@@ -163,14 +61,54 @@ If remote, returns hostname removing any ssh protocol."
 ;;   (gtags-rootdir "/home/moutsopoulosg/dev/master/python"))
 
 ;; workspace links
-(defvar workspace-folder "~/workspace/moutsopoulosg")
+(defvar gm/workspace-root "~/spaces/workspace" 
+  "Root directory containing workspace folders.")
+;; org links for workspace folders
 (defun org-workspace-follow (path)
-  (find-file (format "%s%s" (file-name-as-directory workspace-folder) path)))
+  (find-file (format "%s%s" (file-name-as-directory gm/workspace-root) path)))
 (defun org-workspace-complete ()
-  (concat "workspace:"(file-relative-name (read-file-name "File: " (file-name-as-directory workspace-folder)) workspace-folder)))
+  (concat "workspace:"(file-relative-name (read-file-name "File: " (file-name-as-directory gm/workspace-root)) gm/workspace-root)))
 (org-link-set-parameters "workspace"
 			 :follow 'org-workspace-follow
 			 :complete 'org-workspace-complete)
+;; advice to project.el on workspace folders
+(defun gm/project-find-workspace-projects (dir)
+  "Treat DIR as a project root if it's under my massive Project workspace.
+
+Returns a project root like `~/spaces/workspace/X/'
+"
+  (let* ((parent-root (expand-file-name gm/workspace-root))
+         (relative-path (file-relative-name dir parent-root)))
+    (when (not (string-prefix-p ".." relative-path))
+      (let ((subfolder (car (split-string relative-path "/"))))
+        (cons 'transient (file-name-as-directory (abbreviate-file-name (expand-file-name subfolder parent-root))))))))
+(add-hook 'project-find-functions #'gm/project-find-workspace-projects)
+
+;; selecting projects in workspace
+(defun gm/find-workspace-file ()
+ "Jump to project folder or find file with preview."
+(interactive)
+(let ((default-directory gm/workspace-root))
+ (consult-fd)))
+(defun gm/find-workspace-folder () 
+  "Select a subfolder in projects root and open in dired, sorted by date." 
+  (interactive) 
+  (let* ((default-directory (file-name-as-directory (expand-file-name gm/workspace-root)))
+	 (folders (sort (directory-files default-directory nil "^[^.]" t)
+			(lambda (a b)
+			  (time-less-p
+			   (file-attribute-modification-time (file-attributes (expand-file-name b)))
+			   (file-attribute-modification-time (file-attributes (expand-file-name a)))))))
+	 (choice (completing-read "Project: "
+				  (lambda (str pred action)
+				    (if (eq action 'metadata)
+					'(metadata (display-sort-function . identity)
+						   (cycle-sort-function . identity)
+						   (category . file))
+				      (complete-with-action action folders str pred)))
+				  nil t)))
+    (dired (expand-file-name choice))))
+
 
 ;; (use-package ggtags
 ;;   :custom
@@ -205,7 +143,7 @@ If remote, returns hostname removing any ssh protocol."
   (interactive "P")
   (let ((filename (expand-file-name (or buffer-file-name dired-directory default-directory)))
 	(worktree-path (helm gm/helm-source-worktree-root-dirs))
-	(from-string (projectile-project-root))
+	(from-string (project-root (project-current)))
 	(func (if arg 'find-file 'find-alternate-file))
 	)
     (funcall func (replace-regexp-in-string from-string worktree-path filename nil t))))
@@ -232,3 +170,6 @@ If remote, returns hostname removing any ssh protocol."
 		 ))
   (replace-regexp-in-region (nth 0 rep) (nth 1 rep) (point-min) (point-max))
   ))
+
+(provide 'evrc)
+;;; evrc.el ends here

@@ -1,4 +1,4 @@
-;;; org-learn.el --- Implements SuperMemo's incremental learning algorithm
+;;; org-learn.el --- Implements SuperMemo's incremental learning algorithm  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2016 Free Software Foundation, Inc.
 

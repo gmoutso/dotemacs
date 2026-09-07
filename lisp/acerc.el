@@ -1,6 +1,14 @@
+;;; acerc.el --- add ace option to helm switch buffer  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (require 'ace-window)
 
 ;; add ace option to helm switch buffer
+(with-eval-after-load 'helm-types
 (defun helm-buffer-ace-window (buffer)
   "Use ‘ace-window’ to select a window to display BUFFER."
   (ace-select-window)
@@ -27,6 +35,7 @@
     (helm-exit-and-execute-action 'helm-file-ace-window)))
 (define-key helm-find-files-map (kbd "C-c C-e") #'helm-file-run-ace-window)
 (define-key helm-projectile-find-file-map (kbd "C-c C-e") #'helm-file-run-ace-window)
+)
 
 ;; use ace in dired o shortcut
 (defun find-file-ace-window ()
@@ -39,3 +48,6 @@
                         (find-file file)))
       (find-file-other-window file))))
 (define-key dired-mode-map "o" 'find-file-ace-window)
+
+(provide 'acerc)
+;;; acerc.el ends here

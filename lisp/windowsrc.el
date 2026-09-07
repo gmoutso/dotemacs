@@ -1,3 +1,10 @@
+;;; windowsrc.el --- scrolling  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;;
 ;; scrolling
 ;;
@@ -11,6 +18,11 @@
 ;; (pixel-scroll-mode)  ;; does not work with fixed position scrolling?
 ;; (setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
 ;; (setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
+
+;; Miscellaneous options
+(setq window-resize-pixelwise t)
+(setq frame-resize-pixelwise t)
+
 
 (scroll-bar-mode 0)
 
@@ -29,36 +41,6 @@
 (global-set-key (kbd "C-x z") 'bury-buffer)
 (global-set-key  (kbd "C-x <down>") 'bury-buffer)
 
-;;
-;; tab-line-mode
-;;
-(defun gm/tab-line-buffer-names () (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
-(defun gm/tab-line-bury-marked-buffers-action (_ignore)
-  (let* ((bufs (helm-marked-candidates))
-         (killed-bufs (cl-count-if 'bury-buffer bufs)))
-    (when (buffer-live-p helm-buffer)
-      (with-helm-buffer
-        (setq helm-marked-candidates nil
-              helm-visible-mark-overlays nil)))
-    (message "Bury %s buffer(s)" killed-bufs)))
-(defun gm/tab-line-bury-marked-buffers-run-action ()
-  "Run bury buffer action from `helm-source-buffers-list'."
-  (interactive)
-  (with-helm-alive-p
-    (helm-exit-and-execute-action 'gm/tab-line-bury-marked-buffers-action)))
-(put 'gm/tab-line-bury-marked-buffers-run-action 'helm-only t)
-(defclass gm/helm-source-tab-line-buffers (helm-source-buffers) ())
-(defun gm/helm-switch-to-tab-line-tab-buffer ()
-    (interactive) 
-    (let* ((candidates (gm/tab-line-buffer-names)) ;; note needs to call this outside helm
-	   (source (helm-make-source "Window buffers" 'gm/helm-source-tab-line-buffers
-		     :buffer-list (lambda () candidates)
-		     :action (helm-make-actions
-			      "Bury buffers" 'gm/tab-line-bury-marked-buffers-action))))
-      (helm-add-action-to-source "Bury buffers" 'gm/tab-line-bury-marked-buffers-action source)
-      (helm :sources source)))
-;; (global-set-key  (kbd "C-x <up>") 'gm/helm-switch-to-tab-line-tab-buffer)
-
 
 ;;
 ;; tab-bar-mode
@@ -67,17 +49,29 @@
 ;; (defun tab-bar-rename-after-create (&rest _) (call-interactively #'tab-bar-rename-tab))
 ;; (add-hook 'tab-bar-tab-post-open-functions 'tab-bar-rename-after-create)
 
-;; (variable-pitch-mode 0)
-;; (use-package mixed-pitch
-;;   :hook
-;;   ;; If you want it in all text modes:
-;;   (org-mode . mixed-pitch-mode))
-;; use variable pitch font
-;; (add-hook 'org-mode-hook 'variable-pitch-mode)
-;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-;; (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
-(setq tab-bar-new-tab-choice "*scratch*")
 
+(use-package tab-bar
+  :hook
+  (server-after-make-frame . gm/tab-bar-make-default-tab)
+  :custom
+  (tab-bar-new-tab-choice "*scratch*")
+  :general
+  ([remap tab-new] (cons "new tab" 'gm/new-tab-and-rename))
+  :init
+  (defun gm/tab-bar-make-default-tab ()
+    (when tabspaces-default-tab
+      (if (member tabspaces-default-tab (tabspaces--list-tabspaces))
+	  (tab-switch tabspaces-default-tab)
+	(tab-bar-rename-tab tabspaces-default-tab))))
+  (defun gm/new-tab-and-rename ()
+    (interactive)
+    (tab-new)
+    (tab-rename (read-from-minibuffer "New tab name: "))))
+
+
+;;
+;; windmove
+;;
 
 (windmove-default-keybindings 'shift)
 ;; https://orgmode.org/manual/Conflicts.html
@@ -223,24 +217,12 @@ buffer in current window."
      "%s is up for grabs.")
    (current-buffer)))
 
+;;
 ;; tabspaces
-;; tabspaces is too focused on project.el
-(defun gm/tabspaces-make-default-tab ()
-  (when tabspaces-default-tab
-    (if (member tabspaces-default-tab (tabspaces--list-tabspaces))
-	(tab-switch tabspaces-default-tab)
-      (tab-bar-rename-tab tabspaces-default-tab))))
-(defun gm/tabspaces-new-tab-and-rename ()
-  (interactive)
-  (tab-new)
-  (tab-rename (read-from-minibuffer "New tab name: "))
-  )
-(general-def
-  [remap tab-new] (cons "new tab" 'gm/tabspaces-new-tab-and-rename))
+;;
 (use-package tabspaces
   :hook
   (after-init . tabspaces-mode)
-  (server-after-make-frame . gm/tabspaces-make-default-tab)
   :commands (tabspaces-switch-or-create-workspace
              tabspaces-open-or-create-project-and-workspace)
   :custom
@@ -254,12 +236,51 @@ buffer in current window."
   :general
   (:keymaps 'tabspaces-mode-map
    :prefix "C-c TAB"
-   ;; "2" (cons "new tab" 'gm/tabspaces-new-tab-and-rename)
-   ;; "b" (cons "tabspace buffer" 'gm/helm-switch-to-workspace-buffers) ;; in helmrc.el
    )
+  (:keymaps 'tabspaces-mode-map
+   [remap project-other-tab-command] (cons "open project tab" 'tabspaces-open-or-create-project-and-workspace))
+  :config
+  (with-eval-after-load 'consult
+    ;; hide full buffer list (still available with "b" prefix)
+    ;; (plist-put consult-source-buffer :hidden t)
+    ;; (plist-put consult-source-buffer :default nil)
+    ;; set consult-workspace buffer list
+    (defvar consult--source-workspace
+      (list :name     "Workspace Buffers"
+            :narrow   ?w
+            :history  'buffer-name-history
+            :category 'buffer
+            :state    #'consult--buffer-state
+            :default  t
+            :items    (lambda () (consult--buffer-query
+                             :predicate #'tabspaces--local-buffer-p
+                             :sort 'visibility
+                             :as #'buffer-name)))
+
+      "Set workspace buffer list for consult-buffer.")
+    (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   )
 (which-key-add-key-based-replacements "C-c TAB s" "tab switch/create")
 (which-key-setup-side-window-right-bottom)
+
+(defun gm/tab-line-buffer-names ()
+  (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers)))
+(with-eval-after-load 'consult
+(defun gm/switch-to-tab-line-buffer ()
+  "Switch to a buffer from the tab-line buffer list using consult."
+  (interactive)
+  (let* ((buffers (gm/tab-line-buffer-names))
+         (buffer (consult--read
+                  (mapcar (lambda (buff) (buffer-name buff)) (tab-line-tabs-window-buffers))
+                  :prompt "Tab-line buffer: "
+                  :require-match t
+                  :category 'buffer
+                  :sort nil)))
+    (when buffer
+      (switch-to-buffer buffer))))
+;; todo:  add only when tab-line
+(global-set-key  (kbd "C-x <up>") 'gm/switch-to-tab-line-buffer)
+)
 
 
 ;; (use-package bufferlo
@@ -269,3 +290,6 @@ buffer in current window."
 ;; )
 
 ;; (use-package tab-bookmark)
+
+(provide 'windowsrc)
+;;; windowsrc.el ends here

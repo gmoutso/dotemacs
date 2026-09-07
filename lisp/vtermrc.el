@@ -1,5 +1,13 @@
+;;; vtermrc.el --- generic  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; generic
 (use-package vterm
+  :defer t
   :bind (:map vterm-mode-map
 	      ("C-y" . vterm-yank)
 	      ("C-q" . vterm-send-next-key)
@@ -12,7 +20,8 @@
   (vterm-enable-manipulate-selection-data-by-osc52 t) ;; tmux set -g set-clipboard on
   )
 
-(use-package multi-vterm)
+(use-package multi-vterm
+  :defer t)
 
 ;; tmux configuration
 
@@ -165,3 +174,6 @@
   ;; \\ePtmux;\\e\\e]%s\\007\\e\\\\
   (vterm-insert (format (format ifthenelse tmux notmux) msg msg))
   ))
+
+(provide 'vtermrc)
+;;; vtermrc.el ends here

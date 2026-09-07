@@ -1,3 +1,10 @@
+;;; pythonrc.el --- pythonrc -- Summary  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 ;; pythonrc -- Summary
 ;; configuration for python
 ;;; Commentary:
@@ -24,6 +31,7 @@
 ;; anaconda
 ;;
 (use-package anaconda-mode
+  :defer t
   :config
   ;; (conda-env-autoactivate-mode)
   (anaconda-eldoc-mode)
@@ -38,6 +46,8 @@
   (flycheck-flake8rc "~/.emacs.d/lisp/flakerc")
   )
 
+(use-package blacken)
+
 (use-package python
   :init
   (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
@@ -46,8 +56,7 @@
   ;; :custom
   ;; (python-shell-interpreter "ipython") (python-shell-interpreter-args "-i")
   ;; (python-shell-interpreter "python")  ; ipython does not not exist eg for pydoc
-  ;; (python-shell-extra-pythonpaths
-  ;; '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
+  ;; (python-shell-extra-pythonpaths '("/home/moutsopoulosg/dev/master/python" "/home/moutsopoulosg/Documents/python/modules"))
   )
 
 ;;
@@ -87,8 +96,7 @@
   (display-line-numbers-mode t)
   (column-number-mode t)
   )
-(add-hook 'python-mode-hook 'gm/python-mode-hook)
-(add-hook 'python-ts-mode-hook 'gm/python-mode-hook)
+(add-hook 'python-base-mode-hook 'gm/python-mode-hook)
 
 
 ;; (defun my-run-python (&optional new)
@@ -149,29 +157,16 @@
 ;; 	 )))
 
 
-;; change to tkagg in matplotlib, set ion
-;; this is useful for virtualenv that lack qt or others
-;; (defun python-shell-mpl-use-tk ()
-;;   (interactive)
-;;   (python-shell-send-string "
-;; import matplotlib
-;; matplotlib.use('tkagg')
-;; import matplotlib.pyplot as plt
-;; plt.ion()
-;; print('plt ion with tkagg')" )
-;;   (message "plt is interactive with tk backend"))
+(defun gm/insert-above (string)
+  (save-excursion
+    (beginning-of-line-text)
+    (insert string)
+    (newline-and-indent)
+    ))
 
-;; (require 'importmagic)
-;; (define-key importmagic-mode-map (kbd "C-c C-l") 'importmagic-fix-symbol-at-point)
-;; (defun setup-importmagic ()
-;;   (interactive)
-;;   (conda-env-activate conda-env-current-name)
-;;   (importmagic-mode 1)
-;;   (importmagic--async-add-dir "/home/moutsopoulosg/dev/master/python"))
-;; ;; (add-hook 'python-mode-hook 'setup-importmagic)
-;; (defadvice importmagic--query-imports-for-statement-and-fix (after send-import-statement (statement) activate) (python-shell-send-string statement))
-
+;;
 ;; work with helm-etags-select
+;;
 (defun gm/etags-python-helm-process-candidate (candidate)
   "Return list of MODULE and OBJECT of an helm-etags-select CANDIDATE."
   (let* ((split (helm-grep-split-line candidate))
@@ -192,10 +187,7 @@
 	   (module (car p))
 	   (object (cadr p))
 	   (string (concat "from " module " import " object "\n")))
-    (save-excursion
-      (beginning-of-line)
-      (insert string)
-      )))
+    (gm/insert-above string)))
 (defun gm/etags-python-helm-action-insert-symbol (candidate)
     "Action to insert symbol using helm-etags-select source."
   (let* ((p (gm/etags-python-helm-process-candidate candidate))
@@ -217,25 +209,9 @@
 (defun gm/etags=python-helm-add-action-post-build ()
 (helm-add-action-to-source "Insert import" 'gm/etags-python-helm-action-insert-import helm-source-etags-select)
 (helm-add-action-to-source "Insert symbol" 'gm/etags-python-helm-action-insert-symbol helm-source-etags-select))
-; do it
-(gm/etags=python-helm-add-action-post-build)
+(with-eval-after-load 'helm-etags
+  (gm/etags=python-helm-add-action-post-build))
 
-;; defintions in buffer
-;; (defconst gm/top-pydef-regex
-;;   "^\\(?:\\(?2:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)(\\|\\(?1:[[:alnum:]_]*\\) *\\(?2:=\\)\\)"
-;;   "Class, def or variable definition regex.
-
-;; 1: object, 2: def|class|=")
-;; (defun gm/helm-occur-pydefs ()
-;;   (interactive)
-;;   (helm-occur "^[0-9]* \\(?:\\(?2:def\\|class\\) *\\(?1:[[:alnum:]_]*\\)(\\|\\(?1:[[:alnum:]_]*\\) *\\(?2:=\\)\\)"))
-;; (defun gm/occur-pydefs ()
-;;   "Occur python definitions in buffer."
-;;   (interactive)
-;;   (occur gm/top-pydef-regex)
-;;   )
-
-;; (python-x-setup)
 
 (defun python-move-down-and-newline ()
   "Move to next line, creating if needed."
@@ -258,17 +234,17 @@
 
 
 ; (setq gm/python-imenu-expression '(("Sections" "^ *# *---[ \n\t#]*\\(.*\\)" 1)))
-(setq gm/python-imenu-expression '(("Sections" "^#+ *%+ *\\(.*\\)"
-				    1)))
-(defun gm/python-imenu-index-function ()
-  "Appends the imenu index created from default function with the imenu index created from expression."
-  (let ((mode-imenu (python-imenu-create-index))
-        (custom-imenu (imenu--generic-function gm/python-imenu-expression)))
-    (append custom-imenu mode-imenu)))
-(defun gm/python-imenu-merge-hook ()
-  "Set up imenu for python."
-  (setq imenu-create-index-function 'gm/python-imenu-index-function))
-(add-hook 'python-mode-hook 'gm/python-imenu-merge-hook)
+;; (setq gm/python-imenu-expression '(("Sections" "^#+ *%+ *\\(.*\\)"
+;; 				    1)))
+;; (defun gm/python-imenu-index-function ()
+;;   "Appends the imenu index created from default function with the imenu index created from expression."
+;;   (let ((mode-imenu (python-imenu-create-index))
+;;         (custom-imenu (imenu--generic-function gm/python-imenu-expression)))
+;;     (append custom-imenu mode-imenu)))
+;; (defun gm/python-imenu-merge-hook ()
+;;   "Set up imenu for python."
+;;   (setq imenu-create-index-function 'gm/python-imenu-index-function))
+;; (add-hook 'python-base-mode-hook 'gm/python-imenu-merge-hook)
 
 (defun gm/to_open_dataarray (beginning end)
   (interactive "*r")
@@ -527,20 +503,43 @@ This is necessary if a python repl was started with built-in `run-python'.
     (with-current-buffer buffer
       (setq-local org-babel-python--initialized t))))
 
+(defun gm/project-root ()
+  "Return the project root"
+  (project-root (project-current)))
+
+(defun gm/pyroot ()
+  "Return the python root or project root."
+  (expand-file-name
+   (or
+    ;; uses flycheck-python-project-files including .pyroot
+    (flycheck-python-find-project-root 'checker_)
+    ;; project-vc-extra-root-markers does not include .pyroot
+    (project-root (project-current))
+    )
+))
+
+(defun gm/relative-pyroot-filename (filename)
+  "Get filename relative to root. If in dired, return current line, else return buffer file."
+  (let ((project-file (file-relative-name filename (gm/pyroot))))
+    (cond ((string-prefix-p "python/" project-file)
+	   (substring project-file (length "python/")))
+	  ((string-prefix-p "src/" project-file)
+	   (substring project-file (length "src/")))
+	   (t project-file))
+    ))
+
+(defun gm/get-filename-dwim ()
+  (cond ((derived-mode-p 'dired-mode)
+	 (dired-get-filename nil t))
+	((buffer-file-name))
+	((null (buffer-file-name))
+	 (user-error "Current buffer is not associated with a file."))
+	)
+  )
+
 (defun gm/get-relative-pyroot-filename ()
   "Get filename relative to root. If in dired, return current line, else return buffer file."
-  (let* ((pyroot (expand-file-name
-		  (or 
-		   (flycheck-python-find-project-root 'checker_)
-		   (file-name-concat (vc-root-dir) ".."))))
-	 (filename
-	  (cond ((derived-mode-p 'dired-mode)
-		 (dired-get-filename nil t))
-		((buffer-file-name))
-		((null (buffer-file-name))
-		 (user-error "Current buffer is not associated with a file."))
-		)))
-    (file-relative-name filename pyroot)))
+  (gm/relative-pyroot-filename (gm/get-filename-dwim)))
 
 (defun gm/get-pydef (&optional with-variable no-module)
   (let* ((filename (gm/get-relative-pyroot-filename))
@@ -714,26 +713,5 @@ last statement in BODY, as elisp."
 
 (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
 
-(defun gm/should-use-lsp-mode ()
-  (member (projectile-project-root) '("/home/moutsopoulosg/dev/master/"
-				      "/home/moutsopoulosg/dev/cloud_migration_py2/"
-				      )))
-(defun gm/should-not-use-lsp ()
-  (or
-   (not (buffer-file-name))
-   (not (derived-mode-p 'python-base-mode))
-   (file-remote-p default-directory)
-   (member (file-name-directory (buffer-file-name))
-       '("/home/moutsopoulosg/")
-       )
-   (member (projectile-project-root) '("/home/moutsopoulosg/dev/ev/cloud_migration_py2/"
-				      "/home/moutsopoulosg/dev/ev/evmodel_master/"
-				      ))))
-
-(defun gm/lsp-ensure ()
-  (unless (gm/should-not-use-lsp)
-    (if (gm/should-use-lsp-mode)
-	  (lsp-deferred)
-	  (eglot-ensure)
-	  )))
-(add-hook 'python-base-mode-hook 'gm/lsp-ensure)
+(provide 'pythonrc)
+;;; pythonrc.el ends here

@@ -1,4 +1,4 @@
-;;; ox-clip.el --- Cross-platform formatted copying for org-mode
+;;; ox-clip.el --- Cross-platform formatted copying for org-mode  -*- lexical-binding: t; -*-
 
 ;; Copyright(C) 2016 John Kitchin
 

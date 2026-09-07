@@ -1,9 +1,12 @@
+;;; pycellrc.el --- Python code cells configuration  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (use-package code-cells
   :custom
-  (code-cells-convert-ipynb-style
-   '(("/home/moutsopoulosg/conda_envs/bastille/bin/jupytext" "--update" "--to" "ipynb")
-     ("/home/moutsopoulosg/conda_envs/bastille/bin/jupytext" "--to" "py:percent")
-     code-cells--guess-mode code-cells-convert-ipynb-hook))
   (code-cells-eval-region-commands
    '((jupyter-repl-interaction-mode . gm/jupyter-eval-region)
     (python-ts-mode . python-shell-send-region)
@@ -58,12 +61,5 @@
   (add-to-list 'auto-mode-alist '("\\.ipynb\\'" . gm/code-cells-convert-ipynb-maybe))
   )
 
-(defun gm/code-cells-test-roundtrip (&optional filename)
-  (interactive)
-  (let ((filename (gm/get-filename filename)))
-    (if (not (string-equal (file-name-extension filename) "ipynb"))
-	(error "Only on ipynb files."))
-    (async-shell-command (format "/home/moutsopoulosg/conda_envs/bastille/bin/jupytext --update --to py:percent --test %s" filename)
-			 "*code-cells-roundtrip*")
-    )
-  )
+(provide 'pycellrc)
+;;; pycellrc.el ends here

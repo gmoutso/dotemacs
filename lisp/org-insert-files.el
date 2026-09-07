@@ -1,3 +1,5 @@
+;;; org-insert-files.el --- org-insert-files config  -*- lexical-binding: t; -*-
+
 (require 'org-annotate-code)
 (require 'org-annotate-index)
 (require 'f)

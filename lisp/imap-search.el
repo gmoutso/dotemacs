@@ -1,4 +1,4 @@
-;;; imap-search.el --- Searching imap using NNIR
+;;; imap-search.el --- Searching imap using NNIR  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017 George Moutsopoulos
 ;; Version: 1.0

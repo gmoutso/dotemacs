@@ -1,4 +1,4 @@
-;;; -*- coding: utf-8-unix -*-
+;;; -*- coding: utf-8-unix -*-  -*- lexical-binding: t; -*-
 ;;; org-drill.el - Self-testing using spaced repetition
 ;;;
 ;;; Copyright (C) 2010-2015  Paul Sexton

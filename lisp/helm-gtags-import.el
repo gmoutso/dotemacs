@@ -1,3 +1,5 @@
+;;; helm-gtags-import.el --- helm-gtags-import config  -*- lexical-binding: t; -*-
+
 (defun gm-helm-gtags--create-autoimport (cand)
   (let (filename (helm-gtags--extract-file-and-line cand))
     cand))

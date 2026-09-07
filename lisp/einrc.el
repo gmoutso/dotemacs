@@ -1,3 +1,5 @@
+;;; einrc.el --- einrc config  -*- lexical-binding: t; -*-
+
 (require 'ein)
 (require 'ein-loaddefs)
 (require 'ein-notebook)

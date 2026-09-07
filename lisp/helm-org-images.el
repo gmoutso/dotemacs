@@ -1,4 +1,4 @@
-;;; helm-org-images --- Show images in org file and jump to section
+;;; helm-org-images --- Show images in org file and jump to section  -*- lexical-binding: t; -*-
 
 ;;; Code:
 

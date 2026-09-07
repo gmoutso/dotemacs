@@ -1,4 +1,4 @@
-;; put your css files there
+;; put your css files there  -*- lexical-binding: t; -*-
 (defvar org-theme-css-dir "~/.emacs.d/org-css/")
 ;; org-export-publishing-directory
 

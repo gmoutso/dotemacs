@@ -1,3 +1,10 @@
+;;; evalueoxrc.el --- Evalueox configuration  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
 (require 'ox)
 (use-package ox-latex
   :custom
@@ -102,12 +109,39 @@
 ))
 
 ;;
-;; html
+;; pandoc exporter
 ;;
 (use-package ox-pandoc
   :custom
-  (org-pandoc-options '((standalone . t) (embed-resources . t)))
-  )
+  (org-pandoc-options '((standalone . t)
+                        (embed-resources . t)
+                        (citeproc . t)))
+  (org-pandoc-options-for-latex '((pdf-engine . "xelatex")
+                                  (template . "evalue")
+                                  (citeproc . t)))
+  (org-pandoc-options-for-latex-pdf '((pdf-engine . "xelatex")
+                                      (template . "evalue")
+                                      (citeproc . t)))
+  (org-pandoc-options-for-html5 '((standalone . t)
+				  (embed-resources . t)
+				  (template . "easy-ev.html")
+				  (css . "easy-ev.css")
+				  (resource-path . "/home/moutsopoulosg/.local/share/pandoc/css")
+				  (toc . t)
+				  (toc-depth . 2)
+				  (highlight-style . "tango")))
+  ;; simplify menu
+  (org-pandoc-menu-entry
+  '((?h "to html5 and open." org-pandoc-export-to-html5-and-open)
+    (?H "as html5." org-pandoc-export-as-html5)
+    (?p "to latex-pdf and open." org-pandoc-export-to-latex-pdf-and-open)
+    (?P "to latex-pdf." org-pandoc-export-to-latex-pdf)
+    (?o "to odt and open." org-pandoc-export-to-odt-and-open)
+    (?O "to odt." org-pandoc-export-to-odt)
+    (?, "as typst." org-pandoc-export-as-typst)
+    (?X "to docx." org-pandoc-export-to-docx))
+  ))
+
 ;; export to html - also applies to org-mime-org-mode-htmlize
 (setq org-html-with-latex t)
 ;; exports images -- messes with mime?
@@ -127,3 +161,6 @@
   (interactive)
   (cl-flet ((org-html--format-image (source attributes info) (my-org-html--format-image source attributes info)))
     (org-html-export-to-html)))
+
+(provide 'evalueoxrc)
+;;; evalueoxrc.el ends here

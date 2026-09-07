@@ -1,26 +1,67 @@
-(use-package org)
-(use-package org-variable-pitch
-  :hook (org-variable-pitch-minor . org-mode))
-(add-hook 'after-init-hook #'org-variable-pitch-setup)
-;; (use-package mixed-pitch
-;;   :hook
-;;   ;; If you want it in all text modes:
-;;   (text-mode . mixed-pitch-mode))
+;;; orgrc.el --- Org-mode configuration  -*- lexical-binding: t; -*-
 
-;; toggle emphases, links, etc when cursor is on them
-;; will also render tex with unicode
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
+(use-package org
+  :pin gnu
+  :bind
+  (("C-c l s"  . org-store-link)
+   (:map org-mode-map
+         (("C-c m" . org-latex-preview)
+	  ("C-c l t" . org-toggle-link-display)
+	  ("C-c l i" . org-insert-link)
+	  ("C-c C-." . org-time-stamp)
+	  ("C-c C-j" . consult-org-heading)
+	  )))
+  :init
+  (defun gm/org-hooks ()
+  ;; (setq line-spacing '0.25)
+  ;; (iscroll-mode)
+    )
+  (setq org-export-backends '(html latex pandoc jupyter-notebook odt))
+  :hook
+  (org-mode . turn-on-org-cdlatex)
+  (org-mode . gm/org-hooks)
+  :custom
+  (org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
+  (org-adapt-indentation nil)
+  (org-directory "~/Documents/org")
+  ;; make M-Ret not break heading content if cursor is not at the end of item
+  (org-insert-heading-respect-content nil)
+  ;; hide italics and bold markers
+  (org-hide-emphasis-markers t)
+  (org-use-sub-superscripts nil)
+  (org-confirm-babel-evaluate nil)
+  (org-export-use-babel t)
+  ;; when cycling TODO->DONE insert a CLOSED timestamp
+  (org-log-done t)
+  ;; the CLOSED timestamp should not have time
+  (org-log-done-with-time nil)
+  ;; the CLOSED timestamp should be kept if DONE is deleted
+  (org-closed-keep-when-no-todo t)
+  )
+
+
+(use-package mixed-pitch
+  :hook
+  (org-mode . mixed-pitch-mode))
+
 (use-package org-appear
   :hook
   (org-mode . org-appear-mode)
   :custom
-  (org-appear-autolinks nil) ;; https://github.com/awth13/org-appear/issues/34
+  (org-appear-autolinks t) ;; https://github.com/awth13/org-appear/issues/34 for org-pretty-table
   ;; org-appear-inside-latex is about pretty UTF elements, not image fragments like fragtog
   (org-appear-inside-latex nil) ;; relevant if org-pretty-entities
   (org-pretty-entities nil) ;; non-nil means use UTF8 for \something
   (org-appear-autoentities nil) ;; relavent if org-appear-inside-latex
   (org-appear-autosubmarkers t) ;; relavent if org-appear-inside-latex
-  (org-appear-delay 2)
-  ) 
+  (org-appear-delay 1)
+  )
+
 ;; toggle latex framgents when cursor is on them
 (use-package org-fragtog
   :hook
@@ -29,17 +70,20 @@
   (org-fragtog-preview-delay 0.4)
   (org-fragtog-ignore-predicates '(org-at-table-p))
   )
+
 ;; modern look
-(use-package org-modern)
-(global-org-modern-mode)
+(use-package org-modern
+  :config
+ (global-org-modern-mode))
 
 ;; needs to be set before org is loaded
 (setq org-list-allow-alphabetical t)
 ;; respect content always
 (setq org-insert-heading-respect-content t)
-;;(setq org-drill-hide-item-headings-p )
-;; search through many org files
-(use-package helm-org-rifle)
+
+(use-package helm-org-rifle
+  :defer t)
+
 (custom-set-variables
   '(org-export-with-smart-quotes nil)
   '(org-export-with-smart-quotes nil)
@@ -55,35 +99,20 @@
   '(org-export-with-todo-keywords t)
   '(org-export-with-sub-superscripts nil)
   )
+
 ;;(require 'org-tempo)
-(setq org-latex-preview-ltxpng-directory "~/.emacs.d/latexfragments/")
-(use-package cdlatex)
-(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 ;; (require 'ox-beamer)
-(use-package helm-org)
+(use-package helm-org
+  :defer t
+  )
 
-(setq org-adapt-indentation nil)
-;; mobile org
-(setq org-directory "~/Documents/org")
-
-;; (use-package org-download
-;;   :ensure t
-;;   :defer t
-;;   :init
-;;   ;; Add handlers for drag-and-drop when Org is loaded.
-;;   (with-eval-after-load 'org
-;;     (org-download-enable)))  ;; why not hook this into org-mode-hook?
 (use-package org-download
+  :defer t
   :hook (org-mode . org-download-enable)
   )
 
-
-;; make M-Ret not break heading content if cursor is not at the end of item
-(setq org-insert-heading-respect-content nil)
-
 ;; increase math
 ;; (setq org-format-latex-options (plist-put org-format-latex-options :scale 0.5))
-;; above does not get set? Customize?
 
 ;; (defun org-mode-reftex-setup ()
 ;;   (load-library "reftex")
@@ -111,17 +140,15 @@
 ;; org-mode beautiul as a word-processor
 ;; from http://www.howardism.org/Technical/Emacs/orgmode-wordprocessor.html
 ;;
-;; hide italics and bold markers
-(setq org-hide-emphasis-markers t)
 
 ;; ;; make dashes and bullets into unicode bullets
 ;; (font-lock-add-keywords 'org-mode
 ;; 			'(("^ +\\([-*]\\) "
 ;;                         (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
 ;; ;; better header bullets
 ;; (require 'org-bullets)
 ;; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-
 
 ;; ;(require 'org-faces)
 ;; (eval-after-load 'org-faces '(progn
@@ -138,15 +165,17 @@
 
 ;; I like one python babel session
 ;; note the variable is buffer-local
-(with-eval-after-load "ob"
+(with-eval-after-load 'ob
   (add-to-list 'org-babel-default-header-args '(:eval . "never-export"))
 )
-(eval-after-load 'ob-python '(add-to-list 'org-babel-default-header-args:python '(:session . "*org-python*")))
+(with-eval-after-load 'ob-python
+  (add-to-list 'org-babel-default-header-args:python '(:session . "*org-python*")))
 ;; (eval-after-load 'ob-ipython '(add-to-list 'org-babel-default-header-args:ipython '(:session . "ipython")))
 ;; (remove-hook 'org-mode-hook 'ob-ipython-auto-configure-kernels)
 ;; use <p[tab] for python block
-(eval-after-load 'org '(add-to-list 'org-structure-template-alist '("p" . "src python")))
-(eval-after-load 'org '(add-to-list 'org-structure-template-alist '("d" . "src dot")))
+(with-eval-after-load 'org
+  (add-to-list 'org-structure-template-alist '("p" . "src python"))
+  (add-to-list 'org-structure-template-alist '("d" . "src dot")))
 ;; ob-ipython incompatible with emacs-jupyter
 ;; (require 'ob-ipython)
 (org-babel-do-load-languages
@@ -163,88 +192,53 @@
 
 ;;; display/update images in the buffer after I evaluate
 (add-hook 'org-babel-after-execute-hook 'org-display-inline-images 'append)
-(setq org-confirm-babel-evaluate nil)
-(setq org-export-use-babel t)
 
-
-;;; key bindings
-(use-package org
-  :bind (("C-c l s"  . org-store-link)
-	 (:map org-mode-map
-               (("C-c m" . org-latex-preview)
-		("C-c l t" . org-toggle-link-display)
-		("C-c l i" . org-insert-link)
-		("C-c C-." . org-time-stamp)
-		("C-c C-j" . helm-org-in-buffer-headings)
-		)))
+(use-package org-agenda
+  :defer t
+  :bind (("C-c a" . org-agenda))
   :custom
-  (org-use-sub-superscripts nil))
-;; (use-package org-agenda
-;;   :bind (("C-c a" . org-agenda)))
-
-;; when cycling TODO->DONE insert a CLOSED timestamp
-(setq org-log-done t)
-;; the CLOSED timestamp should not have time
-(setq org-log-done-with-time nil)
-;; the CLOSED timestamp should be kept if DONE is deleted
-(setq org-closed-keep-when-no-todo t)
-
-
-(setq
  ;; I want to see week # was today and tomorrow by default (was 'week)
- org-agenda-span 'fortnight
+ (org-agenda-span 'fortnight)
  ;; do not start the week from today (opposite: start on Monday)
- org-agenda-start-on-weekday 1
+ (org-agenda-start-on-weekday 1)
  ;; in global todo do not ignore some scheduled
- org-agenda-todo-ignore-scheduled nil; 10; nil;'all
+ (org-agenda-todo-ignore-scheduled nil) ; 10; nil;'all)
  ;;
  ;; org-agenda-todo-ignore-with-date t
  ;;
  ;; skip scheduling line if same entry shows because of a (near) deadline
- org-agenda-skip-scheduled-if-deadline-is-shown t
+ (org-agenda-skip-scheduled-if-deadline-is-shown t)
  ;;
  ;; The symbol ‘pre-scheduled’ eliminates the deadline prewarning only prior to the scheduled date
- org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled;'pre-scheduled
+ (org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled) ;'pre-scheduled)
  ;;
  ;; hide entries with deadline/scheduled today or in the future that are done
  ;; note entries deadline/scheduled in the past that are done are hidden always
  ;; the purpose of letting this nil is for a happy feeling
- org-agenda-skip-deadline-if-done nil
+ (org-agenda-skip-deadline-if-done nil)
  ;;
  ;; skip scheduled delay when entry also has a deadline
  ;; org-agenda-skip-scheduled-delay-if-deadline t
- )
-(setq
- ;; agenda custom views
- org-agenda-custom-commands
- '(("n" "Agenda and TODOs"
-  ((agenda "")
-   (alltodo "" (
+ (org-agenda-custom-commands
+  '(("n" "Agenda and TODOs"
+     ((agenda "")
+      (alltodo "" (
 		;; (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))
-		;; (org-agenda-overriding-header "Items without a deadline or schedule: ")
-		)))))
+		   ;; (org-agenda-overriding-header "Items without a deadline or schedule: ")
+		))))))
  ;;
  ;; window arrangement
- org-agenda-restore-windows-after-quit t
- org-agenda-window-setup (quote only-window)
- )
-; ((opt1 val1) (opt2 val2) ...)
+ (org-agenda-restore-windows-after-quit t)
+ (org-agenda-window-setup 'only-window)
+  )
 
 ;; in agenda, also display effort %e if it exists
 ;; (with-eval-after-load 'org-agenda
 ;;   (add-to-list 'org-agenda-prefix-format '(todo .  " %i %-5:c %-5e "))
 ;;   (add-to-list 'org-agenda-prefix-format '(agenda .  " %i %-12:c%?-12t %-5e %s ")))
 
-
 ;; timespan property
 ;; (load-file "org-span.el")
-
-;; org-mode shortcuts
-(defun gm/org-hooks ()
-  (setq line-spacing '0.25)
-  ; (iscroll-mode)
-  )
-(add-hook 'org-mode-hook 'gm/org-hooks)
 
 ;;
 ;; org-publish projects
@@ -306,52 +300,58 @@
 (add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
 
 
+;; roam
 
 ;; org-roam
 (use-package org-roam
-    :after org
-    :init 
-    :custom
-    (org-roam-directory "~/Documents/org/roam")
-    :config
-    (org-roam-setup)
-    :bind (("C-c n c" . org-roam-capture)
-	   ("C-c n f" . org-roam-node-find)
-           ("C-c n j" . org-roam-dailies-capture-today)
-	   ("C-c n d" . org-roam-dailies-goto-date)
-           (:map org-mode-map
-                 (("C-c n i" . org-roam-node-insert)
-                  ("C-c n o" . org-id-get-create)
-                  ("C-c n t" . org-roam-tag-add)
-                  ("C-c n a" . org-roam-alias-add)
-                  ("C-c n l" . org-roam-buffer-toggle)))))
-(custom-set-variables
-  '(org-roam-dailies-directory "daily/")
-  '(org-roam-dailies-capture-templates
-      '(("d" "default" entry
-         "* %(format-time-string org-journal-time-format) %?"
-         :target (file+head "%<%Y-%m-%d>.org"
-                            "#+title: %<%Y-%m-%d>\n")
-	 :unnarrowed t))))
-
-(add-to-list 'display-buffer-alist
-             '("\\*org-roam\\*"
+  :defer t
+  :after org
+  :config
+  (org-roam-db-autosync-mode)
+  (add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*" 
                (display-buffer-in-direction)
                (direction . right)
                (window-width . 0.33)
                (window-height . fit-window-to-buffer)))
-
-
+  :custom
+  (org-roam-directory "~/Documents/org/roam")
+  (org-roam-dailies-directory "daily/")
+  (org-roam-dailies-capture-templates
+      '(("d" "default" entry
+         "* %(format-time-string org-journal-time-format) %?"
+         :target (file+head "%<%Y-%m-%d>.org"
+                            "#+title: %<%Y-%m-%d>\n")
+	 :unnarrowed t)))
+  :bind (("C-c n c" . org-roam-capture)
+	 ("C-c n f" . org-roam-node-find)
+         ("C-c n j" . org-roam-dailies-capture-today)
+	 ("C-c n d" . org-roam-dailies-goto-date)
+         (:map org-mode-map
+               (("C-c n i" . org-roam-node-insert)
+                  ("C-c n o" . org-id-get-create)
+                  ("C-c n t" . org-roam-tag-add)
+                  ("C-c n a" . org-roam-alias-add)
+                  ("C-c n l" . org-roam-buffer-toggle)))))
 
 ;; (setq org-capture-templates-contexts '(("p" ((in-mode . "python-mode")))))
 (setq org-capture-templates-contexts '(("p" ((in-mode . "python-ts-mode")))))
-(require 'org-annotate-word)
-(require 'org-annotate-python)
-(require 'org-annotate-projects)
+(use-package org-annotate-code
+  :defer t)
+(use-package org-annotate-index
+  :defer t)
+(use-package org-annotate-python
+  :defer t)
+(use-package org-annotate-word
+  :defer t)
+(use-package org-annotate-python
+  :defer t)
+(use-package org-annotate-projects
+  :defer t)
 ;; also include the file to refile as header level 1
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
-(setq org-completion-use-ido nil)
+;; (setq org-completion-use-ido nil)
 
 ;; copy current item to Tasks and schedule it for today
 (defun org-copy-schedule-today (ARG)
@@ -604,14 +604,17 @@ in the same directory as the org-buffer and insert a link to this file."
 ;;
 ;; work with pdf tools
 ;;
-(use-package org-noter)
+(use-package org-noter
+  :defer t)
 (use-package org-pdftools
+  :defer t
+  :after (pdf-tools org-noter)
   :hook (org-mode . org-pdftools-setup-link))
 (use-package org-noter-pdftools
-  :after org-noter
+  :defer t
+  :after (org-noter pdf-tools)
   :config
-  (with-eval-after-load 'pdf-annot
-    (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+  (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note))
 
 ;;
 ;; org clock and agenda
@@ -653,7 +656,7 @@ in the same directory as the org-buffer and insert a link to this file."
   :ensure t
   :bind* (("C-c C-x i" . org-mru-clock-in)
           ("C-c C-x j" . org-mru-clock-select-recent-task))
-  :init
+  :config
   (setq org-mru-clock-how-many 100))
 (setq org-mru-clock-files #'org-agenda-files)
 
@@ -855,10 +858,14 @@ Turning off the use of tab in org-mode stops this conversion."
    )
 (add-hook 'org-mode-hook 'gm/org-tab-config)
 
-(use-package helm-org-ql)
-(use-package helm-rg)
-(require 'org-z)
-(org-z-mode 1)
+(use-package helm-org-ql
+  :defer t)
+(use-package helm-rg
+  :defer t)
+(use-package org-z ;; needs helm
+  :defer t
+  :config
+  (org-z-mode 1))
 
 ;; Org ID Properties
 (defun gm/org-id-remove-entry ()
@@ -915,7 +922,6 @@ To make this permanent, use customize `org-image-actual-width'."
   (org-redisplay-inline-images))
 
 ;; Helm will show you the car of each cell, but return the cdr of the selected entry. 
-
 
 ;; correct python session eval on server
 ;; (defun org-babel-python-evaluate-session
@@ -977,15 +983,32 @@ To make this permanent, use customize `org-image-actual-width'."
 ;;            (python-shell-send-buffer))
 ;;          tmp-results-file)))))
 
-(use-package ox-pandoc)
-(add-to-list 'org-pandoc-extensions '(ipynb . ipynb))
-(add-to-list 'org-pandoc-menu-entry '(?i "to ipynb" org-pandoc-export-to-ipynb))
-(defun org-pandoc-export-to-ipynb (&optional a s v b e)
-  "Export to ipynb."
-  (interactive) (org-pandoc-export 'ipynb a s v b e))
-(defcustom org-pandoc-options-for-ipynb nil
+(use-package ox-pandoc
+  :defer t
+  :config
+  (add-to-list 'org-pandoc-extensions '(ipynb . ipynb))
+  (defcustom org-pandoc-options-for-ipynb nil
   "Pandoc options for ipynb"
   :group 'org-pandoc
   :type org-pandoc-option-type)
+  (defun org-pandoc-export-to-ipynb (&optional a s v b e)
+    "Export to ipynb."
+    (interactive) (org-pandoc-export 'ipynb a s v b e))
+  (add-to-list 'org-pandoc-menu-entry '(?i "to ipynb" org-pandoc-export-to-ipynb))
+  )
 
+;; elgant
+(use-package elgantt
+  :defer t
+  )
 
+(use-package org-recipes
+  :after helm
+  :config
+  (setq org-recipes-file-list (mapcar (lambda (fn) (concat (file-name-as-directory org-directory) fn))
+				      '("evpysnip.org" "ipython.org" "emacssnip.org" "evaws.org")))
+  (setq org-wiki-location nil)
+  )
+
+(provide 'orgrc)
+;;; orgrc.el ends here

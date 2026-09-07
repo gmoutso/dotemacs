@@ -1,4 +1,4 @@
-;; for the good (aka original) perspective mode
+;; for the good (aka original) perspective mode  -*- lexical-binding: t; -*-
 (use-package perspective
   :custom
   (persp-mode-prefix-key (kbd "C-x p"))

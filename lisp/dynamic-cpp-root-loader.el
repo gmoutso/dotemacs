@@ -1,3 +1,5 @@
+;;; dynamic-cpp-root-loader.el --- dynamic-cpp-root-loader config  -*- lexical-binding: t; -*-
+
 (require 'projectile)
 (require 'dash)
 (require 'ede)

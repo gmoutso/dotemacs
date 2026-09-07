@@ -1,4 +1,4 @@
-;; inspired by
+;; inspired by  -*- lexical-binding: t; -*-
 ;; https://gist.github.com/ralt/56cac3dbfb9cdb6e36648b5edee2c5ee
 (defun gm/make-remote-command ())
 (defun eshell-exec-visual-override (&rest args)

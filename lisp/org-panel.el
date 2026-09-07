@@ -1,4 +1,4 @@
-;;; org-panel.el --- Simple routines for us with bad memory
+;;; org-panel.el --- Simple routines for us with bad memory  -*- lexical-binding: t; -*-
 ;;
 ;; Author: Lennart Borgman (lennart O borgman A gmail O com)
 ;; Created: Thu Nov 15 15:35:03 2007
@@ -63,6 +63,19 @@
 ;; with emulation minor modes. On the other hand, the other version
 ;; interferes badly with (interactive ...).
 (defvar orgpan-minor-mode-version t)
+
+;; Forward declarations: the full `defvar' forms (with docstrings) for
+;; these panel-state variables appear later in this file, after their
+;; first use above.  Declare them here too so they are known to be
+;; dynamically scoped from the very first reference, independent of
+;; `lexical-binding'.
+(defvar orgpan-panel-window)
+(defvar orgpan-panel-buffer)
+(defvar orgpan-org-window)
+(defvar orgpan-org-buffer)
+(defvar orgpan-last-org-buffer)
+(defvar orgpan-point)
+(defvar orgpan-panel-minor-mode)
 
 (defface orgpan-field
  '((t (:inherit 'widget-field)))

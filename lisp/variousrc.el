@@ -1,3 +1,23 @@
+;;; variousrc.el --- ;; enable cua  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Custom configuration file.
+
+;;; Code:
+
+(use-package savehist
+  :init
+  (savehist-mode))
+
+;; ;; enable cua
+(cua-selection-mode t)
+(transient-mark-mode t)
+(setq mark-even-if-inactive nil)
+;; (cua-mode t)
+;; (setq cua-prefix-override-inhibit-delay 0.7)
+;; (setq cua-keep-region-after-copy nil)
+;; (setq cua-enable-cua-keys nil)
+
 ;; remove cua-scrolling
 (defun gm/set-cua-scroll ()
      (interactive)
@@ -15,6 +35,41 @@
 (gm/unset-cua-scroll)
 
 
+(use-package general)
+(use-package desktop
+  :init
+  (setq desktop-dirname user-emacs-directory)
+  )
+;; (add-to-list 'desktop-modes-not-to-save 'dired-mode 'image-mode)
+;; (setq desktop-load-locked-desktop t) ; to always load after a crash
+;; (setq desktop-restore-frames nil)
+;; (setq desktop-restore-forces-onscreen nil)
+(use-package exec-path-from-shell
+  :custom
+  (exec-path-from-shell-copy-env "PATH"))
+(use-package term/tmux
+  :defer t
+  :custom
+  (xterm-tmux-extra-capabilities '(modifyOtherKeys setSelection)))
+
+(require 'iedit)
+(use-package "eshellrc"
+  :after eshell
+  )
+(use-package pdf-tools
+  :defer t
+  :mode "\\.pdf\\'"
+  :magic ("%PDF" . pdf-view-mode)
+  :config
+  (pdf-tools-install :no-query nil :no-error)
+  (load-library "pdf-scroll-other-window")
+  )
+
+(require 'expand-region)
+;; also consider expreg https://github.com/casouri/expreg that uses treesitter
+(global-set-key (kbd "C-M-SPC") 'er/expand-region)
+
+
 (defun gm/swap-line/up () (interactive)
        (let ((beg) (end))
 	 (beginning-of-line)
@@ -25,6 +80,7 @@
 	 (previous-line)
 	 (yank)
 	 ))
+
 (defun gm/swap-line/down () (interactive)
        (let ((beg) (end))
 	 (beginning-of-line)
@@ -90,9 +146,10 @@ Keeps old as is."
     (activate-mark)
     )
   )
+
 (defun gm/run-etags ()
   (interactive)
-  (let ((default-directory (projectile-project-root)))
+  (let ((default-directory (project-root (project-current))))
    (shell-command "find . -type f -iname \"*.py\" | emacs.etags -")
   ))
 
@@ -131,3 +188,312 @@ If OUTPUT-BUFFER is non-nil, insert output there; otherwise, use *Shell Command 
         (copy-file (buffer-file-name) backup-name t)
         (message "Manual backup created: %s" (file-name-nondirectory backup-name)))
     (message "Buffer is not visiting a file!")))
+
+(defun gm/tramp-to-kio (name)
+  (let ((fullname (expand-file-name name)))
+    (if (file-remote-p fullname)
+	   (let* ((struc (tramp-dissect-file-name fullname))
+		 (localname (tramp-file-name-localname struc))
+		 (host (tramp-file-name-host-port struc))
+		 (user (tramp-file-name-user struc))
+		 (method (tramp-file-name-method struc))
+		 (kioclient (cdr (assoc method '(("ssh" . "fish"))))))
+	     (concat kioclient "://" user (if user "@") host localname))
+      fullname)))
+
+(defun gm/konsole ()
+  (interactive)
+  (if (not (file-remote-p default-directory))
+      (call-process "konsole" nil 0 nil "--new-tab")
+    (let* ((struc (tramp-dissect-file-name default-directory))
+	   (localname (tramp-file-name-localname struc))
+	   (host (tramp-file-name-host-port struc))
+	   (user (tramp-file-name-user struc))
+	   (method (tramp-file-name-method struc)))
+      (call-process "konsole" nil 0 nil "--new-tab" "-e" method (concat user (if user "@") host localname))
+    )))
+
+(defun gm/kde-open (&optional filename)
+  "Works remotely and local files.
+
+Does not work with snap firefox because it cannot access hidden files in .cache"
+  (interactive)
+  (let ((filename (or filename (dired-get-filename nil t) default-directory)))
+    ;; (cmd (shell-quote-argument (concat "kde-open5 " (gm/tramp-to-kio filename)))))
+    (if filename
+	(make-process
+         :name "kio-open" :connection-type nil :noquery t
+         :buffer nil
+	 :command (list  "setsid" "-w" "kde-open5" (gm/tramp-to-kio filename))
+	 )
+      (message "Cannot guess url to open."))))
+(with-eval-after-load 'dired
+  (define-key dired-mode-map [remap browse-url-of-dired-file] 'gm/kde-open))
+
+;; ;; esc-esc-esc annoying
+(setq-default buffer-quit-function
+	      #'(lambda () (message "Are you trying to quit?")))
+
+;; unfill-paragraph from Stefan Monnier <foo at acm.org>.
+;; It is the opposite of fill-paragraph    
+(defun unfill-paragraph (&optional region)
+  "Takes a multi-line paragraph and makes it into a single line of text."
+  (interactive (progn (barf-if-buffer-read-only) '(t)))
+  (let ((fill-column (point-max))
+	;; This would override `fill-column' if it's an integer.
+	(emacs-lisp-docstring-fill-column t))
+    (fill-paragraph nil region)))
+
+;; ;; I want to kill-ring-save a whole line if no region is selected
+(defun my-kill-ring-save (beg end flash)
+  (interactive (if (use-region-p)
+		   (list (region-beginning) (region-end) nil)
+		 (list (line-beginning-position)
+		       (line-beginning-position 2) 'flash)))
+  (kill-ring-save beg end)
+  (when flash
+    (save-excursion
+      (if (equal (current-column) 0)
+	  (goto-char end)
+	(goto-char beg))
+      (sit-for blink-matching-delay))))
+
+(global-set-key [remap kill-ring-save] 'my-kill-ring-save)
+;; I want to kill-region a whole line if no region is selected
+(defun my-kill-region (beg end flash)
+  "kills the selected region, or kills the whole line (including EOL) at point if a region is not selected."
+  (interactive (if (use-region-p)
+		   (list (region-beginning) (region-end) nil)
+		 (list (line-beginning-position)
+		       (line-beginning-position 2) 'flash)))
+  (kill-region beg end)
+  )
+(global-set-key [remap kill-region] 'my-kill-region)
+
+;; ;; sentences end with a single space (for use with sentence navigation)
+(setq sentence-end-double-space nil)
+
+;; ;; global visual line mode
+(global-visual-line-mode 1)
+
+;; ;; Automatically reload files was modified by external program
+(global-auto-revert-mode 1)
+
+;; ;; show matching parentheses (is a global mode)
+(show-paren-mode 1)
+
+;; ;; parentheses pairing
+;; (electric-pair-mode 1)
+(use-package smartparens
+  :ensure t
+  :config
+  (smartparens-global-mode 1)
+  )
+
+
+;; ;; turn off menu bar
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+
+;; ;; Change "yes or no" to "y or n"
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(setq make-backup-files t
+      backup-by-copying t
+      ;; backup in one flat place
+      backup-directory-alist '(("." . "~/.emacs.d/backup-files"))
+      delete-old-versions t
+      kept-new-versions 2
+      version-control t
+      ;; kept-old-versions 2
+      )
+(setq initial-scratch-message "Welcome!\n"
+      inhibit-startup-screen t)
+
+;; ;; undo-tree mode
+(use-package undo-tree
+  :ensure t
+  :custom
+  (undo-tree-auto-save-history nil)
+  :init
+  (global-undo-tree-mode)
+)
+
+(use-package recentf
+  :init
+  (recentf-mode t)
+  :config
+  ;; (run-at-time nil (* 10 60) 'recentf-save-list)
+  )
+
+;; cursor
+(setq
+ blink-cursor-mode nil
+ cursor-type (quote box)
+ )
+
+
+
+;; ;; view-mode
+(eval-after-load "view"
+  '(progn
+     (define-key view-mode-map "k" 'View-scroll-line-backward)
+       (define-key view-mode-map "j" 'View-scroll-line-forward)))
+(define-key ctl-x-map "\C-q" 'view-mode)
+
+;; ;; My signature
+;; (setq
+;;  browse-url-browser-function 'browse-url-generic
+;;  browse-url-generic-program "kde-open5"
+;;  browse-url-default-browser "kde-open5";; used by shr
+;;  )
+
+;; (setq ffap-machine-p-known 'reject)
+;; (put 'narrow-to-region 'disabled nil)
+;; (put 'scroll-left 'disabled nil)
+
+(require 'cl-lib)
+
+(defun move-current-file (&optional filename)
+  "Move current file and update buffer, with overwrite confirmation."
+  (interactive (list (if current-prefix-arg
+                        (read-file-name "Move file: ")
+                      buffer-file-name)))
+  (cl-assert filename nil '("filename is nil"))
+  (let* ((target (read-file-name "Choose file or directory: " nil nil nil nil
+                                 (lambda (f) (or (file-directory-p f) (file-regular-p f)))))
+         (final-target (if (file-directory-p target)
+                           (expand-file-name (file-name-nondirectory filename) target)
+                         target)))
+    (when (and (file-exists-p final-target)
+               (not (yes-or-no-p (format "File %s exists. Overwrite? " final-target))))
+      (user-error "Move cancelled"))
+    (rename-file filename final-target t)
+    (set-visited-file-name final-target t t)
+    (message "Moved %s to %s" filename final-target)))
+
+(defun copy-current-file (&optional filename)
+  "Move current file and update buffer, with overwrite confirmation."
+  (interactive (list (if current-prefix-arg
+                         (read-file-name "Move file: ")
+                      buffer-file-name)))
+  (cl-assert filename nil '("filename is nil"))
+  (let* ((target (read-file-name "Choose file or directory: " nil nil nil nil
+                                 (lambda (f) (or (file-directory-p f) (file-regular-p f)))))
+         (final-target (if (file-directory-p target)
+                           (expand-file-name (file-name-nondirectory filename) target)
+                         target)))
+    (when (and (file-exists-p final-target)
+               (not (yes-or-no-p (format "File %s exists. Overwrite? " final-target))))
+      (user-error "Copy cancelled"))
+    (copy-file filename final-target t)
+    (message "Copy %s to %s" filename final-target)))
+
+;; rename file and buffer (and maybe git rename)
+(defun rename-file-and-buffer ()
+  "Rename the current buffer and file it is visiting. May use git rename."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " default-directory nil nil (file-name-nondirectory filename))))
+        (cond
+         ((vc-backend filename) (vc-rename-file filename new-name))
+         (t
+          (rename-file filename new-name t)
+          (set-visited-file-name new-name t t)))))))
+
+
+(defun gm/get-filename-dwim ()
+  (cond ((derived-mode-p 'dired-mode)
+	 (dired-get-filename nil t))
+	((buffer-file-name))
+	((null (buffer-file-name))
+	 (user-error "Current buffer is not associated with a file."))
+	)
+  )
+
+(defun gm/copy-filename ()
+  (interactive)
+  "Copy current file name."
+  (let ((name (gm/get-filename-dwim)))
+    (kill-new name)
+    (message "copied %s" name)))
+
+
+
+;;; Shell environment variable selection with embark actions
+(defun gm/env-candidates ()
+  "Return alist of env candidates from `process-environment'."
+  (mapcar (lambda (entry)
+            (let* ((parts (split-string entry "=" nil))
+                   (var (car parts))
+                   (val (string-join (cdr parts) "=")))
+              (cons (format "%-30s %s" var (propertize val 'face 'shadow)) val)))
+          (sort (copy-sequence process-environment) #'string<)))
+
+(defun gm/env-insert (candidate)
+  "Insert the value of the selected environment variable."
+  (insert (cdr (assoc candidate (gm/env-candidates)))))
+
+(defun gm/env-copy (candidate)
+  "Copy the value of the selected environment variable to kill ring."
+  (let ((val (cdr (assoc candidate (gm/env-candidates)))))
+    (kill-new val)
+    (message "Copied: %s" val)))
+
+(defvar-keymap gm/env-embark-map
+  :doc "Embark keymap for environment variable actions."
+  :parent embark-general-map
+  "i" #'gm/env-insert
+  "w" #'gm/env-copy)
+
+(add-to-list 'embark-keymap-alist '(env-variable . gm/env-embark-map))
+
+(defun gm/select-env-variable ()
+  "Select a shell environment variable and act on it with embark."
+  (interactive)
+  (let* ((candidates (gm/env-candidates))
+         (metadata '(metadata (category . env-variable)))
+         (collection (lambda (string pred action)
+                       (if (eq action 'metadata)
+                           metadata
+                         (complete-with-action action candidates string pred))))
+         (selected (completing-read "Env: " collection nil t)))
+    (when selected
+      (let ((val (cdr (assoc selected candidates))))
+        (insert val)))))
+
+
+;;
+;; json
+;;
+(defun gm/flymake-treesit-json-backend (report-fn &rest _args)
+  "Flymake backend using Tree-Sitter to report JSON syntax errors."
+  (when (treesit-parser-list nil 'json)
+    (let ((root (treesit-buffer-root-node 'json))
+          (diagnostics nil))
+      ;; Query Tree-Sitter for error nodes
+      (dolist (node (treesit-induce-sparse-tree root "ERROR"))
+        (let ((node-elem (car node)))
+          (when (treesit-node-p node-elem)
+            (push (flymake-make-diagnostic
+                   (current-buffer)
+                   (treesit-node-start node-elem)
+                   (treesit-node-end node-elem)
+                   :error
+                   "JSON Syntax Error")
+                  diagnostics))))
+      (funcall report-fn diagnostics))))
+(use-package json-ts-mode
+  :ensure nil
+  :mode "\\.json\\'"
+  :hook
+  (json-ts-mode . (lambda ()
+                          (add-hook 'flymake-diagnostic-functions #'gm/flymake-treesit-json-backend nil t)
+                          (flymake-mode 1)))
+  :init
+  (add-to-list 'major-mode-remap-alist '(json-mode . json-ts-mode)))
+
+(provide 'variousrc)
+;;; variousrc.el ends here

@@ -1,4 +1,4 @@
-;; Make customisations that affect Emacs faces BEFORE loading a theme
+;; Make customisations that affect Emacs faces BEFORE loading a theme  -*- lexical-binding: t; -*-
 ;; (any change needs a theme re-load to take effect).
 (require 'ef-themes)
 
