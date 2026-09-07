@@ -1,4 +1,4 @@
-;; allow to send emails from org-mode
+;; allow to send emails from org-mode  -*- lexical-binding: t; -*-
 (use-package org-mime)
 (setq org-mime-library 'semi)  ; mml for gnus, semi for wanderlust
 (setq org-mime-export-options '(:section-numbers nil

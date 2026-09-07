@@ -1,4 +1,4 @@
-;;; vtermrc.el --- generic
+;;; vtermrc.el --- generic  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

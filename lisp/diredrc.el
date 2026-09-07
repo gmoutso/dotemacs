@@ -1,4 +1,4 @@
-;;; diredrc.el --- Dired mode configuration
+;;; diredrc.el --- Dired mode configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

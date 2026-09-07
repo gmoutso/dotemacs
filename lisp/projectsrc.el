@@ -1,4 +1,4 @@
-;;; projectsrc.el --- configs for project management
+;;; projectsrc.el --- configs for project management  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration for project management with Projectile.

@@ -1,4 +1,4 @@
-;;; consultrc.el --- Complete Vertico/Consult/Embark configuration
+;;; consultrc.el --- Complete Vertico/Consult/Embark configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; This is a complete replacement for Helm functionality using the

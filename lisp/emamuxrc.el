@@ -1,4 +1,4 @@
-;;; emamuxrc.el --- Emamux tmux integration
+;;; emamuxrc.el --- Emamux tmux integration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

@@ -1,4 +1,4 @@
-;; for the bad persp-mode
+;; for the bad persp-mode  -*- lexical-binding: t; -*-
 
 (defvar persp-mode-functions-to-advise
     '(next-buffer

@@ -1,3 +1,5 @@
+;;; texify.el --- texify config  -*- lexical-binding: t; -*-
+
 (require 'tex-buf)
 (defun TeX-command-default (name)
   "Next TeX command to use. Most of the code is stolen from `TeX-command-query'."

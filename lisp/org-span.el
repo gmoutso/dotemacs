@@ -1,4 +1,4 @@
-;;; org-span.el: A task property decribing time span of task
+;;; org-span.el: A task property decribing time span of task  -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; the values of span are like mins, hours, day or days
 ;;; this is more coarse-grained than the builtin effort property

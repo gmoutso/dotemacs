@@ -1,4 +1,4 @@
-;; ;;
+;; ;;  -*- lexical-binding: t; -*-
 ;; ;; gnus init file
 ;; ;;
 ;; (setq

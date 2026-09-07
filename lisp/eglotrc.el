@@ -1,4 +1,4 @@
-;;; eglotrc.el --- Eglot LSP configuration
+;;; eglotrc.el --- Eglot LSP configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

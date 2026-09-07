@@ -1,4 +1,4 @@
-;;; term-tmuxrc.el --- I need to set TMPDIR in .bashrc before non-interactive exit!
+;;; term-tmuxrc.el --- I need to set TMPDIR in .bashrc before non-interactive exit!  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

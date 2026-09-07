@@ -1,4 +1,4 @@
-;;; embarkrc.el --- ============================================================================
+;;; embarkrc.el --- ============================================================================  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.
@@ -53,8 +53,8 @@
 		  (message "Copied: %s" module))
       ('copy (kill-new compact-name)
 	     (message "Copied: %s" compact-name))
-      ('debug (message (format "%s in %s from file %s:%s and action %s" symbol module file line action)))
-      (_ (kill-new compact-new))))
+      ('debug (message (format "%s in %s from file %s:%s and action %s" name module file line action)))
+      (_ (kill-new compact-name))))
   )
 
 (defun gm/eglot-python-symbol-candidate-act (candidate &optional action property)

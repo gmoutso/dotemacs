@@ -1,4 +1,4 @@
-;;
+;;  -*- lexical-binding: t; -*-
 ;; tangle functions org version 9.4
 ;;
 ;; to be used with header arguments :tangle yes :comments yes :noweb yes

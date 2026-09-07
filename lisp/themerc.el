@@ -1,4 +1,4 @@
-;;; themerc.el --- --- theming config ---
+;;; themerc.el --- --- theming config ---  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

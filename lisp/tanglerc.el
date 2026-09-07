@@ -1,4 +1,4 @@
-;;; tanglerc.el --- tangle functions org version 9.4
+;;; tanglerc.el --- tangle functions org version 9.4  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

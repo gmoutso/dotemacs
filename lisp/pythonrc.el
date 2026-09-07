@@ -1,4 +1,4 @@
-;;; pythonrc.el --- pythonrc -- Summary
+;;; pythonrc.el --- pythonrc -- Summary  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

@@ -1,4 +1,4 @@
-;;; fontsrc.el --- faces
+;;; fontsrc.el --- faces  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

@@ -1,4 +1,4 @@
-;;; smtpmail-multi.el --- Use different smtp servers for sending mail
+;;; smtpmail-multi.el --- Use different smtp servers for sending mail  -*- lexical-binding: t; -*-
 
 ;; Filename: smtpmail-multi.el
 ;; Description: Use different smtp servers for sending mail

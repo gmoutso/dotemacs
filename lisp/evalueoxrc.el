@@ -1,4 +1,4 @@
-;;; evalueoxrc.el --- Evalueox configuration
+;;; evalueoxrc.el --- Evalueox configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

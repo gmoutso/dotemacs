@@ -1,4 +1,4 @@
-;; (load-library "orgmimerc")  ; requires wl ; does not work?
+;; (load-library "orgmimerc")  ; requires wl ; does not work?  -*- lexical-binding: t; -*-
 (require 'fontsrc)
 ;; (load-library "eafrc")
 ;; (load-library "activitywatchrc")
@@ -18,6 +18,7 @@
 ;; (setq ya-cppref-path-to-doc-root "/usr/share/cppreference/doc/html/")
 ;; (load-library "latexrc")
 ;; (load-library "lsprc")
+(use-package ecarc)
 (use-package condarc
   :init
   (setenv "PATH" (concat (getenv "PATH") ":/home/moutsopoulosg/anaconda3/bin:/home/moutsopoulosg/anaconda3/condabin"))

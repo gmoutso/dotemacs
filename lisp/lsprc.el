@@ -1,4 +1,4 @@
-;; lsprc -- Summary
+;; lsprc -- Summary  -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; None
 ;; Code

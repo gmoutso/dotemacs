@@ -1,4 +1,4 @@
-;;; wlrc.el --- wondelust config
+;;; wlrc.el --- wondelust config  -*- lexical-binding: t; -*-
 
 (require 'wl)
 

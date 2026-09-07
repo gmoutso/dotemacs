@@ -1,4 +1,4 @@
-;;; ghostelrc.el --- Hydra configuration
+;;; ghostelrc.el --- Hydra configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

@@ -1,4 +1,4 @@
-;;; termrc.el --- https://github.com/wangchen/redguardtoo-emacs.d/blob/master/lisp/init-term-mode.el
+;;; termrc.el --- https://github.com/wangchen/redguardtoo-emacs.d/blob/master/lisp/init-term-mode.el  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

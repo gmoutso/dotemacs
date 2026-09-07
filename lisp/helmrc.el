@@ -1,4 +1,4 @@
-;;; helmrc.el --- ;; helm configuration
+;;; helmrc.el --- ;; helm configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

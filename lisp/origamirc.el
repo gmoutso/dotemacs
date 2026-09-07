@@ -1,3 +1,5 @@
+;;; origamirc.el --- origamirc config  -*- lexical-binding: t; -*-
+
 (use-package origami)
 
  (defhydra hydra-folding (:color red)

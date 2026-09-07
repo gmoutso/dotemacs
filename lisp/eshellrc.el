@@ -1,4 +1,4 @@
-;;; eshellrc.el --- configuration for shells
+;;; eshellrc.el --- configuration for shells  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration for eshell and shell modes.

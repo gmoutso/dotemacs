@@ -1,4 +1,4 @@
-;;; agentrc.el --- --- BACKEND 1: GitHub Copilot (Company Official) ---
+;;; agentrc.el --- --- BACKEND 1: GitHub Copilot (Company Official) ---  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

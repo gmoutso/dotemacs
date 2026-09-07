@@ -15,7 +15,15 @@
 
 (require 'tramp)
 (require 'project)
-(require 'rsync-mode)
+(use-package rsync-mode
+  :custom
+   (rsync-default-excluded-dirs . (".git"
+				   "data"
+				   ".ipynb_checkpoints"
+				   ".pytest_cache"
+				   "venv"
+				   "*.egg-info"))
+   )
 
 (defun rsync-project--tramp-to-shell (file-or-path)
   "Convert a TRAMP FILE-OR-PATH to an rsync-compatible shell path."

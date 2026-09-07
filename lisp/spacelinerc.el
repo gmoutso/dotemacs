@@ -1,3 +1,5 @@
+;;; spacelinerc.el --- spacelinerc config  -*- lexical-binding: t; -*-
+
 (require 'spaceline-config)
 (require 'spaceline-segments)
 ;(spaceline-spacemacs-theme)

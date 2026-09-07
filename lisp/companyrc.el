@@ -1,4 +1,4 @@
-;; company
+;; company  -*- lexical-binding: t; -*-
 (use-package company
   :init
   (global-company-mode)

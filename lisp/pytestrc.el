@@ -1,4 +1,4 @@
-;;; pytestrc.el --- Pytest integration
+;;; pytestrc.el --- Pytest integration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

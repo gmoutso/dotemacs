@@ -1,4 +1,4 @@
-;;; pycellrc.el --- Python code cells configuration
+;;; pycellrc.el --- Python code cells configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

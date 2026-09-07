@@ -1,4 +1,4 @@
-;;; condarc.el --- if you want interactive shell support, include:
+;;; condarc.el --- if you want interactive shell support, include:  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

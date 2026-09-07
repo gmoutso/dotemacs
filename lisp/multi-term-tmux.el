@@ -1,4 +1,4 @@
-;;; multi-term-tmux.el --- Managing remote and persistent terminal
+;;; multi-term-tmux.el --- Managing remote and persistent terminal  -*- lexical-binding: t; -*-
 ;;; buffers in Emacs with multi-term and tmux.
 
 ;; Author: Todd Goodall <tgoodall@utexas.edu>

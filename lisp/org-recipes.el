@@ -1,4 +1,4 @@
-;;; org-recipes.el --- A code snippet manager with Org and Helm
+;;; org-recipes.el --- A code snippet manager with Org and Helm  -*- lexical-binding: t; -*-
 ;;
 ;; Filename: org-recipes.el
 ;; Description: A code snippet manager with Org and Helm

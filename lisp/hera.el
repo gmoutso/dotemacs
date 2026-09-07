@@ -1,3 +1,5 @@
+;;; hera.el --- hera config  -*- lexical-binding: t; -*-
+
 
 ;; Author: Dustin Lacewell <dlacewell@gmail.com>
 ;; Version: 0.1

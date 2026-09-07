@@ -17,10 +17,16 @@
 	 )      ; Open ECA hydra menu
   ;; :hook ((python-mode . eca)             ; Automatically trigger server for Python
   ;;        (emacs-lisp-mode . eca))        ; Automatically trigger server for Elisp
+  :custom
+  (eca-chat-window-side 'right)
+  (eca-chat-window-width 0.35)
+  (eca-chat-use-side-window nil)
   :config
   ;; Customise the chat window behavior if desired
-  (setq eca-chat-window-side 'right
-        eca-chat-window-width 0.35))
+  ;; (setq eca-chat-window-side 'right
+  ;;       eca-chat-window-width 0.35
+  ;; 	eca-chat-use-side-window nil)
+  )
 
 (pretty-hydra-define hydra-eca (:exit t :quit-key "q" :title "ECA - AI Assistant")
   ("Chat"

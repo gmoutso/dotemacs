@@ -1,4 +1,4 @@
-;;; latexrc.el --- ;; enable cua
+;;; latexrc.el --- ;; enable cua  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

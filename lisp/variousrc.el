@@ -1,4 +1,4 @@
-;;; variousrc.el --- ;; enable cua
+;;; variousrc.el --- ;; enable cua  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.
@@ -463,6 +463,37 @@ Does not work with snap firefox because it cannot access hidden files in .cache"
     (when selected
       (let ((val (cdr (assoc selected candidates))))
         (insert val)))))
+
+
+;;
+;; json
+;;
+(defun gm/flymake-treesit-json-backend (report-fn &rest _args)
+  "Flymake backend using Tree-Sitter to report JSON syntax errors."
+  (when (treesit-parser-list nil 'json)
+    (let ((root (treesit-buffer-root-node 'json))
+          (diagnostics nil))
+      ;; Query Tree-Sitter for error nodes
+      (dolist (node (treesit-induce-sparse-tree root "ERROR"))
+        (let ((node-elem (car node)))
+          (when (treesit-node-p node-elem)
+            (push (flymake-make-diagnostic
+                   (current-buffer)
+                   (treesit-node-start node-elem)
+                   (treesit-node-end node-elem)
+                   :error
+                   "JSON Syntax Error")
+                  diagnostics))))
+      (funcall report-fn diagnostics))))
+(use-package json-ts-mode
+  :ensure nil
+  :mode "\\.json\\'"
+  :hook
+  (json-ts-mode . (lambda ()
+                          (add-hook 'flymake-diagnostic-functions #'gm/flymake-treesit-json-backend nil t)
+                          (flymake-mode 1)))
+  :init
+  (add-to-list 'major-mode-remap-alist '(json-mode . json-ts-mode)))
 
 (provide 'variousrc)
 ;;; variousrc.el ends here

@@ -1,4 +1,4 @@
-;;; keys.el --- treemacs
+;;; keys.el --- treemacs  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

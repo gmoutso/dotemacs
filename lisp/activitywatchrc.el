@@ -1,3 +1,5 @@
+;;; activitywatchrc.el --- activitywatchrc config  -*- lexical-binding: t; -*-
+
 (global-activity-watch-mode)
 (defun activity-watch-project-name-workspace-subdir ()
   (when (and (string-equal (activity-watch-project-name-projectile) "workspace")

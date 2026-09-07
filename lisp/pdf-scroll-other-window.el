@@ -1,4 +1,4 @@
-;;; pdf-scroll-other-window.el --- (scroll-other-window 2)
+;;; pdf-scroll-other-window.el --- (scroll-other-window 2)  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

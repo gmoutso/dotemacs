@@ -1,4 +1,4 @@
-;;; hydrarc.el --- Hydra configuration
+;;; hydrarc.el --- Hydra configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

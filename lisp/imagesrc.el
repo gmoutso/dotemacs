@@ -1,4 +1,4 @@
-;;; imagesrc.el --- condition on a latex fragment
+;;; imagesrc.el --- condition on a latex fragment  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

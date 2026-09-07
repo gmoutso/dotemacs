@@ -1,4 +1,4 @@
-;;; orgrc.el --- Org-mode configuration
+;;; orgrc.el --- Org-mode configuration  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.
@@ -21,7 +21,7 @@
   ;; (setq line-spacing '0.25)
   ;; (iscroll-mode)
     )
-  (setq org-export-backends '(pdf html latex odt))
+  (setq org-export-backends '(html latex pandoc jupyter-notebook odt))
   :hook
   (org-mode . turn-on-org-cdlatex)
   (org-mode . gm/org-hooks)

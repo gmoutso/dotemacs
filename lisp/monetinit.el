@@ -1,3 +1,5 @@
+;;; monetinit.el --- monetinit config  -*- lexical-binding: t; -*-
+
 (require 'fontsrc)
 (require 'diredrc)
 (require 'verticorc)

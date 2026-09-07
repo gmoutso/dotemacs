@@ -1,4 +1,4 @@
-;;; org-mime.el --- org html export for text/html MIME emails
+;;; org-mime.el --- org html export for text/html MIME emails  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2010-2015 Eric Schulte
 

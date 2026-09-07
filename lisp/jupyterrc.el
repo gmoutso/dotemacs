@@ -1,4 +1,4 @@
-;;; jupyterrc.el --- (conda-env-activate "emacs")
+;;; jupyterrc.el --- (conda-env-activate "emacs")  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

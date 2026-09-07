@@ -1,4 +1,4 @@
-;;; acerc.el --- add ace option to helm switch buffer
+;;; acerc.el --- add ace option to helm switch buffer  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

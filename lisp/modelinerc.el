@@ -1,4 +1,4 @@
-;;; modelinerc.el --- (defadvice powerline-major-mode (around delight-powerline-major-mode activate)
+;;; modelinerc.el --- (defadvice powerline-major-mode (around delight-powerline-major-mode activate)  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

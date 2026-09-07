@@ -1,4 +1,4 @@
-;;; copilotrc.el --- https://github.com/copilot-emacs/copilot.el
+;;; copilotrc.el --- https://github.com/copilot-emacs/copilot.el  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

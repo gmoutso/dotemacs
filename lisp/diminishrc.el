@@ -1,4 +1,4 @@
-;;; diminishrc.el --- diminish: hide some minor modes
+;;; diminishrc.el --- diminish: hide some minor modes  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.

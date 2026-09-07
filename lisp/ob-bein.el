@@ -1,3 +1,5 @@
+;;; ob-bein.el --- ob-bein config  -*- lexical-binding: t; -*-
+
 (add-to-list 'org-src-lang-modes '("bein" . python))
 (defun org-connect-to-notebook-buffer ()
   (interactive)

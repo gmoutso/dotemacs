@@ -1,4 +1,4 @@
-;;; windowsrc.el --- scrolling
+;;; windowsrc.el --- scrolling  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; Custom configuration file.
