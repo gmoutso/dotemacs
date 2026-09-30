@@ -454,6 +454,15 @@ so that the session gets registered for an org-mode session if needed.
 
 (defun gm/run-python-with-args
     (host &optional cmd venv pythonpaths name)
+  "Run a python REPL using arbitrary host, environment, host, pythonpath.
+
+This command 1) sets the emacs python-shell- variables, 2) initiates a REPL using org, and 3) associates it to the python buffer.
+
+HOST in tramp format (or local), eg \"/ssh:ec2:\" or \"~/\"
+CMD is the executable like \"ipython\"
+PYTHONPATHS are a list of local paths
+NAME is the name of the buffer
+"
   (let ((default-directory host)
 	(venv (pythonic-python-readable-file-name (concat host venv))))
     (let* ((name (generate-new-buffer-name (or name "Python")))

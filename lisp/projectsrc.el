@@ -19,5 +19,17 @@
 
 (load-library "rsync-project")
 
+(use-package project
+  :bind (:map project-prefix-map
+              ("v" . magit-project-status))
+  :config
+  ;; Update the 'C-x p p' switch project menu option for 'v'
+  (setq project-switch-commands
+        (mapcar (lambda (entry)
+                  (if (eq (car entry) 'project-vc-dir)
+                      '(magit-project-status "Magit")
+                    entry))
+                project-switch-commands)))
+
 (provide 'projectsrc)
 ;;; projectsrc.el ends here

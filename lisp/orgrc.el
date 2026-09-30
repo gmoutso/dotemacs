@@ -1010,5 +1010,59 @@ To make this permanent, use customize `org-image-actual-width'."
   (setq org-wiki-location nil)
   )
 
+
+(defun gm/uncommented-org2ipynb (&optional org-file output-file force)
+  "Convert ORG-FILE to OUTPUT-FILE (.ipynb) via pandoc.
+
+Standalone: does not modify buffers, hooks, or ox-pandoc defaults.
+Preprocessing mirrors scripts/org2ipynb.sh — strips COMMENT keyword
+from headings, #+BEGIN/END_COMMENT fences, and :noexport:/:ignore: tags
+so their content IS exported.
+
+Interactively converts the current buffer's file next to itself.
+With prefix arg, prompts for OUTPUT-FILE and forces overwrite."
+  (interactive
+   (list buffer-file-name
+         (and current-prefix-arg
+              (read-file-name "Output .ipynb: "
+                              nil nil nil
+                              (concat (file-name-base buffer-file-name)
+                                      ".ipynb")))
+         current-prefix-arg))
+  (unless org-file (user-error "No org file given"))
+  (setq org-file (expand-file-name org-file))
+  (setq output-file
+        (expand-file-name
+         (or output-file
+             (concat (file-name-sans-extension org-file) ".ipynb"))))
+  (when (and (file-exists-p output-file) (not force))
+    (user-error "Refusing to overwrite %s (pass FORCE / C-u)" output-file))
+  (make-directory (file-name-directory output-file) t)
+  (let ((default-directory (file-name-directory org-file)))
+    (with-temp-buffer
+      (insert-file-contents org-file)
+      ;; --- sed-equivalent preprocessing ---
+      (goto-char (point-min))
+      (while (re-search-forward "^\\(\\*+ +\\)COMMENT " nil t)
+        (replace-match "\\1"))
+      (goto-char (point-min))
+      (while (re-search-forward
+              "^[ \t]*#\\+\\(BEGIN\\|END\\)_COMMENT[ \t]*$" nil t)
+        (replace-match ""))
+      (goto-char (point-min))
+      (while (re-search-forward ":\\(noexport\\|ignore\\):" nil t)
+        (replace-match ""))
+      ;; --- pipe to pandoc ---
+      (let ((rc (call-process-region
+                 (point-min) (point-max)
+                 "pandoc" nil (get-buffer-create "*org2ipynb*") nil
+                 "--from" "org" "--to" "ipynb"
+                 "-o" output-file)))
+        (unless (eq rc 0)
+          (pop-to-buffer "*org2ipynb*")
+          (error "pandoc exited %s" rc)))))
+  (message "Wrote %s" output-file)
+  output-file)
+
 (provide 'orgrc)
 ;;; orgrc.el ends here

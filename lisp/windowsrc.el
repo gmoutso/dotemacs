@@ -65,8 +65,10 @@
 	(tab-bar-rename-tab tabspaces-default-tab))))
   (defun gm/new-tab-and-rename ()
     (interactive)
+    (let ((name (read-from-minibuffer "New tab name: ")))
     (tab-new)
-    (tab-rename (read-from-minibuffer "New tab name: "))))
+    (tab-rename name)))
+  )
 
 
 ;;

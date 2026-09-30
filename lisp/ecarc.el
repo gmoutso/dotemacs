@@ -21,6 +21,8 @@
   (eca-chat-window-side 'right)
   (eca-chat-window-width 0.35)
   (eca-chat-use-side-window nil)
+  (eca-chat-prompt-prefix "━━ User Input ━━━━━━━━━━━━━━━━━━━━━━\n> ")
+  ;; (eca-chat-prompt-separator "\━━━━━━━━━━━━━━━━━━━━━━\n")
   :config
   ;; Customise the chat window behavior if desired
   ;; (setq eca-chat-window-side 'right
