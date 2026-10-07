@@ -148,7 +148,7 @@ Opens either file name at point (if in dired), current file (if .ipynb) or via f
 ;;       (message "arg2: %s" jupyter-server-kernel-names)
 ;;       )
 ;;     (dolist (server servers)
-;;       (when-let* ((names (assoc (oref server url) jupyter-server-kernel-names)))
+;;       (when-let** ((names (assoc (oref server url) jupyter-server-kernel-names)))
 ;;         (setf (alist-get (oref server url)
 ;;                          jupyter-server-kernel-names nil nil #'equal)
 ;;               (cl-loop

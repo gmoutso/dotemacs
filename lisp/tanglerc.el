@@ -53,6 +53,8 @@ Note, does not give correct file search field in orglink as in the tangled file 
 (defun gm/goto-tangled-block ()
   "The opposite of `org-babel-tangle-jump-to-org'. Jumps at tangled code from org src block.
 
+This calculates the link correctly.
+
 https://emacs.stackexchange.com/a/69591"
   (interactive)
   (if (org-in-src-block-p)
@@ -93,7 +95,9 @@ Note sure why this was written: all languages must be the same in org file."
 
 
 (defun org-babel-tangle-jump-to-org ()
-  "Jump from a tangled code file to the related Org mode file."
+  "Jump from a tangled code file to the related Org mode file.
+
+This overrides default function in org that is buggy in finding offset."
   (interactive)
   (let ((mid (point))
 	start body-start end target-buffer target-char link block-name body)
