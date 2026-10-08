@@ -142,14 +142,14 @@
                      (old-str (gethash file dist-table))
                      (pre-str (with-temp-buffer
                                 (mapcar (lambda (r)
-                                          (when-let* ((candidates (org-recipes--get-candidates r)))
+                                          (when-let ((candidates (org-recipes--get-candidates r)))
                                             (org-recipes--insert-candidates candidates)
                                             (newline)))
                                         pre-recipe-list)
                                 (buffer-string)))
                      (post-str (with-temp-buffer
                                  (mapcar (lambda (r)
-                                           (when-let* ((candidates (org-recipes--get-candidates r)))
+                                           (when-let ((candidates (org-recipes--get-candidates r)))
                                              (newline)
                                              (org-recipes--insert-candidates candidates)))
                                          post-recipe-list)
@@ -234,7 +234,7 @@
         ))))
 
 (defun org-recipes--get-parent-string (headline)
-  (when-let* ((parent (org-element-property :parent headline))
+  (when-let ((parent (org-element-property :parent headline))
              (parent-str (org-element-property :raw-value parent)))
     (concat (org-recipes--get-parent-string parent)
             (propertize parent-str 'face (org-recipes--get-heading-face parent))
@@ -242,9 +242,9 @@
 
 (defun org-recipes-dwim ()
   (interactive)
-  (if-let* ((recipe-list (list-at-point)))
+  (if-let ((recipe-list (list-at-point)))
       (org-recipes--process-recipes recipe-list)
-    (when-let* ((symbol (symbol-at-point))
+    (when-let ((symbol (symbol-at-point))
                (candidates (org-recipes--get-candidates symbol)))
       (org-recipes--delete-thing-at-point symbol)
       (let ((start (point)))
@@ -256,7 +256,7 @@
   (let ((start (point))
         (deleted deleted))
     (mapcar (lambda (r)
-              (when-let* ((candidates (org-recipes--get-candidates r)))
+              (when-let ((candidates (org-recipes--get-candidates r)))
                 (unless deleted
                   (org-recipes--delete-thing-at-point recipe-list)
                   (setq deleted t))
@@ -288,7 +288,7 @@
     (save-excursion
       (beginning-of-buffer)
       (when (search-forward "#+MODE:" nil t)
-        (when-let* ((mode-keyword (org-element-property :value (org-element-at-point))))
+        (when-let ((mode-keyword (org-element-property :value (org-element-at-point))))
           (beginning-of-line)
           (mapcar #'org-recipes--string-to-mode
                   (org-recipes--split-mode-list (org-element-property :value (org-element-at-point)))))))))

@@ -35,7 +35,7 @@
   (let ((name (project-root (project-current))))
   (setq gm/eglot-ensure-projects-names (remove name gm/eglot-ensure-projects-names))))
 (defun gm/eglot-ensure ()
-  (when-let* ((proj (project-current)))
+  (when-let ((proj (project-current)))
     (let ((name (project-root proj)))
       (when (member name gm/eglot-ensure-projects-names)
         (eglot-ensure)))))

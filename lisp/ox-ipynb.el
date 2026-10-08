@@ -165,7 +165,7 @@ The cdr of SRC-RESULT is the end position of the results."
          img-path img-data
          (start 0)
          end
-	 (src-metadata (or (when-let* (smd (plist-get  (cadr src-block) :attr_ipynb))
+	 (src-metadata (or (when-let (smd (plist-get  (cadr src-block) :attr_ipynb))
 			     (read (format "(%s)" (s-join " " smd))))
 			   (make-hash-table)))
          block-start block-end
@@ -708,7 +708,7 @@ nil:END:"  nil t)
             (cl-loop for s in (ox-ipynb-split-text text)
                      unless (string= "" (s-trim s))
                      do
-                     (when-let* ((md (ox-ipynb-export-markdown-cell s)))
+                     (when-let ((md (ox-ipynb-export-markdown-cell s)))
                        (push md cells)))))
       ;; this is a special case where there are no source blocks, and the whole
       ;; document is a markdown cell.
@@ -716,7 +716,7 @@ nil:END:"  nil t)
         (cl-loop for s in (ox-ipynb-split-text text)
 		 unless (string= "" (s-trim s))
 		 do
-		 (when-let* ((md (ox-ipynb-export-markdown-cell s)))
+		 (when-let ((md (ox-ipynb-export-markdown-cell s)))
                    (push md cells)))))
 
     (while current-source
@@ -744,14 +744,14 @@ nil:END:"  nil t)
               (cl-loop for s in (ox-ipynb-split-text text)
                        unless (string= "" s)
                        do
-                       (when-let* ((md (ox-ipynb-export-markdown-cell (s-trim s))))
+                       (when-let ((md (ox-ipynb-export-markdown-cell (s-trim s))))
 			 (push md cells)))))
         ;; on last block so add rest of document
         (let ((text (buffer-substring-no-properties end (point-max))))
           (cl-loop for s in (ox-ipynb-split-text text)
                    unless (string= "" s)
                    do
-                   (when-let* ((md (ox-ipynb-export-markdown-cell (s-trim s))))
+                   (when-let ((md (ox-ipynb-export-markdown-cell (s-trim s))))
                      (push md cells))))))
 
     (setq data (append

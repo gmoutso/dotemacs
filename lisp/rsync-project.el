@@ -17,12 +17,12 @@
 (require 'project)
 (use-package rsync-mode
   :custom
-  (rsync-default-excluded-dirs  '(".git"
-				  "data"
-				  ".ipynb_checkpoints"
-				  ".pytest_cache"
-				  "venv"
-				  "*.egg-info"))
+   (rsync-default-excluded-dirs . '(".git"
+				   "data"
+				   ".ipynb_checkpoints"
+				   ".pytest_cache"
+				   "venv"
+				   "*.egg-info"))
    :config
    (setq rsync-default-excluded-dirs '(".git"
 				       "data"
