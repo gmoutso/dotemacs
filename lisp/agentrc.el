@@ -32,7 +32,7 @@
         (gptel-make-gemini "Gemini"
           :key (lambda () 
                  (let ((match (car (auth-source-search :host "generators.world" :user "apikey"))))
-                   (if-let ((secret (plist-get match :secret)))
+                   (if-let* ((secret (plist-get match :secret)))
                        (if (functionp secret) (funcall secret) secret)
                      (error "Check your .authinfo.gpg!"))))
           :stream t))
