@@ -742,6 +742,15 @@ so that copying, pasting, and then using this function will work well."
     )
     ))
 
+(defun gm/org-clear-all-results ()
+  "Clear all results in the buffer."
+  (interactive)
+  (org-save-outline-visibility nil
+    (save-excursion
+      (goto-char (point-min))
+      (while (org-babel-next-src-block)
+        (org-babel-remove-result nil t)))))
+
 ;; automatically add a #+NAME: above a source block
 (defun gm/org-add-src-name-maybe-advice (&rest dumby) (gm/org-add-src-name-maybe))
 ;; (advice-add 'jupyter-org-insert-src-block :after #'gm/org-add-src-name-maybe-advice)
