@@ -122,14 +122,9 @@
   (org-pandoc-options-for-latex-pdf '((pdf-engine . "xelatex")
                                       (template . "evalue")
                                       (citeproc . t)))
-  (org-pandoc-options-for-html5 '((standalone . t)
-				  (embed-resources . t)
-				  (template . "easy-ev.html")
-				  (css . "easy-ev.css")
-				  (resource-path . "/home/moutsopoulosg/.local/share/pandoc/css")
-				  (toc . t)
-				  (toc-depth . 2)
-				  (highlight-style . "tango")))
+  ;; all html5 settings live in one defaults file shared with the CLI
+  (org-pandoc-options-for-html5
+   '((defaults . "/home/moutsopoulosg/.local/share/pandoc/defaults/ev-html.yaml")))
   ;; simplify menu
   (org-pandoc-menu-entry
   '((?h "to html5 and open." org-pandoc-export-to-html5-and-open)
@@ -141,6 +136,28 @@
     (?, "as typst." org-pandoc-export-as-typst)
     (?X "to docx." org-pandoc-export-to-docx))
   ))
+
+;; ox-pandoc replaces fuzzy links to numbered targets by Org's own ordinal
+;; and drops explicit descriptions ([[table-t1][ok]] -> [[#table-t1][1]]).
+;; For html5 exports only (the only format running ev.lua): keep the
+;; description if given, and otherwise emit a bare
+;; [[#id]] link; ~/.local/share/pandoc/filters/ev.lua then labels it
+;; ("Table 3") using its own numbering, so link text and captions agree.
+(with-eval-after-load 'ox-pandoc
+  (define-advice org-pandoc-link (:around (orig link contents info) ev-labels)
+    (let* ((path (and (eq (org-element-type link) 'link)
+                      (string= (org-element-property :type link) "fuzzy")
+                      (org-element-property :path link)))
+           (dest (and path
+                      (not (string-prefix-p "citeproc_bib_item" path))
+                      (ignore-errors (org-export-resolve-fuzzy-link link info)))))
+      (if (and dest
+               (eq org-pandoc-format 'html5) ; only where ev.lua is used
+               (not (eq (org-element-type dest) 'headline)))
+          (if (org-string-nw-p contents)
+              (format "[[#%s][%s]]" path contents)
+            (format "[[#%s]]" path))
+        (funcall orig link contents info)))))
 
 ;; export to html - also applies to org-mime-org-mode-htmlize
 (setq org-html-with-latex t)

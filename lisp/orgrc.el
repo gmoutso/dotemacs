@@ -112,7 +112,7 @@
   )
 
 ;; increase math
-;; (setq org-format-latex-options (plist-put org-format-latex-options :scale 0.5))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1))
 
 ;; (defun org-mode-reftex-setup ()
 ;;   (load-library "reftex")
