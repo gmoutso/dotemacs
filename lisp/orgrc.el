@@ -21,7 +21,7 @@
   ;; (setq line-spacing '0.25)
   ;; (iscroll-mode)
     )
-  (setq org-export-backends '(html latex pandoc jupyter-notebook odt))
+  (setq org-export-backends '(html latex pandoc odt))
   :hook
   (org-mode . turn-on-org-cdlatex)
   (org-mode . gm/org-hooks)
@@ -112,7 +112,8 @@
   )
 
 ;; increase math
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1))
+;; set in custom..
+;; (setq org-format-latex-options (plist-put org-format-latex-options :scale 2))
 
 ;; (defun org-mode-reftex-setup ()
 ;;   (load-library "reftex")
